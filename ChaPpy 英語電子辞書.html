@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>📚 ChaPpy 英語電子辞書</title>
+<!-- iOSでホーム画面に追加したとき、Safariのバーなしでアプリのように全画面起動させるための設定 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChaPpy">
+<meta name="theme-color" content="#1d1e25">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231d1e25'/%3E%3Ctext x='90' y='118' font-size='96' text-anchor='middle'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   ChaPpy 英語電子辞書 — 参考書・ノート風デザイン
+   （フォントはオンライン時のみ読み込み。オフラインでも読み込み失敗時は
+   　自動でゴシック体にフォールバックし、全機能はそのまま動作します）
+   ========================================================================== */
+:root{
+  /* ダークモード固定のカラーパレット */
+  --paper:#1d1e25;
+  --paper2:#26272f;
+  --ink:#eef0f5;
+  --ink-soft:#a9adbd;
+  --grid:#3a3c48;
+  --card-solid:#26272f;
+  --red:#e2665a;
+  --red-deep:#ff8b7d;
+  --navy:#7fa8d9;
+  --navy-soft:#9db9e0;
+  --gold:#e0b45c;
+  --ok:#57b17f;
+  --blue:#7fa8d9;
+  --blue-tint:rgba(127,168,217,0.14);
+  --yellow:#f2c744;
+  --shadow-sm: 3px 3px 0 rgba(0,0,0,0.35);
+  --shadow-md: 4px 4px 0 rgba(0,0,0,0.4);
+  --shadow-lg: 6px 6px 0 rgba(0,0,0,0.5);
+  --radius-lg: 6px;
+  --radius-md: 4px;
+  --radius-sm: 3px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 30px 30px;
+  color:var(--ink);
+  transition:background .4s ease, color .4s ease;
+  overscroll-behavior-y:none;
+  -webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;}
+button{font-family:inherit;}
+
+/* ---------- layout shells ---------- */
+#app{
+  max-width:900px;
+  margin:0 auto;
+  min-height:100vh;
+  padding-bottom:calc(84px + var(--safe-bottom));
+  position:relative;
+}
+.screen{display:none;}
+.screen.active{display:block; animation:fadeIn .35s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  padding:calc(10px + var(--safe-top)) 16px 10px;
+  background:var(--paper);
+  border-bottom:2px solid var(--ink);
+  display:flex; align-items:center; gap:10px;
+  transition:background .4s ease, border-color .4s ease;
+}
+.topbar h1{
+  font-family:"Kaisei Decol",serif;
+  font-size:19px; font-weight:700; margin:0; flex:1;
+  letter-spacing:.02em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.icon-btn{
+  width:36px; height:36px; border-radius:50%;
+  border:1.5px solid var(--ink); background:var(--card-solid); color:var(--ink);
+  font-size:16px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; box-shadow:2px 2px 0 rgba(34,36,46,.15);
+  transition:transform .15s ease;
+}
+.icon-btn:active{transform:translate(1px,1px); box-shadow:none;}
+.back-btn{
+  border:none; background:none; color:var(--ink);
+  font-family:"Kaisei Decol",serif;
+  font-size:16px; font-weight:700; display:flex; align-items:center; gap:2px;
+  cursor:pointer; padding:6px 4px 6px 0; flex-shrink:0;
+}
+.back-btn:active{opacity:.5;}
+
+/* ---------- content padding ---------- */
+.content{padding:16px;}
+.section-title{
+  font-family:"Kaisei Decol",serif;
+  font-size:13px; font-weight:700; color:var(--ink-soft);
+  letter-spacing:.06em;
+  margin:22px 4px 10px;
+}
+.section-title:first-child{margin-top:6px;}
+
+/* ---------- hero (home) ---------- */
+.hero{
+  text-align:center; padding:26px 16px 6px; position:relative;
+}
+.hero-title{
+  font-family:"Kaisei Decol",serif;
+  font-size:28px; font-weight:700; letter-spacing:.02em; margin:0 0 6px;
+  color:var(--ink);
+  display:inline-block;
+  background-image:linear-gradient(120deg, rgba(242,199,68,.55) 0%, rgba(242,199,68,.55) 100%);
+  background-repeat:no-repeat;
+  background-size:100% 38%;
+  background-position:0 78%;
+  padding:0 4px;
+}
+.hero-sub{font-size:13px; color:var(--ink-soft); margin:6px 0 20px;}
+
+/* ---------- search ---------- */
+.search-wrap{position:relative; margin:0 0 8px;}
+.search-input{
+  width:100%; padding:13px 42px 13px 42px;
+  border-radius:var(--radius-md); border:1.5px solid var(--ink);
+  background:var(--card-solid); color:var(--ink);
+  font-size:16px; outline:none;
+  box-shadow:var(--shadow-sm);
+  transition:box-shadow .2s ease;
+}
+.search-input:focus{box-shadow:3px 3px 0 var(--navy);}
+.search-icon{
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  font-size:16px; color:var(--ink-soft); pointer-events:none;
+}
+.search-clear{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:26px; height:26px; border:1px solid var(--grid); border-radius:50%;
+  background:var(--paper2); color:var(--ink-soft); font-size:13px;
+  display:none; align-items:center; justify-content:center; cursor:pointer;
+}
+
+.search-results{margin-top:10px;}
+.search-hit{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 14px; margin-bottom:8px;
+  background:var(--card-solid); border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-sm); cursor:pointer; border:1.5px solid var(--ink);
+}
+.search-hit:active{transform:translate(1px,1px); box-shadow:none;}
+.search-hit .badge{
+  font-family:"Kaisei Decol",serif;
+  font-size:11px; font-weight:700; color:#fff;
+  background:var(--navy); padding:3px 8px; border-radius:20px; flex-shrink:0;
+}
+.search-hit .hit-title{font-weight:700; font-size:15px; flex:1;}
+.search-hit .hit-snip{font-size:12px; color:var(--ink-soft); display:block; margin-top:2px;}
+.search-empty{text-align:center; color:var(--ink-soft); font-size:14px; padding:30px 10px;}
+
+/* ---------- category cards ---------- */
+.cat-grid{display:flex; flex-direction:column; gap:16px; margin-top:18px;}
+.cat-card{
+  display:flex; align-items:center; gap:14px;
+  padding:18px 18px 18px 22px; border-radius:var(--radius-lg);
+  background:var(--card-solid); box-shadow:var(--shadow-md);
+  border:1.5px solid var(--ink);
+  cursor:pointer; position:relative; overflow:visible;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.cat-card::before{
+  content:attr(data-tab);
+  position:absolute; top:-13px; left:16px;
+  font-family:"Kaisei Decol",serif; font-size:11px; color:#fff;
+  padding:3px 10px; border-radius:2px; letter-spacing:.08em;
+}
+.cat-card:active{transform:translate(2px,2px); box-shadow:none;}
+.cat-card .cat-emoji{font-size:32px; flex-shrink:0;}
+.cat-card .cat-info{flex:1;}
+.cat-card .cat-name{font-family:"Kaisei Decol",serif; font-size:18px; font-weight:700; margin:0 0 2px;}
+.cat-card .cat-desc{font-size:12.5px; color:var(--ink-soft); margin:0;}
+.cat-card .cat-arrow{font-size:20px; color:var(--ink-soft); flex-shrink:0;}
+.cat-card.g1::before{background:var(--navy);}
+.cat-card.g2::before{background:var(--ok);}
+.cat-card.g3::before{background:var(--red);}
+.cat-card.g1{border-left:5px solid var(--navy);}
+.cat-card.g2{border-left:5px solid var(--ok);}
+.cat-card.g3{border-left:5px solid var(--red);}
+
+.quick-row{display:flex; gap:10px; margin-top:18px;}
+.quick-btn{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:13px 6px; border-radius:var(--radius-md);
+  background:var(--card-solid); box-shadow:var(--shadow-sm); border:1.5px solid var(--ink);
+  cursor:pointer; font-size:11.5px; font-weight:700; color:var(--ink);
+}
+.quick-btn:active{transform:translate(1px,1px); box-shadow:none;}
+.quick-btn .qi{font-size:21px;}
+
+/* ---------- grade screen ---------- */
+.grade-hero{padding:18px 4px 4px;}
+.grade-hero h2{font-family:"Kaisei Decol",serif; font-size:24px; font-weight:700; margin:0 0 4px;}
+.grade-hero p{color:var(--ink-soft); font-size:12.5px; margin:0;}
+
+.toc-scroll{
+  display:flex; gap:8px; overflow-x:auto; padding:14px 0 6px;
+  scrollbar-width:none;
+}
+.toc-scroll::-webkit-scrollbar{display:none;}
+.toc-chip{
+  flex-shrink:0; padding:7px 13px; border-radius:20px;
+  background:var(--card-solid); color:var(--ink); font-size:12.5px; font-weight:600;
+  white-space:nowrap; cursor:pointer; border:1.5px solid var(--ink);
+}
+.toc-chip:active{background:var(--paper2);}
+
+.unit-list{display:flex; flex-direction:column; gap:10px; margin-top:8px;}
+.unit-card{
+  display:flex; align-items:center; gap:12px;
+  padding:15px 16px; border-radius:var(--radius-md);
+  background:var(--card-solid); box-shadow:var(--shadow-sm); border:1.5px solid var(--ink);
+  cursor:pointer; scroll-margin-top:120px;
+  transition:transform .13s ease, box-shadow .13s ease;
+}
+.unit-card:active{transform:translate(2px,2px); box-shadow:none;}
+.unit-num{
+  width:30px; height:30px; border-radius:50%; flex-shrink:0;
+  background:var(--navy); color:#fff; font-family:"Kaisei Decol",serif; font-weight:700; font-size:13px;
+  display:flex; align-items:center; justify-content:center;
+}
+.unit-main{flex:1; min-width:0;}
+.unit-name{font-size:14.5px; font-weight:700; margin:0 0 3px;}
+.unit-stars{font-size:11px; color:var(--gold); letter-spacing:1px;}
+.unit-fav-star{font-size:19px; color:var(--grid); background:none; border:none; cursor:pointer; flex-shrink:0; padding:4px;}
+.unit-fav-star.on{color:var(--gold);}
+.unit-chevron{color:var(--ink-soft); font-size:16px; flex-shrink:0;}
+
+/* ---------- unit detail ---------- */
+.unit-head{padding:18px 4px 6px;}
+.unit-head-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+.unit-head h2{font-family:"Kaisei Decol",serif; font-size:23px; font-weight:700; margin:0 0 6px;}
+.unit-head .stars-row{font-size:14px; color:var(--gold); letter-spacing:2px;}
+.fav-toggle{
+  width:42px; height:42px; border-radius:50%; flex-shrink:0;
+  background:var(--card-solid); border:1.5px solid var(--ink); box-shadow:var(--shadow-sm);
+  font-size:19px; color:var(--grid); display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.fav-toggle.on{color:var(--gold);}
+.fav-toggle:active{transform:translate(1px,1px); box-shadow:none;}
+
+.card{
+  background:var(--card-solid); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-md); border:1.5px solid var(--ink);
+  padding:17px; margin-bottom:18px;
+  scroll-margin-top:70px;
+}
+.card-title{
+  display:flex; align-items:center; gap:8px;
+  font-family:"Kaisei Decol",serif;
+  font-size:16px; font-weight:700; margin:0 0 12px;
+}
+.must-card{
+  position:relative;
+  background:var(--card-solid);
+  border:2px dashed var(--red);
+}
+.must-card::after{
+  content:"重要"; position:absolute; top:-11px; right:14px;
+  background:var(--red); color:#fff; font-family:"Kaisei Decol",serif;
+  font-size:11px; padding:3px 10px; border-radius:2px; letter-spacing:.1em;
+  transform:rotate(3deg);
+}
+.must-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+.must-list li{
+  font-size:14px; line-height:1.6; padding:10px 12px;
+  background:var(--paper2); border-radius:var(--radius-sm);
+  border:1px solid var(--grid);
+}
+.must-list b{
+  font-weight:700; color:var(--ink); background-image:linear-gradient(120deg, rgba(242,199,68,.6) 0%, rgba(242,199,68,.6) 100%);
+  background-repeat:no-repeat; background-size:100% 55%; background-position:0 88%; padding:0 1px;
+}
+
+.explain-flow{display:flex; flex-direction:column; gap:2px; margin-bottom:10px;}
+.explain-box{
+  padding:13px; border-radius:var(--radius-sm);
+  background:var(--paper2); border:1px dashed var(--grid);
+  font-size:14.5px; line-height:1.6;
+}
+.explain-box .tag{
+  font-family:"Kaisei Decol",serif;
+  display:inline-block; font-size:11px; font-weight:700; padding:2px 8px;
+  border-radius:20px; margin-bottom:6px;
+}
+.tag-before{background:var(--grid); color:var(--ink-soft);}
+.tag-after{background:var(--navy); color:#fff;}
+.arrow-down{
+  text-align:center; font-size:20px; color:var(--navy); margin:2px 0; font-weight:700;
+}
+.explain-note{
+  font-size:13px; color:var(--ink-soft); line-height:1.65; margin-top:10px;
+  padding-top:10px; border-top:1px dashed var(--grid);
+}
+
+.example-item{
+  padding:12px 0; border-bottom:1px dashed var(--grid);
+}
+.example-item:last-child{border-bottom:none; padding-bottom:0;}
+.example-item:first-child{padding-top:0;}
+.example-en{font-size:15px; font-weight:700; margin:0 0 3px;}
+.example-ja{font-size:13px; color:var(--ink-soft); margin:0;}
+
+/* ---------- sticky-note mnemonic card ---------- */
+.mnemonic-card{
+  background:#3a3420; border:1.5px solid #7a682e; color:#f2e6b0;
+  transform:rotate(-1.2deg); box-shadow:var(--shadow-md);
+  position:relative;
+}
+.mnemonic-card::before{
+  content:"📌"; position:absolute; top:-14px; left:50%; transform:translateX(-50%) rotate(8deg);
+  font-size:20px;
+}
+.mnemonic-card .card-title{color:inherit;}
+.mnemonic-text{font-size:15px; line-height:1.7; font-weight:700; margin:0;}
+
+.mistake-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+.mistake-list li{
+  font-size:13.5px; line-height:1.55; padding:10px 12px 10px 36px; position:relative;
+  background:var(--paper2); border-radius:var(--radius-sm);
+  border:1px solid var(--grid); border-left:4px solid var(--red);
+}
+.mistake-list li::before{
+  content:"⚠️"; position:absolute; left:10px; top:9px; font-size:13px;
+}
+
+.check-card{ border:2px solid var(--ink); }
+.check-inner{ position:relative; }
+.check-q{font-family:"Kaisei Decol",serif; font-size:15px; font-weight:700; margin:0 0 12px;}
+.check-btn{
+  width:100%; padding:12px; border-radius:var(--radius-sm); border:1.5px solid var(--ink);
+  background:var(--ink); color:var(--paper); font-family:"Kaisei Decol",serif;
+  font-size:14.5px; font-weight:700; cursor:pointer; box-shadow:3px 3px 0 var(--red);
+  transition:transform .12s ease;
+}
+.check-btn:active{transform:translate(2px,2px); box-shadow:none;}
+.check-answer{
+  margin-top:10px; padding:12px; border-radius:var(--radius-sm);
+  background:var(--paper2); font-size:14px; line-height:1.6; display:none;
+  border:1px solid var(--grid); position:relative;
+}
+.check-answer.show{display:block; animation:fadeIn .3s ease;}
+
+/* ---------- stamp (hanko-style ○ mark on reveal) ---------- */
+.stamp-wrap{ position:relative; float:right; width:0; height:0; }
+.stamp{
+  position:absolute; top:-6px; right:-6px; width:58px; height:58px; border-radius:50%;
+  border:3px solid var(--red-deep); color:var(--red-deep);
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Kaisei Decol",serif; font-size:13px; letter-spacing:.05em;
+  transform:rotate(-14deg) scale(0); opacity:.9; pointer-events:none;
+}
+.check-answer.show .stamp, .quiz-a.show .stamp{
+  animation: stampIn .4s cubic-bezier(.2,1.4,.5,1) forwards;
+}
+@keyframes stampIn{ to{ transform:rotate(-14deg) scale(1); } }
+
+/* ---------- quiz screen ---------- */
+.quiz-wrap{padding:10px 4px;}
+.quiz-progress{
+  font-family:"Kaisei Decol",serif;
+  font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:14px; font-weight:700;
+}
+.quiz-card{
+  background:var(--card-solid); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+  border:2px solid var(--ink); padding:28px 20px; min-height:220px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  cursor:pointer; position:relative;
+}
+.quiz-badge{
+  font-family:"Kaisei Decol",serif;
+  font-size:11px; font-weight:700; color:#fff; background:var(--navy); padding:4px 10px; border-radius:20px; margin-bottom:14px;
+}
+.quiz-q{font-size:16.5px; font-weight:700; line-height:1.6;}
+.quiz-hint{font-size:12px; color:var(--ink-soft); margin-top:16px;}
+.quiz-a{font-size:15.5px; line-height:1.7; color:var(--ink); font-weight:700; display:none; position:relative; width:100%;}
+.quiz-a.show{display:block; animation:fadeIn .3s ease;}
+.quiz-btnrow{display:flex; gap:10px; margin-top:16px;}
+.quiz-action{
+  flex:1; padding:14px; border-radius:var(--radius-md); border:1.5px solid var(--ink);
+  font-family:"Kaisei Decol",serif; font-size:15px; font-weight:700; cursor:pointer;
+}
+.quiz-next{background:var(--ink); color:var(--paper); box-shadow:3px 3px 0 var(--navy);}
+.quiz-next:active{transform:translate(2px,2px); box-shadow:none;}
+
+/* ---------- favorites / empty ---------- */
+.empty-state{text-align:center; padding:60px 20px; color:var(--ink-soft);}
+.empty-state .ee{font-size:46px; margin-bottom:12px;}
+.empty-state p{font-size:14px; line-height:1.6; margin:0;}
+
+/* ---------- bottom tab bar ---------- */
+.tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  max-width:900px; margin:0 auto;
+  display:flex; justify-content:space-around;
+  padding:8px 6px calc(8px + var(--safe-bottom));
+  background:var(--paper);
+  border-top:2px solid var(--ink);
+}
+.tab-btn{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:none; border:none; color:var(--ink-soft); font-size:10.5px; font-weight:700;
+  padding:4px 14px; cursor:pointer; border-radius:12px; font-family:"Zen Kaku Gothic New",sans-serif;
+}
+.tab-btn .ti{font-size:20px;}
+.tab-btn.active{color:var(--red-deep);}
+
+/* ---------- scroll to top ---------- */
+.top-fab{
+  position:fixed; right:18px; bottom:calc(84px + var(--safe-bottom));
+  width:42px; height:42px; border-radius:50%;
+  background:var(--ink); color:var(--paper); border:1.5px solid var(--ink); box-shadow:var(--shadow-md);
+  font-size:17px; display:none; align-items:center; justify-content:center; cursor:pointer;
+  z-index:55; max-width:900px;
+}
+.top-fab.show{display:flex; animation:fadeIn .2s ease;}
+.top-fab:active{transform:translate(2px,2px); box-shadow:none;}
+
+/* ---------- misc ---------- */
+::selection{background:rgba(242,199,68,.55);}
+.hidden{display:none !important;}
+
+@media (min-width:640px){
+  .hero-title{font-size:32px;}
+  .cat-grid{flex-direction:row; flex-wrap:wrap;}
+  .cat-card{flex:1 1 calc(50% - 8px);}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <button class="back-btn hidden" id="backBtn" onclick="goBack()">‹ 戻る</button>
+    <h1 id="topTitle">📚 ChaPpy 英語電子辞書</h1>
+  </div>
+
+  <!-- ============ HOME SCREEN ============ -->
+  <section class="screen active" id="screen-home">
+    <div class="content">
+      <div class="hero">
+        <p class="hero-title">📚 ChaPpy 英語電子辞書</p>
+        <p class="hero-sub">中学英文法を、小学生でもわかるレベルで。</p>
+      </div>
+
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="例：受動態、can、比較級…" oninput="onSearch()">
+        <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+      </div>
+
+      <div id="searchResults" class="search-results hidden"></div>
+
+      <div id="homeDefault">
+        <div class="quick-row">
+          <button class="quick-btn" onclick="showFavorites()"><span class="qi">⭐</span>お気に入り</button>
+          <button class="quick-btn" onclick="startQuiz()"><span class="qi">📝</span>一問一答</button>
+          <button class="quick-btn" onclick="startQuiz(true)"><span class="qi">🎲</span>ランダム暗記</button>
+        </div>
+
+        <div class="section-title">学年からえらぶ</div>
+        <div class="cat-grid" id="catGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GRADE SCREEN ============ -->
+  <section class="screen" id="screen-grade">
+    <div class="content">
+      <div class="grade-hero">
+        <h2 id="gradeTitle"></h2>
+        <p id="gradeDesc"></p>
+      </div>
+      <div class="toc-scroll" id="tocScroll"></div>
+      <div class="unit-list" id="unitList"></div>
+    </div>
+  </section>
+
+  <!-- ============ UNIT DETAIL SCREEN ============ -->
+  <section class="screen" id="screen-unit">
+    <div class="content" id="unitContent"></div>
+  </section>
+
+  <!-- ============ QUIZ SCREEN ============ -->
+  <section class="screen" id="screen-quiz">
+    <div class="content quiz-wrap">
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div class="quiz-card" id="quizCard" onclick="revealQuizAnswer()">
+        <div class="quiz-badge" id="quizBadge"></div>
+        <p class="quiz-q" id="quizQ"></p>
+        <p class="quiz-hint" id="quizHint">タップして答えを見る</p>
+        <p class="quiz-a" id="quizA"></p>
+      </div>
+      <div class="quiz-btnrow">
+        <button class="quiz-action quiz-next" onclick="nextQuiz()">次の問題 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAVORITES SCREEN ============ -->
+  <section class="screen" id="screen-favorites">
+    <div class="content">
+      <div class="grade-hero">
+        <h2>⭐ お気に入り</h2>
+        <p>タップして保存した単元一覧（このセッション中のみ保存されます）</p>
+      </div>
+      <div class="unit-list" id="favList"></div>
+    </div>
+  </section>
+
+</div>
+
+<button class="top-fab" id="topFab" onclick="scrollToTop()">↑</button>
+
+<!-- ============ BOTTOM TAB BAR ============ -->
+<div class="tabbar">
+  <button class="tab-btn active" id="tab-home" onclick="goHome()"><span class="ti">🏠</span>ホーム</button>
+  <button class="tab-btn" id="tab-fav" onclick="showFavorites()"><span class="ti">⭐</span>お気に入り</button>
+  <button class="tab-btn" id="tab-quiz" onclick="startQuiz()"><span class="ti">📝</span>一問一答</button>
+  <button class="tab-btn" id="tab-top" onclick="scrollToTop()"><span class="ti">⬆️</span>トップへ</button>
+</div>
+
+<script>
+
+/* ==========================================================================
+   データ本体：中学1〜3年 全文法ユニット
+   各ユニット構造:
+   {
+     id, grade(1-3), title, importance(1-5),
+     points: [ 絶対出るポイント配列 (HTML文字列可) ],
+     before: {tag, text}, after: {tag, text},   // 変形の説明（ある場合）
+     note: "説明の補足",
+     examples: [{en, ja}],
+     mnemonic: "語呂合わせ",
+     mistakes: [ "間違えやすい点" ],
+     check: {q, a}
+   }
+   ========================================================================== */
+const GRADES = [
+  {
+    key:"g1", grade:1, name:"中学1年", emoji:"📘", desc:"英語の基本のき。ここが土台！",
+    units: [
+      {
+        title:"be動詞（am / is / are）", importance:5,
+        points:[
+          "「〜です・〜にいます」を表す be動詞",
+          "主語が I → <b>am</b>",
+          "主語が he/she/it、単数 → <b>is</b>",
+          "主語が you、複数（we/they/学校名など） → <b>are</b>",
+          "否定文は be動詞のすぐ後ろに <b>not</b>",
+          "疑問文は be動詞を主語の前に出す"
+        ],
+        before:{tag:"日本語", text:"太郎は 学生 です。"},
+        after:{tag:"英語", text:"Taro is a student."},
+        note:"be動詞は「＝（イコール）」のはたらき。「太郎＝学生」のように、主語と後ろの言葉をつなぐ橋のイメージ。",
+        examples:[
+          {en:"I am a student.", ja:"私は学生です。"},
+          {en:"She is very kind.", ja:"彼女はとても親切です。"},
+          {en:"They are in the park.", ja:"彼らは公園にいます。"},
+          {en:"Is he your brother? — Yes, he is.", ja:"彼はあなたのお兄さんですか？ ―はい、そうです。"}
+        ],
+        mnemonic:"「アイ アム、ユー アー、ヒーシーイット イズ」の合言葉で主語とセットで丸暗記！",
+        mistakes:[
+          "am / is / are を一般動詞と混ぜて “I am like it.” のようにしてしまう（be動詞と一般動詞は同じ文で並べない）",
+          "疑問文で “Do you are ...?” のように do を付けてしまう（be動詞の疑問文に do は不要）"
+        ],
+        check:{q:"「彼女は先生です。」を英語にすると？", a:"She is a teacher.（主語 she → is を使う）"}
+      },
+      {
+        title:"一般動詞（現在形）", importance:5,
+        points:[
+          "be動詞以外の「〜する」を表す動詞",
+          "主語が3人称単数（he/she/it）→ 動詞の語尾に <b>-s / -es</b>",
+          "否定文：主語が I/you/複数 → <b>don't</b>＋動詞の原形　　he/she/it → <b>doesn't</b>＋動詞の原形",
+          "疑問文：<b>Do/Does</b>＋主語＋動詞の原形〜？"
+        ],
+        before:{tag:"3人称単数でない", text:"I play soccer."},
+        after:{tag:"3人称単数（he）", text:"He plays soccer."},
+        note:"主語が「彼・彼女・それ・1人の名前」のときだけ、動詞に s を付け足す。それ以外（I, you, we, they）は動詞そのまま。",
+        examples:[
+          {en:"I like music.", ja:"私は音楽が好きです。"},
+          {en:"My father works at a bank.", ja:"私の父は銀行で働いています。"},
+          {en:"She doesn't eat meat.", ja:"彼女は肉を食べません。"},
+          {en:"Does he play tennis? — No, he doesn't.", ja:"彼はテニスをしますか？ ―いいえ、しません。"}
+        ],
+        mnemonic:"「ヒーシーイット、エス（s）をつけよう」で3人称単数のsを忘れない！",
+        mistakes:[
+          "3人称単数なのに s を忘れる（“He play soccer.” ✕ → “He plays soccer.” ○）",
+          "doesn't の後ろにも s を付けてしまう（“He doesn't plays.” ✕ → doesn't の後ろは動詞の原形）"
+        ],
+        check:{q:"「彼は毎日勉強します。」を英語にすると？", a:"He studies every day.（study → studies に変化）"}
+      },
+      {
+        title:"疑問文（be動詞・一般動詞）", importance:4,
+        points:[
+          "be動詞の疑問文：be動詞を主語の前に出す（Is he ...?）",
+          "一般動詞の疑問文：文の頭に <b>Do / Does</b> を置き、動詞は原形に戻す",
+          "答え方：Yes, 主語＋be動詞/do・does．　No, 主語＋be動詞/do・does＋not．"
+        ],
+        before:{tag:"平叙文", text:"You are hungry."},
+        after:{tag:"疑問文", text:"Are you hungry?"},
+        note:"be動詞は「前に出す」だけ。一般動詞は「Do/Doesを借りてくる」というイメージ。",
+        examples:[
+          {en:"Are you a fan of soccer? — Yes, I am.", ja:"あなたはサッカーのファンですか？―はい、そうです。"},
+          {en:"Do you have a pen? — No, I don't.", ja:"ペンを持っていますか？―いいえ、持っていません。"},
+          {en:"Does she speak English? — Yes, she does.", ja:"彼女は英語を話しますか？―はい、話します。"}
+        ],
+        mnemonic:"「ビーどうしゼンブ前へ、いっぱんどうしDoたのむ」",
+        mistakes:[
+          "一般動詞の疑問文で動詞にsを残す（“Does he plays?” ✕ → “Does he play?” ○）",
+          "be動詞の疑問文にDoを付ける（“Do you are ...?” ✕）"
+        ],
+        check:{q:"“He likes dogs.” を疑問文にすると？", a:"Does he like dogs?（Doesを使い、likesはlikeに戻す）"}
+      },
+      {
+        title:"否定文", importance:4,
+        points:[
+          "be動詞の否定文：be動詞＋<b>not</b>（is not＝isn't）",
+          "一般動詞の否定文：主語＋<b>don't / doesn't</b>＋動詞の原形",
+          "can などの助動詞：<b>can't（cannot）</b>＋動詞の原形"
+        ],
+        before:{tag:"肯定文", text:"I am busy."},
+        after:{tag:"否定文", text:"I am not busy."},
+        note:"「〜ではない」と打ち消すときは、be動詞や助動詞のすぐ後ろに not を置くだけ。一般動詞は not を直接置けないので don't/doesn't に頼る。",
+        examples:[
+          {en:"She is not (isn't) at home.", ja:"彼女は家にいません。"},
+          {en:"I don't like carrots.", ja:"私はにんじんが好きではありません。"},
+          {en:"He doesn't play the piano.", ja:"彼はピアノを弾きません。"}
+        ],
+        mnemonic:"「ノット は べどうし の となり」",
+        mistakes:[
+          "一般動詞にそのままnotをつける（“I not like it.” ✕）",
+          "doesn'tの後の動詞にsを付けたままにする（“He doesn't plays.” ✕）"
+        ],
+        check:{q:"「私は魚が好きではありません。」を英語にすると？", a:"I don't like fish."}
+      },
+      {
+        title:"命令文", importance:3,
+        points:[
+          "「〜しなさい」→ 主語を消して<b>動詞の原形</b>から文を始める",
+          "「〜してはいけません」→ 文の頭に <b>Don't</b>",
+          "「〜しましょう」→ 文の頭に <b>Let's</b>",
+          "ていねいに言うときは文末や文頭に <b>please</b>"
+        ],
+        before:{tag:"ふつうの文", text:"You open the door."},
+        after:{tag:"命令文", text:"Open the door."},
+        note:"命令文は「あなたは」を隠して、いきなり動詞から始める文。主語のyouを消すのがポイント。",
+        examples:[
+          {en:"Open the window, please.", ja:"窓を開けてください。"},
+          {en:"Don't run in the hall.", ja:"廊下を走ってはいけません。"},
+          {en:"Let's go to the library.", ja:"図書館へ行きましょう。"}
+        ],
+        mnemonic:"「ドント は 動詞 の 前」「レッツ は みんなで さそう」",
+        mistakes:[
+          "命令文の頭にYouを残す（“You open the door.”は命令文ではなく平叙文）",
+          "Let'sの後を原形にせず三単現のsを付けてしまう"
+        ],
+        check:{q:"「静かにしなさい。」を英語にすると？", a:"Be quiet.（be動詞の命令文はBeから始める）"}
+      },
+      {
+        title:"疑問詞（What/Who/Where/When/Why/How）", importance:5,
+        points:[
+          "<b>What</b>＝何　<b>Who</b>＝だれ　<b>Where</b>＝どこ",
+          "<b>When</b>＝いつ　<b>Why</b>＝なぜ　<b>How</b>＝どうやって・どのくらい",
+          "疑問詞は文の一番先頭に置き、その後は疑問文の形（be動詞/do・does＋主語）を続ける"
+        ],
+        before:{tag:"be動詞疑問文", text:"Is this your bag?"},
+        after:{tag:"疑問詞疑問文", text:"What is this? — It's my bag."},
+        note:"疑問詞は「知りたいことを聞くための魔法の言葉」。まず疑問詞を置き、そのあとに普通の疑問文をくっつけるだけ。",
+        examples:[
+          {en:"What do you have in your bag?", ja:"かばんの中に何を持っていますか？"},
+          {en:"Where do you live?", ja:"あなたはどこに住んでいますか？"},
+          {en:"How do you go to school?", ja:"あなたはどうやって学校へ行きますか？"},
+          {en:"Why are you sad?", ja:"なぜ悲しいのですか？"}
+        ],
+        mnemonic:"「What誰なにWho どこWhere いつWhen なぜWhy どうHow」の五・七のリズムで暗記！",
+        mistakes:[
+          "疑問詞の後にDo/Doesを忘れる（一般動詞の疑問詞疑問文でも Do/Does は必要）",
+          "Whatの後にbe動詞と一般動詞の語順を逆にする"
+        ],
+        check:{q:"「あなたは何のスポーツが好きですか？」を英語にすると？", a:"What sport do you like?"}
+      },
+      {
+        title:"can（〜できる）", importance:4,
+        points:[
+          "can＋<b>動詞の原形</b>＝「〜できる」",
+          "否定文：<b>can't（cannot）</b>＋動詞の原形",
+          "疑問文：<b>Can</b>＋主語＋動詞の原形〜？",
+          "主語が誰でも can の形は変わらない（3単現のsは不要）"
+        ],
+        before:{tag:"能力なし", text:"I swim.（泳ぐ）"},
+        after:{tag:"能力あり", text:"I can swim.（泳げる）"},
+        note:"canは動詞に「できる力」をプラスする魔法の言葉。canの後ろの動詞は絶対に原形（sをつけない）。",
+        examples:[
+          {en:"I can play the guitar.", ja:"私はギターを弾くことができます。"},
+          {en:"She can't cook well.", ja:"彼女は上手に料理ができません。"},
+          {en:"Can you speak Japanese? — Yes, I can.", ja:"日本語を話せますか？―はい、話せます。"}
+        ],
+        mnemonic:"「キャンのあとは かならず げんけい」",
+        mistakes:[
+          "canの後の動詞にsを付ける（“He can plays.” ✕）",
+          "canとdo/doesを一緒に使ってしまう（“Can he plays?” ✕）"
+        ],
+        check:{q:"「私は自転車に乗れません。」を英語にすると？", a:"I can't (cannot) ride a bike."}
+      },
+      {
+        title:"現在進行形（be + 〜ing）", importance:4,
+        points:[
+          "「今〜しているところ」＝<b>be動詞＋動詞のing形</b>",
+          "否定文：be動詞＋not＋〜ing",
+          "疑問文：be動詞＋主語＋〜ing？",
+          "ing形の作り方：ふつうはing／eで終わる語はeを取ってing／短母音+子音で終わる語は子音を重ねてing"
+        ],
+        before:{tag:"ふだんの習慣", text:"I play soccer.（サッカーをする＝習慣）"},
+        after:{tag:"今している最中", text:"I am playing soccer.（今サッカーをしている）"},
+        note:"be動詞＋ing は「動作の途中を写真でパシャッと撮った」イメージ。まさに今やっていることを表す。",
+        examples:[
+          {en:"She is studying English now.", ja:"彼女は今、英語を勉強しています。"},
+          {en:"They are not watching TV.", ja:"彼らはテレビを見ていません。"},
+          {en:"Is he running in the park? — Yes, he is.", ja:"彼は公園を走っていますか？―はい、走っています。"}
+        ],
+        mnemonic:"「ビー＋イング、いま その しゅんかん」",
+        mistakes:[
+          "be動詞を忘れて動詞のing形だけにする（“I playing soccer.” ✕）",
+          "make→makeing のようにeを消し忘れる（正しくは making）"
+        ],
+        check:{q:"「彼らは今、昼食を食べています。」を英語にすると？", a:"They are eating lunch now."}
+      },
+      {
+        title:"過去形（規則動詞・不規則動詞）", importance:5,
+        points:[
+          "規則動詞：動詞の語尾に<b>-ed</b>をつける（play→played）",
+          "不規則動詞：形が不規則に変化（go→went, have→had, see→sawなど）",
+          "be動詞の過去形：am/is→<b>was</b>、are→<b>were</b>",
+          "否定文：<b>didn't</b>＋動詞の原形　　疑問文：<b>Did</b>＋主語＋動詞の原形〜？"
+        ],
+        before:{tag:"現在", text:"I play tennis.（現在）"},
+        after:{tag:"過去", text:"I played tennis yesterday.（過去）"},
+        note:"過去形は「もう終わったこと」を表す。didを使うときは、動詞は必ず原形に戻すのがポイント（過去のニュアンスはdidが持ってくれる）。",
+        examples:[
+          {en:"I visited Kyoto last year.", ja:"私は去年、京都を訪れました。"},
+          {en:"She went to the store yesterday.", ja:"彼女は昨日お店に行きました。"},
+          {en:"Did you watch the movie? — No, I didn't.", ja:"あなたはその映画を見ましたか？―いいえ、見ませんでした。"}
+        ],
+        mnemonic:"「ディッド の あとは げんけいに もどす」／不規則動詞は替え歌で覚える（go-went-went, see-saw-seen）",
+        mistakes:[
+          "didn'tの後の動詞を過去形のままにする（“I didn't went.” ✕ → “I didn't go.” ○）",
+          "不規則動詞にedをつけてしまう（“goed” ✕ → “went” ○）"
+        ],
+        check:{q:"「彼女は昨夜、宿題をしませんでした。」を英語にすると？", a:"She didn't do her homework last night."}
+      },
+      {
+        title:"There is / There are（〜がある・いる）", importance:3,
+        points:[
+          "単数・数えられない名詞：<b>There is</b> 〜.",
+          "複数：<b>There are</b> 〜.",
+          "否定文：There is not (isn't) / There are not (aren't) 〜.",
+          "疑問文：Is there 〜? / Are there 〜?"
+        ],
+        before:{tag:"日本語", text:"机の上に本が1冊あります。"},
+        after:{tag:"英語", text:"There is a book on the desk."},
+        note:"「〜がある／いる」と新しく紹介するときに使う表現。主語は必ず初めて話題に出るもの（すでに知っている物にはthere isは使わない）。",
+        examples:[
+          {en:"There are many students in the classroom.", ja:"教室にはたくさんの生徒がいます。"},
+          {en:"There isn't a park near my house.", ja:"私の家の近くに公園はありません。"},
+          {en:"Is there a station near here? — Yes, there is.", ja:"この近くに駅はありますか？―はい、あります。"}
+        ],
+        mnemonic:"「ゼアイズ ひとつ、ゼアアー たくさん」",
+        mistakes:[
+          "後ろの名詞が複数なのにThere isを使う（“There is two cats.” ✕ → “There are two cats.” ○）",
+          "すでに知っている（固有の）ものにThere isを使ってしまう"
+        ],
+        check:{q:"「公園に子どもたちが3人います。」を英語にすると？", a:"There are three children in the park."}
+      },
+      {
+        title:"前置詞（in / on / at など）", importance:3,
+        points:[
+          "<b>in</b>：広い場所・月・年・季節の中（in Tokyo, in April, in 2020）",
+          "<b>on</b>：面に接している・曜日・日付（on the desk, on Monday）",
+          "<b>at</b>：地点・時刻（at the station, at 7 o'clock）",
+          "<b>by</b>＝〜によって・〜までに、<b>with</b>＝〜と一緒に・〜を使って"
+        ],
+        before:{tag:"位置のイメージ", text:"箱（in）／机の上（on）／駅（at）"},
+        after:{tag:"時間のイメージ", text:"月・年（in）／曜日・日（on）／時刻（at）"},
+        note:"in・on・at は「広い→せまい→点」の順番でイメージするとわかりやすい。inは空間、onは接触、atは1点。",
+        examples:[
+          {en:"I live in Tokyo.", ja:"私は東京に住んでいます。"},
+          {en:"We have a test on Friday.", ja:"金曜日にテストがあります。"},
+          {en:"Let's meet at the station at 5.", ja:"5時に駅で会いましょう。"}
+        ],
+        mnemonic:"「インは ひろい、オンは くっつく、アットは てん」",
+        mistakes:[
+          "曜日にinを使ってしまう（“in Monday” ✕ → “on Monday” ○）",
+          "時刻にonを使ってしまう（“on 7 o'clock” ✕ → “at 7 o'clock” ○）"
+        ],
+        check:{q:"「私は日曜日に公園に行きます。」の（　）に入る前置詞は？　I go to the park （ ） Sunday.", a:"on（曜日にはonを使う）"}
+      },
+      {
+        title:"代名詞（I / you / he / she …）", importance:3,
+        points:[
+          "主格（〜は）：I, you, he, she, it, we, they",
+          "目的格（〜を・〜に）：me, you, him, her, it, us, them",
+          "動詞の後ろや前置詞の後ろには目的格を使う"
+        ],
+        before:{tag:"主格", text:"He is my friend.（彼は私の友達です）"},
+        after:{tag:"目的格", text:"I like him.（私は彼が好きです）"},
+        note:"「〜は」の形と「〜を」の形は別の単語になる。文の主人公なら主格、動作を受ける側なら目的格。",
+        examples:[
+          {en:"She helped me yesterday.", ja:"彼女は昨日私を手伝ってくれました。"},
+          {en:"I will call them tonight.", ja:"今夜彼らに電話します。"},
+          {en:"Please give it to us.", ja:"それを私たちにください。"}
+        ],
+        mnemonic:"「アイマイミー、ユーユアユー、ヒーヒズヒム」の格変化リズムで覚える",
+        mistakes:[
+          "動詞の後ろに主格を使ってしまう（“I like he.” ✕ → “I like him.” ○）"
+        ],
+        check:{q:"「私は彼女を知っています。」を英語にすると？", a:"I know her."}
+      },
+      {
+        title:"所有代名詞（mine / yours …）", importance:2,
+        points:[
+          "所有代名詞＝「〜のもの」1語で表す：mine, yours, his, hers, ours, theirs",
+          "「所有格＋名詞」を1語で言い換えたもの（my book → mine）"
+        ],
+        before:{tag:"所有格＋名詞", text:"This is my pen."},
+        after:{tag:"所有代名詞", text:"This pen is mine."},
+        note:"「私の〜」ではなく「私のもの」と名詞をまるごと1語にまとめてしまう便利な言葉。",
+        examples:[
+          {en:"Is this bag yours?", ja:"このかばんはあなたのものですか？"},
+          {en:"That car is his.", ja:"あの車は彼のものです。"},
+          {en:"These books are ours.", ja:"これらの本は私たちのものです。"}
+        ],
+        mnemonic:"「マイン・ユアーズ・ヒズ・ハーズ・アワーズ・セアーズ」で語尾のsに注目",
+        mistakes:[
+          "his以外にも所有格と所有代名詞が同じ形だと勘違いする（my→mine, your→yours、hisはhisのまま）"
+        ],
+        check:{q:"「これは私のものです。」を英語にすると？", a:"This is mine."}
+      },
+      {
+        title:"所有格（my / your / his …）", importance:2,
+        points:[
+          "所有格＝「〜の」＋必ず名詞とセットで使う：my, your, his, her, its, our, their",
+          "人の名前＋'s も所有格（Taro's bag＝太郎のかばん）"
+        ],
+        before:{tag:"名詞なし＝×", text:"This is my.（✕：名詞が必要）"},
+        after:{tag:"名詞あり＝○", text:"This is my bag.（○）"},
+        note:"所有格は1人では使えない、必ず名詞とペアになる言葉。「わたしの」だけでは文が完成しない。",
+        examples:[
+          {en:"Her dog is very cute.", ja:"彼女の犬はとてもかわいいです。"},
+          {en:"This is Taro's bag.", ja:"これは太郎のかばんです。"},
+          {en:"Our school has a big library.", ja:"私たちの学校には大きな図書館があります。"}
+        ],
+        mnemonic:"「マイ・ユア・ヒズ・ハー・イッツ・アワ・ゼア」は必ず名詞とセット！",
+        mistakes:[
+          "所有格の後に名詞を置き忘れる（“This is her.”は所有格の意味では使えない）"
+        ],
+        check:{q:"「これは彼の自転車です。」を英語にすると？", a:"This is his bike."}
+      },
+      {
+        title:"頻度を表す副詞（always/usually/sometimes/never）", importance:2,
+        points:[
+          "always（いつも）＞ usually（たいてい）＞ often（よく）＞ sometimes（時々）＞ never（決してない）",
+          "置く場所：be動詞・助動詞の<b>後ろ</b>、一般動詞の<b>前</b>"
+        ],
+        before:{tag:"be動詞文", text:"He is always kind.（彼はいつも親切）"},
+        after:{tag:"一般動詞文", text:"He always studies hard.（彼はいつも一生懸命勉強する）"},
+        note:"頻度の副詞は「動詞のすぐそば」に置くのがルール。be動詞なら後ろ、一般動詞なら前と覚える。",
+        examples:[
+          {en:"I usually get up at 7.", ja:"私はたいてい7時に起きます。"},
+          {en:"She is never late for school.", ja:"彼女は学校に決して遅刻しません。"},
+          {en:"We sometimes eat out.", ja:"私たちは時々外食します。"}
+        ],
+        mnemonic:"「オールウェイズ100％、ネバー0％」の割合で頻度を数直線でイメージ",
+        mistakes:[
+          "一般動詞の後ろに置いてしまう（“I get up always at 7.” ✕ → “I always get up at 7.” ○）"
+        ],
+        check:{q:"「私は時々図書館へ行きます。」を英語にすると？", a:"I sometimes go to the library."}
+      }
+    ]
+  },
+  {
+    key:"g2", grade:2, name:"中学2年", emoji:"📗", desc:"表現がぐっと広がる学年！",
+    units:[
+      {
+        title:"未来形（will / be going to）", importance:5,
+        points:[
+          "<b>will</b>＋動詞の原形：その場で決めたこと・予想",
+          "<b>be going to</b>＋動詞の原形：前から決めていた予定",
+          "否定文：will not（won't）／ be動詞＋not going to",
+          "疑問文：Will＋主語〜？／ be動詞＋主語＋going to〜？"
+        ],
+        before:{tag:"現在", text:"I study English.（現在の習慣）"},
+        after:{tag:"未来", text:"I will study English tomorrow.（未来の予定）"},
+        note:"will は「今決めた！」という気持ち、be going to は「前から決めていた」予定。どちらも「これから」を表すが、決めたタイミングが違う。",
+        examples:[
+          {en:"I will help you.", ja:"（今決めて）お手伝いします。"},
+          {en:"We are going to visit Osaka next week.", ja:"私たちは来週大阪を訪れる予定です。"},
+          {en:"It will rain tomorrow.", ja:"明日は雨が降るでしょう。"}
+        ],
+        mnemonic:"「ウィルは とっさに、ゴナは まえから」",
+        mistakes:[
+          "willの後にtoを入れてしまう（“will to go” ✕）",
+          "be going toのbe動詞を主語に合わせ忘れる（“I is going to” ✕）"
+        ],
+        check:{q:"「私は今夜、宿題をするつもりです。」を英語にすると？", a:"I am going to do my homework tonight."}
+      },
+      {
+        title:"助動詞（must/may/should/have to）", importance:4,
+        points:[
+          "<b>must</b>＝〜しなければならない（強い義務）",
+          "<b>have to</b>＝〜しなければならない（mustとほぼ同じ、否定は意味が変わる）",
+          "<b>must not</b>＝〜してはいけない（禁止）／<b>don't have to</b>＝〜する必要はない（不必要）",
+          "<b>should</b>＝〜すべき（アドバイス）　<b>may</b>＝〜してもよい／〜かもしれない"
+        ],
+        before:{tag:"義務", text:"You must study hard.（勉強しなければならない）"},
+        after:{tag:"禁止と不必要の違い", text:"must not＝禁止／don't have to＝不必要"},
+        note:"mustとhave toは似ているが、否定文でまったく意味が変わるのが最大のポイント。禁止なのか、不要なのかを区別しよう。",
+        examples:[
+          {en:"You must not run here.", ja:"ここで走ってはいけません。"},
+          {en:"You don't have to hurry.", ja:"急ぐ必要はありません。"},
+          {en:"You should see a doctor.", ja:"医者に診てもらうべきです。"}
+        ],
+        mnemonic:"「マストノット＝きんし、ドントハブトゥー＝ふようで区別！」",
+        mistakes:[
+          "must notとdon't have toを同じ意味だと勘違いする",
+          "has toの3単現を忘れる（“He have to go.” ✕ → “He has to go.” ○）"
+        ],
+        check:{q:"「あなたは今日、学校に来る必要はありません。」を英語にすると？", a:"You don't have to come to school today."}
+      },
+      {
+        title:"不定詞（to＋動詞の原形）の3用法", importance:5,
+        points:[
+          "<b>名詞的用法</b>：「〜すること」（主語・目的語・補語になる）",
+          "<b>形容詞的用法</b>：「〜するための・〜すべき」（名詞を後ろから修飾）",
+          "<b>副詞的用法</b>：「〜するために（目的）」「〜して（感情の原因）」"
+        ],
+        before:{tag:"名詞的", text:"I like to read books.（本を読むことが好き）"},
+        after:{tag:"形容詞的／副詞的", text:"I have a book to read.（読むための本）／ I study to pass the test.（合格するために勉強する）"},
+        note:"to＋動詞の原形は形は1つだが、働き（役割）が3つある。文の中でどこにかかっているかを見て、名詞・形容詞・副詞のどれかを判断する。",
+        examples:[
+          {en:"To swim in the sea is fun.", ja:"海で泳ぐことは楽しいです。（名詞的）"},
+          {en:"She has a lot of homework to do.", ja:"彼女にはやるべき宿題がたくさんあります。（形容詞的）"},
+          {en:"He went to the store to buy milk.", ja:"彼は牛乳を買うためにお店へ行きました。（副詞的）"},
+          {en:"I was happy to see you.", ja:"あなたに会えて嬉しかったです。（副詞的：感情の原因）"}
+        ],
+        mnemonic:"「トゥ＋動詞は、こと・ための・ために」の3点セットで暗記",
+        mistakes:[
+          "toの後ろを動詞のing形にしてしまう（“to swimming” ✕ → “to swim” ○）",
+          "3用法を区別せず全部同じ意味に訳してしまう"
+        ],
+        check:{q:"“I have many things to do.” の to do はどの用法？", a:"形容詞的用法（things を後ろから修飾＝やるべきこと）"}
+      },
+      {
+        title:"動名詞（動詞のing形＝〜すること）", importance:4,
+        points:[
+          "動詞のing形が名詞のはたらきをする＝「〜すること」",
+          "主語・目的語・補語になる",
+          "enjoy, finish, stop などの動詞は<b>動名詞のみ</b>を目的語にとる"
+        ],
+        before:{tag:"不定詞（名詞的）", text:"I like to play soccer."},
+        after:{tag:"動名詞", text:"I like playing soccer.（ほぼ同じ意味）"},
+        note:"動名詞は「動詞なのに名詞に変身したもの」。enjoyやfinishのあとは必ずing形と覚えてしまうのが近道。",
+        examples:[
+          {en:"Playing the piano is fun.", ja:"ピアノを弾くことは楽しいです。"},
+          {en:"I enjoy reading comic books.", ja:"私は漫画を読むことを楽しみます。"},
+          {en:"She finished cleaning her room.", ja:"彼女は部屋を掃除し終えました。"}
+        ],
+        mnemonic:"「エンジョイ・フィニッシュ・ストップは イング専門」",
+        mistakes:[
+          "enjoyの後にtoを使ってしまう（“enjoy to play” ✕ → “enjoy playing” ○）"
+        ],
+        check:{q:"「私は歌うことが好きです。」を動名詞を使って英語にすると？", a:"I like singing."}
+      },
+      {
+        title:"比較（比較級・最上級）", importance:5,
+        points:[
+          "比較級：形容詞/副詞＋<b>-er</b> ＋ than 〜（2つを比べる）",
+          "最上級：the＋形容詞/副詞＋<b>-est</b>（3つ以上で一番）",
+          "長い単語は <b>more</b>／<b>the most</b> を前に置く（beautiful→more beautiful）",
+          "同じくらい：<b>as … as</b> 〜"
+        ],
+        before:{tag:"比較級", text:"Ken is taller than Yuji.（健は裕二より背が高い）"},
+        after:{tag:"最上級", text:"Ken is the tallest in his class.（健はクラスで一番背が高い）"},
+        note:"2人を比べるときは -er + than、3人以上の中で一番なら the -est。長い単語には -er/-est の代わりに more/most をくっつける。",
+        examples:[
+          {en:"This book is more interesting than that one.", ja:"この本はあの本より面白いです。"},
+          {en:"She is the most popular student in our school.", ja:"彼女は私たちの学校で一番人気のある生徒です。"},
+          {en:"I am as tall as my brother.", ja:"私は兄と同じくらいの背の高さです。"}
+        ],
+        mnemonic:"「短い語は er・est、長い語は more・most」",
+        mistakes:[
+          "more と -er を両方つけてしまう（“more taller” ✕）",
+          "最上級で the を忘れる（“He is tallest.” ✕ → “He is the tallest.” ○）"
+        ],
+        check:{q:"「これはすべての中で一番簡単な問題です。」を英語にすると？", a:"This is the easiest question of all."}
+      },
+      {
+        title:"接続詞（when/if/because/that など）", importance:4,
+        points:[
+          "<b>when</b>＝〜のとき　<b>if</b>＝もし〜なら　<b>because</b>＝なぜなら〜だから",
+          "<b>that</b>＝〜ということ（think/know/hopeなどの後ろでよく使われ、省略も可）",
+          "when/ifの文が前に来るときはコンマ（,）を入れる"
+        ],
+        before:{tag:"後ろに置く", text:"I was happy when I saw you."},
+        after:{tag:"前に置く（コンマ必要）", text:"When I saw you, I was happy."},
+        note:"接続詞は2つの文をつなぐ「のり」。文の前半に置くか後半に置くかで、コンマが必要かどうかが変わる。",
+        examples:[
+          {en:"If it rains tomorrow, we will stay home.", ja:"もし明日雨が降ったら、私たちは家にいます。"},
+          {en:"I think that this movie is great.", ja:"私はこの映画は素晴らしいと思います。"},
+          {en:"He was absent because he was sick.", ja:"彼は病気だったので欠席しました。"}
+        ],
+        mnemonic:"「文の前は カンマ 忘れずに」",
+        mistakes:[
+          "if / whenの文の中でwillを使ってしまう（時・条件を表す副詞節では未来のことも現在形で表す：“If it will rain” ✕ → “If it rains” ○）"
+        ],
+        check:{q:"「もし晴れたら、私たちはピクニックに行きます。」を英語にすると？", a:"If it is sunny, we will go on a picnic."}
+      },
+      {
+        title:"SVOO（give/tell などの第4文型）", importance:3,
+        points:[
+          "動詞＋<b>人（O1）</b>＋<b>物（O2）</b>＝「人に物を〜する」",
+          "give, show, tell, teach, send などがよく使われる",
+          "書き換え：動詞＋物＋<b>to/for</b>＋人　の形にもできる"
+        ],
+        before:{tag:"SVOO", text:"I gave him a present.（彼にプレゼントをあげた）"},
+        after:{tag:"書き換え（to型）", text:"I gave a present to him.（同じ意味）"},
+        note:"「人に」「物を」の順番で動詞のすぐ後ろに2つの目的語を並べる文型。giveやtellの仲間はto、buyやmakeの仲間はforを使って書き換える。",
+        examples:[
+          {en:"My mother made me a cake.", ja:"母は私にケーキを作ってくれました。"},
+          {en:"He showed us his pictures.", ja:"彼は私たちに写真を見せてくれました。"},
+          {en:"She teaches us English.", ja:"彼女は私たちに英語を教えています。"}
+        ],
+        mnemonic:"「give/tell/show系はto、buy/make/cook系はfor」",
+        mistakes:[
+          "toとforを逆に使ってしまう（buyはfor、giveはtoが基本）"
+        ],
+        check:{q:"“I bought her a bag.” をtoかforを使って書き換えると？", a:"I bought a bag for her."}
+      },
+      {
+        title:"SVOC（call/make などの第5文型）", importance:3,
+        points:[
+          "動詞＋<b>目的語（O）</b>＋<b>補語（C）</b>＝「OをCと呼ぶ・OをCにする」",
+          "call, name, make などが代表的",
+          "O＝Cの関係が成り立つのが特徴（O is C の関係）"
+        ],
+        before:{tag:"SVOO（誤解しやすい）", text:"×（意味が違う）"},
+        after:{tag:"SVOC", text:"We call him Ken.（私たちは彼をケンと呼びます＝He is Ken）"},
+        note:"SVOOは「人と物」で別々のものだが、SVOCは目的語（O）と補語（C）がイコールの関係になっているのが最大の違い。",
+        examples:[
+          {en:"They named the baby Sora.", ja:"彼らはその赤ちゃんをソラと名付けました。"},
+          {en:"The news made her happy.", ja:"その知らせは彼女を幸せにしました。"},
+          {en:"We call this flower sakura in Japanese.", ja:"私たちは日本語でこの花をさくらと呼びます。"}
+        ],
+        mnemonic:"「O＝Cが成り立てば、それはSVOC」",
+        mistakes:[
+          "SVOOとSVOCを混同する（give型はOとOが別物、call型はO＝C）"
+        ],
+        check:{q:"「その映画は私を悲しくさせました。」を英語にすると？", a:"The movie made me sad."}
+      },
+      {
+        title:"感嘆文（What/How）", importance:2,
+        points:[
+          "<b>What</b>＋(a/an)＋形容詞＋名詞＋主語＋動詞！",
+          "<b>How</b>＋形容詞/副詞＋主語＋動詞！",
+          "「なんて〜なんだ！」という驚きや感動を表す"
+        ],
+        before:{tag:"ふつうの文", text:"This is a very beautiful flower."},
+        after:{tag:"感嘆文", text:"What a beautiful flower this is!"},
+        note:"Whatの後ろには「a/an＋形容詞＋名詞」のカタマリがくっつき、Howの後ろには形容詞や副詞だけがくる。名詞があるかないかで使い分ける。",
+        examples:[
+          {en:"What an interesting book this is!", ja:"なんて面白い本なんだ！"},
+          {en:"How fast he runs!", ja:"彼はなんて速く走るんだ！"},
+          {en:"How kind you are!", ja:"あなたはなんて親切なんだ！"}
+        ],
+        mnemonic:"「ワットは 名詞つき、ハウは 名詞なし」",
+        mistakes:[
+          "Whatの後にaを忘れる（数えられる名詞が単数のとき）",
+          "How のあとに名詞を置いてしまう（Howの後は形容詞・副詞のみ）"
+        ],
+        check:{q:"「なんて大きな犬なんだ！」を感嘆文にすると？", a:"What a big dog this is!"}
+      }
+    ]
+  },
+  {
+    key:"g3", grade:3, name:"中学3年", emoji:"📕", desc:"高校入試の得点源！ここが正念場。",
+    units:[
+      {
+        title:"受動態", importance:5,
+        points:[
+          "<b>be動詞＋過去分詞</b>＝「〜される」",
+          "現在：is/am/are＋過去分詞　　過去：was/were＋過去分詞",
+          "否定：be動詞＋not＋過去分詞　　疑問：Be動詞＋主語＋過去分詞？",
+          "「〜によって」＝<b>by</b>"
+        ],
+        before:{tag:"能動態", text:"太郎がドアを開ける。"},
+        after:{tag:"受動態", text:"ドアが（太郎によって）開けられる。"},
+        note:"受動態は「する側」ではなく「される側」を主役にした文。もともとの目的語が主語になり、動詞はbe動詞＋過去分詞に変わる。",
+        examples:[
+          {en:"This letter was written by Natsume Soseki.", ja:"この手紙は夏目漱石によって書かれました。"},
+          {en:"English is spoken in many countries.", ja:"英語は多くの国で話されています。"},
+          {en:"The window was not broken by him.", ja:"その窓は彼によって割られたのではありません。"},
+          {en:"Was this cake made by you? — Yes, it was.", ja:"このケーキはあなたが作ったのですか？―はい、そうです。"}
+        ],
+        mnemonic:"「ビー＋カコブンシで される」／ by は「〜によって」の目印",
+        mistakes:[
+          "過去分詞を使わず過去形を使ってしまう（不規則動詞はwrite-wrote-writtenのように3段活用に注意）",
+          "be動詞を主語に合わせ忘れる（複数主語なのにisのまま等）"
+        ],
+        check:{q:"「この歌は多くの人に愛されています。」を英語にすると？", a:"This song is loved by many people."}
+      },
+      {
+        title:"現在完了（have/has＋過去分詞）", importance:5,
+        points:[
+          "形：<b>have/has＋過去分詞</b>",
+          "<b>経験</b>：〜したことがある（have been to, have seen など）",
+          "<b>完了・結果</b>：ちょうど〜したところ／もう〜した（just, already, yet）",
+          "<b>継続</b>：ずっと〜している（for＋期間、since＋起点）",
+          "疑問：<b>Have/Has</b>＋主語＋過去分詞？　　否定：have/has<b>not</b>＋過去分詞"
+        ],
+        before:{tag:"過去形（過去の1点）", text:"I lived in Osaka.（過去に住んでいた＝今は？わからない）"},
+        after:{tag:"現在完了（過去〜今のつながり）", text:"I have lived in Osaka for 5 years.（5年前から今もずっと住んでいる）"},
+        note:"現在完了は「過去」と「今」をつなぐ橋。ただの過去形と違い、「その結果、今どうなっているか」に意識が向いている文法。",
+        examples:[
+          {en:"I have been to Kyoto twice.", ja:"私は京都に2回行ったことがあります。（経験）"},
+          {en:"She has just finished her homework.", ja:"彼女はちょうど宿題を終えたところです。（完了）"},
+          {en:"I have lived here since 2018.", ja:"私は2018年からここに住んでいます。（継続）"},
+          {en:"Have you ever eaten natto? — No, I haven't.", ja:"納豆を食べたことがありますか？―いいえ、ありません。（経験）"}
+        ],
+        mnemonic:"「経験は been to／完了は just・already・yet／継続は for・since」の3点セットで丸暗記",
+        mistakes:[
+          "現在完了と一緒にago（〜前に）を使ってしまう（“I have been there two years ago.” ✕ → 過去形にする）",
+          "forとsinceを逆に使う（forは期間の長さ、sinceは開始した時点）"
+        ],
+        check:{q:"「私は3年間ずっと英語を勉強しています。」を英語にすると？", a:"I have studied English for three years."}
+      },
+      {
+        title:"現在完了進行形（have/has been＋〜ing）", importance:3,
+        points:[
+          "形：<b>have/has been＋動詞のing形</b>",
+          "「（ずっと）〜し続けている」という<b>動作の継続</b>を強調",
+          "現在完了の「継続」との違い：状態動詞（know, likeなど）は現在完了進行形にしない"
+        ],
+        before:{tag:"現在完了（継続・状態）", text:"I have known him for 10 years.（状態がずっと続く）"},
+        after:{tag:"現在完了進行形（動作の継続）", text:"It has been raining since this morning.（動作がずっと続いている）"},
+        note:"「知っている」「持っている」のような状態はhave/has＋過去分詞のままでOK。「走る」「勉強する」のような動作をずっと続けているときはbeen＋ing形にする。",
+        examples:[
+          {en:"I have been studying for two hours.", ja:"私は2時間ずっと勉強し続けています。"},
+          {en:"She has been waiting for the bus since 9 a.m.", ja:"彼女は午前9時からずっとバスを待ち続けています。"},
+          {en:"It has been raining since last night.", ja:"昨夜からずっと雨が降り続いています。"}
+        ],
+        mnemonic:"「ハブ・ビーン・イングで ずっと〜し続け中」",
+        mistakes:[
+          "状態動詞（know/like/haveなど）を進行形にしてしまう（“have been knowing” ✕）"
+        ],
+        check:{q:"「彼は今朝からずっとサッカーの練習をしています。」を英語にすると？", a:"He has been practicing soccer since this morning."}
+      },
+      {
+        title:"分詞（現在分詞・過去分詞の形容詞用法）", importance:4,
+        points:[
+          "<b>現在分詞（〜ing）</b>＝「〜している」（能動・進行の意味）",
+          "<b>過去分詞（〜ed等）</b>＝「〜された」（受け身の意味）",
+          "1語なら名詞の<b>前</b>、他の語句を伴うなら名詞の<b>後ろ</b>から修飾"
+        ],
+        before:{tag:"現在分詞", text:"a sleeping baby（眠っている赤ちゃん＝赤ちゃんが眠る）"},
+        after:{tag:"過去分詞", text:"a broken window（割られた窓＝窓が割られる）"},
+        note:"「〜している」なら現在分詞、「〜される・〜された」なら過去分詞と覚える。名詞を後ろから説明するときは、分詞のあとに他の語句がついている場合。",
+        examples:[
+          {en:"The boy playing soccer is my brother.", ja:"サッカーをしている少年は私の弟です。"},
+          {en:"This is a picture painted by a famous artist.", ja:"これは有名な芸術家によって描かれた絵です。"},
+          {en:"I have a broken phone.", ja:"私は壊れた電話を持っています。"}
+        ],
+        mnemonic:"「イングは している側、過去分詞は される側」",
+        mistakes:[
+          "現在分詞と過去分詞を意味的に逆に使ってしまう（“an excited game” ✕ → “an exciting game” ○、人が興奮＝excited、物がわくわくさせる＝exciting）"
+        ],
+        check:{q:"「あの走っている犬を見て。」を英語にすると？", a:"Look at that running dog. / Look at the dog running over there."}
+      },
+      {
+        title:"関係代名詞（who / which / that）", importance:5,
+        points:[
+          "<b>who</b>：先行詞が<b>人</b>（主格・目的格）",
+          "<b>which</b>：先行詞が<b>もの・動物</b>",
+          "<b>that</b>：人・もの両方に使える万能タイプ",
+          "先行詞（説明したい名詞）の直後に関係代名詞＋説明が続く"
+        ],
+        before:{tag:"2つの文", text:"I have a friend. + He can speak French."},
+        after:{tag:"関係代名詞で1文に", text:"I have a friend who can speak French.（フランス語を話せる友達）"},
+        note:"関係代名詞は「後ろから名詞をくわしく説明するのり」。2つの文を1つにまとめて、名詞をもっと詳しく紹介できる。",
+        examples:[
+          {en:"The girl who is singing over there is Mika.", ja:"あそこで歌っている女の子はミカです。"},
+          {en:"This is the book which I bought yesterday.", ja:"これは私が昨日買った本です。"},
+          {en:"I know a boy that runs very fast.", ja:"私はとても速く走る男の子を知っています。"}
+        ],
+        mnemonic:"「ヒトはwho、モノはwhich、まよったらthat」",
+        mistakes:[
+          "先行詞が人なのにwhichを使ってしまう",
+          "関係代名詞の後ろに主語を重ねて置いてしまう（“a friend who he can speak” ✕）"
+        ],
+        check:{q:"「これは私の母が作ったケーキです。」を関係代名詞whichを使って英語にすると？", a:"This is the cake which my mother made."}
+      },
+      {
+        title:"間接疑問文", importance:4,
+        points:[
+          "疑問文が他の文の一部（目的語）になったもの",
+          "語順が<b>疑問詞＋主語＋動詞</b>のふつうの文の語順に変わる（疑問文の倒置をやめる）",
+          "know, tell, wonder などの後ろによく使われる"
+        ],
+        before:{tag:"ふつうの疑問文", text:"Where does he live?"},
+        after:{tag:"間接疑問文", text:"I don't know where he lives.（彼がどこに住んでいるか知りません）"},
+        note:"疑問文をそのまま文の中に組み込むと、doやdoesが消えて動詞が主語に合わせた形に戻り、語順も「疑問詞＋主語＋動詞」という普通の文の順番になる。",
+        examples:[
+          {en:"Do you know what this word means?", ja:"あなたはこの単語が何を意味するか知っていますか？"},
+          {en:"I don't know who that man is.", ja:"私はあの男性が誰なのか知りません。"},
+          {en:"Please tell me when the train will arrive.", ja:"電車がいつ到着するか教えてください。"}
+        ],
+        mnemonic:"「疑問詞のあとは ふつうの語順に もどす」",
+        mistakes:[
+          "間接疑問文の中でも疑問文の語順のままにしてしまう（“I know where does he live.” ✕ → “I know where he lives.” ○）"
+        ],
+        check:{q:"「彼女がなぜ怒っているのか私にはわかりません。」を英語にすると？", a:"I don't know why she is angry."}
+      }
+    ]
+  }
+];
+
+/* IDを割り当て + フラット化して扱いやすくする */
+let uidCounter = 0;
+const ALL_UNITS = [];
+GRADES.forEach(g=>{
+  g.units.forEach(u=>{
+    u.id = "u" + (uidCounter++);
+    u.grade = g.grade;
+    u.gradeKey = g.key;
+    u.gradeName = g.name;
+    ALL_UNITS.push(u);
+  });
+});
+
+/* ==========================================================================
+   状態管理（すべてメモリ内 / このセッション限り）
+   ========================================================================== */
+const state = {
+  favorites: new Set(),
+  history: [],           // 画面遷移の履歴（戻るボタン用）
+  currentGrade: null,
+  quizPool: [],
+  quizIndex: 0
+};
+
+/* ==========================================================================
+   画面遷移
+   ========================================================================== */
+function showScreen(id, title, showBack){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.getElementById("topTitle").textContent = title;
+  document.getElementById("backBtn").classList.toggle("hidden", !showBack);
+  window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+  setActiveTab(id);
+}
+
+function setActiveTab(id){
+  document.getElementById("tab-home").classList.toggle("active", id==="screen-home");
+  document.getElementById("tab-fav").classList.toggle("active", id==="screen-favorites");
+  document.getElementById("tab-quiz").classList.toggle("active", id==="screen-quiz");
+}
+
+function goHome(){
+  state.history = [];
+  showScreen("screen-home","📚 ChaPpy 英語電子辞書", false);
+}
+
+function goBack(){
+  state.history.pop();
+  const prev = state.history[state.history.length-1];
+  if(!prev){ goHome(); return; }
+  if(prev.type==="grade") openGrade(prev.key, false);
+  else if(prev.type==="home") goHome();
+  else goHome();
+}
+
+function pushHistory(entry){ state.history.push(entry); }
+
+/* ==========================================================================
+   ホーム：カテゴリーカード描画
+   ========================================================================== */
+function renderCategoryCards(){
+  const grid = document.getElementById("catGrid");
+  grid.innerHTML = GRADES.map(g=>`
+    <div class="cat-card g${g.grade}" data-tab="${g.name}" onclick="openGrade('${g.key}', true)">
+      <div class="cat-emoji">${g.emoji}</div>
+      <div class="cat-info">
+        <p class="cat-name">${g.name}</p>
+        <p class="cat-desc">${g.desc}（全${g.units.length}単元）</p>
+      </div>
+      <div class="cat-arrow">›</div>
+    </div>
+  `).join("");
+}
+renderCategoryCards();
+
+/* ==========================================================================
+   検索（リアルタイム）
+   ========================================================================== */
+function onSearch(){
+  const q = document.getElementById("searchInput").value.trim();
+  const clearBtn = document.getElementById("searchClear");
+  const resultsBox = document.getElementById("searchResults");
+  const defaultBox = document.getElementById("homeDefault");
+  clearBtn.style.display = q ? "flex" : "none";
+
+  if(!q){
+    resultsBox.classList.add("hidden");
+    defaultBox.classList.remove("hidden");
+    return;
+  }
+  defaultBox.classList.add("hidden");
+  resultsBox.classList.remove("hidden");
+
+  const qLower = q.toLowerCase();
+  const hits = ALL_UNITS.filter(u=>{
+    const hay = (u.title + " " + u.points.join(" ") + " " + (u.note||"") + " " +
+                 u.examples.map(e=>e.en+" "+e.ja).join(" ") + " " + u.mnemonic + " " +
+                 u.mistakes.join(" ")).toLowerCase();
+    return hay.includes(qLower);
+  });
+
+  if(hits.length===0){
+    resultsBox.innerHTML = `<div class="search-empty">😢「${escapeHtml(q)}」に一致する単元が見つかりませんでした。</div>`;
+    return;
+  }
+
+  resultsBox.innerHTML = hits.map(u=>`
+    <div class="search-hit" onclick="openUnitFromSearch('${u.id}')">
+      <span class="badge">${u.gradeName}</span>
+      <div style="flex:1;min-width:0;">
+        <p class="hit-title">${u.title}</p>
+        <span class="hit-snip">${u.points[0].replace(/<[^>]+>/g,'')}</span>
+      </div>
+      <div class="unit-chevron">›</div>
+    </div>
+  `).join("");
+}
+
+function clearSearch(){
+  document.getElementById("searchInput").value = "";
+  onSearch();
+  document.getElementById("searchInput").focus();
+}
+
+function openUnitFromSearch(id){
+  const u = ALL_UNITS.find(x=>x.id===id);
+  state.currentGrade = GRADES.find(g=>g.key===u.gradeKey);
+  pushHistory({type:"grade", key:u.gradeKey});
+  openUnit(id);
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ==========================================================================
+   学年画面
+   ========================================================================== */
+function openGrade(key, addHistory){
+  const g = GRADES.find(x=>x.key===key);
+  state.currentGrade = g;
+  if(addHistory) pushHistory({type:"grade", key:key});
+
+  document.getElementById("gradeTitle").textContent = g.emoji + " " + g.name;
+  document.getElementById("gradeDesc").textContent = g.desc + "／全" + g.units.length + "単元を完全収録";
+
+  document.getElementById("tocScroll").innerHTML = g.units.map((u,i)=>`
+    <button class="toc-chip" onclick="scrollToUnitCard('${u.id}')">${i+1}. ${u.title.split("（")[0]}</button>
+  `).join("");
+
+  document.getElementById("unitList").innerHTML = g.units.map((u,i)=>`
+    <div class="unit-card" id="card-${u.id}" onclick="openUnit('${u.id}')">
+      <div class="unit-num">${i+1}</div>
+      <div class="unit-main">
+        <p class="unit-name">${u.title}</p>
+        <span class="unit-stars">${starString(u.importance)}</span>
+      </div>
+      <button class="unit-fav-star ${state.favorites.has(u.id)?'on':''}" onclick="event.stopPropagation(); toggleFav('${u.id}', this)">★</button>
+      <div class="unit-chevron">›</div>
+    </div>
+  `).join("");
+
+  showScreen("screen-grade", g.name, true);
+}
+
+function scrollToUnitCard(id){
+  const el = document.getElementById("card-"+id);
+  if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function starString(n){
+  return "★".repeat(n) + "☆".repeat(5-n);
+}
+
+/* ==========================================================================
+   単元詳細画面
+   ========================================================================== */
+function openUnit(id, addHistory){
+  const u = ALL_UNITS.find(x=>x.id===id);
+  pushHistory({type:"unit", id:id});
+
+  const isFav = state.favorites.has(u.id);
+
+  document.getElementById("unitContent").innerHTML = `
+    <div class="unit-head">
+      <div class="unit-head-top">
+        <div>
+          <h2>${u.title}</h2>
+          <div class="stars-row">${starString(u.importance)}</div>
+        </div>
+        <button class="fav-toggle ${isFav?'on':''}" id="unitFavBtn" onclick="toggleFav('${u.id}', this, true)">★</button>
+      </div>
+    </div>
+
+    <div class="card must-card">
+      <p class="card-title">🎯 テストで絶対出る！！</p>
+      <ul class="must-list">
+        ${u.points.map(p=>`<li>${p}</li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="card">
+      <p class="card-title">🌟 小学生でもわかる説明</p>
+      <div class="explain-flow">
+        <div class="explain-box"><span class="tag tag-before">${u.before.tag}</span><br>${u.before.text}</div>
+        <div class="arrow-down">↓</div>
+        <div class="explain-box"><span class="tag tag-after">${u.after.tag}</span><br>${u.after.text}</div>
+      </div>
+      <p class="explain-note">${u.note}</p>
+    </div>
+
+    <div class="card">
+      <p class="card-title">📝 例文</p>
+      ${u.examples.map(e=>`
+        <div class="example-item">
+          <p class="example-en">${e.en}</p>
+          <p class="example-ja">${e.ja}</p>
+        </div>
+      `).join("")}
+    </div>
+
+    <div class="card mnemonic-card">
+      <p class="card-title">💡 覚え方（語呂合わせ）</p>
+      <p class="mnemonic-text">${u.mnemonic}</p>
+    </div>
+
+    <div class="card">
+      <p class="card-title">⚠️ 間違えやすいポイント</p>
+      <ul class="mistake-list">
+        ${u.mistakes.map(m=>`<li>${m}</li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="card check-card">
+      <p class="card-title">📝 5秒チェック</p>
+      <div class="check-inner">
+        <p class="check-q">Q. ${u.check.q}</p>
+        <button class="check-btn" onclick="revealCheck(this)">答えを見る</button>
+        <div class="check-answer">
+          <div class="stamp-wrap"><div class="stamp">できた</div></div>
+          A. ${u.check.a}
+        </div>
+      </div>
+    </div>
+  `;
+
+  showScreen("screen-unit", u.gradeName, true);
+}
+
+function revealCheck(btn){
+  const ans = btn.nextElementSibling;
+  ans.classList.add("show");
+  btn.style.display = "none";
+}
+
+/* ==========================================================================
+   お気に入り
+   ========================================================================== */
+function toggleFav(id, el, isDetail){
+  if(state.favorites.has(id)){ state.favorites.delete(id); el.classList.remove("on"); }
+  else { state.favorites.add(id); el.classList.add("on"); }
+
+  // グレード画面のスターも同期
+  const cardStar = document.querySelector(`#card-${id} .unit-fav-star`);
+  if(cardStar) cardStar.classList.toggle("on", state.favorites.has(id));
+}
+
+function showFavorites(){
+  const list = Array.from(state.favorites).map(id=>ALL_UNITS.find(u=>u.id===id)).filter(Boolean);
+  const box = document.getElementById("favList");
+
+  if(list.length===0){
+    box.innerHTML = `<div class="empty-state"><div class="ee">⭐</div><p>まだお気に入りがありません。<br>単元画面の星マークをタップして登録しよう！</p></div>`;
+  } else {
+    box.innerHTML = list.map(u=>`
+      <div class="unit-card" onclick="openUnit('${u.id}')">
+        <div class="unit-num">${u.gradeName.slice(-2,-1)}</div>
+        <div class="unit-main">
+          <p class="unit-name">${u.title}</p>
+          <span class="unit-stars">${starString(u.importance)}</span>
+        </div>
+        <button class="unit-fav-star on" onclick="event.stopPropagation(); toggleFavInList('${u.id}')">★</button>
+        <div class="unit-chevron">›</div>
+      </div>
+    `).join("");
+  }
+  pushHistory({type:"home"});
+  showScreen("screen-favorites","⭐ お気に入り", true);
+}
+
+function toggleFavInList(id){
+  state.favorites.delete(id);
+  showFavorites();
+}
+
+/* ==========================================================================
+   一問一答（クイズ）モード
+   ========================================================================== */
+function startQuiz(shuffleAll){
+  state.quizPool = ALL_UNITS.slice();
+  shuffleArray(state.quizPool);
+  state.quizIndex = 0;
+  pushHistory({type:"home"});
+  showScreen("screen-quiz","📝 一問一答", true);
+  renderQuiz();
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+}
+
+function renderQuiz(){
+  if(state.quizPool.length===0){ startQuiz(); return; }
+  if(state.quizIndex >= state.quizPool.length){ state.quizIndex = 0; shuffleArray(state.quizPool); }
+
+  const u = state.quizPool[state.quizIndex];
+  document.getElementById("quizProgress").textContent = `${state.quizIndex+1} / ${state.quizPool.length} 問　（${u.gradeName}・${u.title}）`;
+  document.getElementById("quizBadge").textContent = u.gradeName;
+  document.getElementById("quizQ").textContent = "Q. " + u.check.q;
+  document.getElementById("quizA").innerHTML = '<span class="stamp-wrap"><span class="stamp">できた</span></span>A. ' + u.check.a;
+  document.getElementById("quizA").classList.remove("show");
+  document.getElementById("quizHint").style.display = "block";
+}
+
+function revealQuizAnswer(){
+  document.getElementById("quizA").classList.add("show");
+  document.getElementById("quizHint").style.display = "none";
+}
+
+function nextQuiz(){
+  state.quizIndex++;
+  renderQuiz();
+}
+
+/* ==========================================================================
+   トップへ戻るFAB
+   ========================================================================== */
+window.addEventListener("scroll", ()=>{
+  const fab = document.getElementById("topFab");
+  if(window.scrollY > 400) fab.classList.add("show");
+  else fab.classList.remove("show");
+});
+function scrollToTop(){ window.scrollTo({top:0, behavior:"smooth"}); }
+
+/* 初期化：ホーム画面の履歴を1つ積んでおく */
+pushHistory({type:"home"});
+
+</script>
+</body>
+</html>
