@@ -1,1606 +1,1356 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>📚 ChaPpy 英語電子辞書</title>
-<!-- iOSでホーム画面に追加したとき、Safariのバーなしでアプリのように全画面起動させるための設定 -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ChaPpy">
-<meta name="theme-color" content="#1d1e25">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231d1e25'/%3E%3Ctext x='90' y='118' font-size='96' text-anchor='middle'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
-<style>
-/* ==========================================================================
-   ChaPpy 英語電子辞書 — 参考書・ノート風デザイン
-   （フォントはオンライン時のみ読み込み。オフラインでも読み込み失敗時は
-   　自動でゴシック体にフォールバックし、全機能はそのまま動作します）
-   ========================================================================== */
-:root{
-  /* ダークモード固定のカラーパレット */
-  --paper:#1d1e25;
-  --paper2:#26272f;
-  --ink:#eef0f5;
-  --ink-soft:#a9adbd;
-  --grid:#3a3c48;
-  --card-solid:#26272f;
-  --red:#e2665a;
-  --red-deep:#ff8b7d;
-  --navy:#7fa8d9;
-  --navy-soft:#9db9e0;
-  --gold:#e0b45c;
-  --ok:#57b17f;
-  --blue:#7fa8d9;
-  --blue-tint:rgba(127,168,217,0.14);
-  --yellow:#f2c744;
-  --shadow-sm: 3px 3px 0 rgba(0,0,0,0.35);
-  --shadow-md: 4px 4px 0 rgba(0,0,0,0.4);
-  --shadow-lg: 6px 6px 0 rgba(0,0,0,0.5);
-  --radius-lg: 6px;
-  --radius-md: 4px;
-  --radius-sm: 3px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-top: env(safe-area-inset-top, 0px);
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ひすとり - 満点突破一問一答</title>
+    <!-- Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* テーマ別カラー変数（デフォルト：アカデミックネイビー） */
+        :root {
+            --primary-navy: #1B2A4A;
+            --secondary-navy: #2C3E50;
+            --accent-gold: #C5A059;
+            --light-gold: #F4E8C1;
+            --bg-paper: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3748;
+            --text-sub: #718096;
+            
+            --status-forgot: #E53E3E;
+            --status-forgot-bg: #FFF5F5;
+            --status-learning: #DD6B20;
+            --status-learning-bg: #FFFAF0;
+            --status-mastered: #38A169;
+            --status-mastered-bg: #F0FFF4;
+            --status-unlearned: #A0AEC0;
 
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
-body{
-  margin:0;
-  font-family:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
-  background:var(--paper);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 30px 30px;
-  color:var(--ink);
-  transition:background .4s ease, color .4s ease;
-  overscroll-behavior-y:none;
-  -webkit-font-smoothing:antialiased;
-}
-img,svg{display:block;}
-button{font-family:inherit;}
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
 
-/* ---------- layout shells ---------- */
-#app{
-  max-width:900px;
-  margin:0 auto;
-  min-height:100vh;
-  padding-bottom:calc(84px + var(--safe-bottom));
-  position:relative;
-}
-.screen{display:none;}
-.screen.active{display:block; animation:fadeIn .35s ease;}
-@keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+        /* 1. アカデミックネイビー (Default) */
+        [data-theme="navy"] {
+            --primary-navy: #1B2A4A;
+            --secondary-navy: #2C3E50;
+            --accent-gold: #C5A059;
+            --light-gold: #F4E8C1;
+            --bg-paper: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3748;
+            --text-sub: #718096;
+        }
 
-/* ---------- top bar ---------- */
-.topbar{
-  position:sticky; top:0; z-index:50;
-  padding:calc(10px + var(--safe-top)) 16px 10px;
-  background:var(--paper);
-  border-bottom:2px solid var(--ink);
-  display:flex; align-items:center; gap:10px;
-  transition:background .4s ease, border-color .4s ease;
-}
-.topbar h1{
-  font-family:"Kaisei Decol",serif;
-  font-size:19px; font-weight:700; margin:0; flex:1;
-  letter-spacing:.02em;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.icon-btn{
-  width:36px; height:36px; border-radius:50%;
-  border:1.5px solid var(--ink); background:var(--card-solid); color:var(--ink);
-  font-size:16px; display:flex; align-items:center; justify-content:center;
-  cursor:pointer; flex-shrink:0; box-shadow:2px 2px 0 rgba(34,36,46,.15);
-  transition:transform .15s ease;
-}
-.icon-btn:active{transform:translate(1px,1px); box-shadow:none;}
-.back-btn{
-  border:none; background:none; color:var(--ink);
-  font-family:"Kaisei Decol",serif;
-  font-size:16px; font-weight:700; display:flex; align-items:center; gap:2px;
-  cursor:pointer; padding:6px 4px 6px 0; flex-shrink:0;
-}
-.back-btn:active{opacity:.5;}
+        /* 2. クラシックグリーン（抹茶・和風教科書） */
+        [data-theme="green"] {
+            --primary-navy: #1F3A2B;
+            --secondary-navy: #2D4A3E;
+            --accent-gold: #709775;
+            --light-gold: #D8E2DC;
+            --bg-paper: #F4F6F4;
+            --card-bg: #FFFFFF;
+            --text-main: #243028;
+            --text-sub: #637568;
+        }
 
-/* ---------- content padding ---------- */
-.content{padding:16px;}
-.section-title{
-  font-family:"Kaisei Decol",serif;
-  font-size:13px; font-weight:700; color:var(--ink-soft);
-  letter-spacing:.06em;
-  margin:22px 4px 10px;
-}
-.section-title:first-child{margin-top:6px;}
+        /* 3. モカブラウン（レトロ羊皮紙風） */
+        [data-theme="brown"] {
+            --primary-navy: #3D2314;
+            --secondary-navy: #54331D;
+            --accent-gold: #A9714B;
+            --light-gold: #EFE3C8;
+            --bg-paper: #F9F6F0;
+            --card-bg: #FFFFFF;
+            --text-main: #332720;
+            --text-sub: #7A695D;
+        }
 
-/* ---------- hero (home) ---------- */
-.hero{
-  text-align:center; padding:26px 16px 6px; position:relative;
-}
-.hero-title{
-  font-family:"Kaisei Decol",serif;
-  font-size:28px; font-weight:700; letter-spacing:.02em; margin:0 0 6px;
-  color:var(--ink);
-  display:inline-block;
-  background-image:linear-gradient(120deg, rgba(242,199,68,.55) 0%, rgba(242,199,68,.55) 100%);
-  background-repeat:no-repeat;
-  background-size:100% 38%;
-  background-position:0 78%;
-  padding:0 4px;
-}
-.hero-sub{font-size:13px; color:var(--ink-soft); margin:6px 0 20px;}
+        /* 4. ミッドナイトダーク（目に優しい夜間モード） */
+        [data-theme="dark"] {
+            --primary-navy: #121824;
+            --secondary-navy: #1E293B;
+            --accent-gold: #38BDF8;
+            --light-gold: #1E293B;
+            --bg-paper: #0F172A;
+            --card-bg: #1E293B;
+            --text-main: #F1F5F9;
+            --text-sub: #94A3B8;
+        }
 
-/* ---------- search ---------- */
-.search-wrap{position:relative; margin:0 0 8px;}
-.search-input{
-  width:100%; padding:13px 42px 13px 42px;
-  border-radius:var(--radius-md); border:1.5px solid var(--ink);
-  background:var(--card-solid); color:var(--ink);
-  font-size:16px; outline:none;
-  box-shadow:var(--shadow-sm);
-  transition:box-shadow .2s ease;
-}
-.search-input:focus{box-shadow:3px 3px 0 var(--navy);}
-.search-icon{
-  position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  font-size:16px; color:var(--ink-soft); pointer-events:none;
-}
-.search-clear{
-  position:absolute; right:8px; top:50%; transform:translateY(-50%);
-  width:26px; height:26px; border:1px solid var(--grid); border-radius:50%;
-  background:var(--paper2); color:var(--ink-soft); font-size:13px;
-  display:none; align-items:center; justify-content:center; cursor:pointer;
-}
+        /* 5. さくらチェリー（フェミニン・文房具風） */
+        [data-theme="cherry"] {
+            --primary-navy: #4A1D2F;
+            --secondary-navy: #632B41;
+            --accent-gold: #D9779B;
+            --light-gold: #FCE7F0;
+            --bg-paper: #FFF5F8;
+            --card-bg: #FFFFFF;
+            --text-main: #3B202B;
+            --text-sub: #805B6B;
+        }
 
-.search-results{margin-top:10px;}
-.search-hit{
-  display:flex; align-items:center; gap:10px;
-  padding:12px 14px; margin-bottom:8px;
-  background:var(--card-solid); border-radius:var(--radius-sm);
-  box-shadow:var(--shadow-sm); cursor:pointer; border:1.5px solid var(--ink);
-}
-.search-hit:active{transform:translate(1px,1px); box-shadow:none;}
-.search-hit .badge{
-  font-family:"Kaisei Decol",serif;
-  font-size:11px; font-weight:700; color:#fff;
-  background:var(--navy); padding:3px 8px; border-radius:20px; flex-shrink:0;
-}
-.search-hit .hit-title{font-weight:700; font-size:15px; flex:1;}
-.search-hit .hit-snip{font-size:12px; color:var(--ink-soft); display:block; margin-top:2px;}
-.search-empty{text-align:center; color:var(--ink-soft); font-size:14px; padding:30px 10px;}
+        /* 6. Sol（太陽光・温もり） */
+        [data-theme="sol"] {
+            --primary-navy: #7A431D;
+            --secondary-navy: #9C5B28;
+            --accent-gold: #E68A00;
+            --light-gold: #FFE2B3;
+            --bg-paper: #FFFBF2;
+            --card-bg: #FFFFFF;
+            --text-main: #3D2B1F;
+            --text-sub: #8C7361;
+        }
 
-/* ---------- category cards ---------- */
-.cat-grid{display:flex; flex-direction:column; gap:16px; margin-top:18px;}
-.cat-card{
-  display:flex; align-items:center; gap:14px;
-  padding:18px 18px 18px 22px; border-radius:var(--radius-lg);
-  background:var(--card-solid); box-shadow:var(--shadow-md);
-  border:1.5px solid var(--ink);
-  cursor:pointer; position:relative; overflow:visible;
-  transition:transform .15s ease, box-shadow .15s ease;
-}
-.cat-card::before{
-  content:attr(data-tab);
-  position:absolute; top:-13px; left:16px;
-  font-family:"Kaisei Decol",serif; font-size:11px; color:#fff;
-  padding:3px 10px; border-radius:2px; letter-spacing:.08em;
-}
-.cat-card:active{transform:translate(2px,2px); box-shadow:none;}
-.cat-card .cat-emoji{font-size:32px; flex-shrink:0;}
-.cat-card .cat-info{flex:1;}
-.cat-card .cat-name{font-family:"Kaisei Decol",serif; font-size:18px; font-weight:700; margin:0 0 2px;}
-.cat-card .cat-desc{font-size:12.5px; color:var(--ink-soft); margin:0;}
-.cat-card .cat-arrow{font-size:20px; color:var(--ink-soft); flex-shrink:0;}
-.cat-card.g1::before{background:var(--navy);}
-.cat-card.g2::before{background:var(--ok);}
-.cat-card.g3::before{background:var(--red);}
-.cat-card.g1{border-left:5px solid var(--navy);}
-.cat-card.g2{border-left:5px solid var(--ok);}
-.cat-card.g3{border-left:5px solid var(--red);}
+        /* Solテーマ特有の太陽光降り注ぐエフェクト */
+        [data-theme="sol"]::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 50% -20%, rgba(255, 220, 130, 0.35) 0%, rgba(255, 200, 80, 0.12) 45%, transparent 75%),
+                linear-gradient(135deg, rgba(255, 235, 170, 0.18) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 1000;
+        }
 
-.quick-row{display:flex; gap:10px; margin-top:18px;}
-.quick-btn{
-  flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;
-  padding:13px 6px; border-radius:var(--radius-md);
-  background:var(--card-solid); box-shadow:var(--shadow-sm); border:1.5px solid var(--ink);
-  cursor:pointer; font-size:11.5px; font-weight:700; color:var(--ink);
-}
-.quick-btn:active{transform:translate(1px,1px); box-shadow:none;}
-.quick-btn .qi{font-size:21px;}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* ---------- grade screen ---------- */
-.grade-hero{padding:18px 4px 4px;}
-.grade-hero h2{font-family:"Kaisei Decol",serif; font-size:24px; font-weight:700; margin:0 0 4px;}
-.grade-hero p{color:var(--ink-soft); font-size:12.5px; margin:0;}
+        body {
+            background-color: var(--bg-paper);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+        }
 
-.toc-scroll{
-  display:flex; gap:8px; overflow-x:auto; padding:14px 0 6px;
-  scrollbar-width:none;
-}
-.toc-scroll::-webkit-scrollbar{display:none;}
-.toc-chip{
-  flex-shrink:0; padding:7px 13px; border-radius:20px;
-  background:var(--card-solid); color:var(--ink); font-size:12.5px; font-weight:600;
-  white-space:nowrap; cursor:pointer; border:1.5px solid var(--ink);
-}
-.toc-chip:active{background:var(--paper2);}
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            vertical-align: middle;
+            display: inline-block;
+        }
 
-.unit-list{display:flex; flex-direction:column; gap:10px; margin-top:8px;}
-.unit-card{
-  display:flex; align-items:center; gap:12px;
-  padding:15px 16px; border-radius:var(--radius-md);
-  background:var(--card-solid); box-shadow:var(--shadow-sm); border:1.5px solid var(--ink);
-  cursor:pointer; scroll-margin-top:120px;
-  transition:transform .13s ease, box-shadow .13s ease;
-}
-.unit-card:active{transform:translate(2px,2px); box-shadow:none;}
-.unit-num{
-  width:30px; height:30px; border-radius:50%; flex-shrink:0;
-  background:var(--navy); color:#fff; font-family:"Kaisei Decol",serif; font-weight:700; font-size:13px;
-  display:flex; align-items:center; justify-content:center;
-}
-.unit-main{flex:1; min-width:0;}
-.unit-name{font-size:14.5px; font-weight:700; margin:0 0 3px;}
-.unit-stars{font-size:11px; color:var(--gold); letter-spacing:1px;}
-.unit-fav-star{font-size:19px; color:var(--grid); background:none; border:none; cursor:pointer; flex-shrink:0; padding:4px;}
-.unit-fav-star.on{color:var(--gold);}
-.unit-chevron{color:var(--ink-soft); font-size:16px; flex-shrink:0;}
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            color: #FFFFFF;
+            padding: 14px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-/* ---------- unit detail ---------- */
-.unit-head{padding:18px 4px 6px;}
-.unit-head-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
-.unit-head h2{font-family:"Kaisei Decol",serif; font-size:23px; font-weight:700; margin:0 0 6px;}
-.unit-head .stars-row{font-size:14px; color:var(--gold); letter-spacing:2px;}
-.fav-toggle{
-  width:42px; height:42px; border-radius:50%; flex-shrink:0;
-  background:var(--card-solid); border:1.5px solid var(--ink); box-shadow:var(--shadow-sm);
-  font-size:19px; color:var(--grid); display:flex; align-items:center; justify-content:center;
-  cursor:pointer;
-}
-.fav-toggle.on{color:var(--gold);}
-.fav-toggle:active{transform:translate(1px,1px); box-shadow:none;}
+        .header-logo {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--light-gold);
+        }
 
-.card{
-  background:var(--card-solid); border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-md); border:1.5px solid var(--ink);
-  padding:17px; margin-bottom:18px;
-  scroll-margin-top:70px;
-}
-.card-title{
-  display:flex; align-items:center; gap:8px;
-  font-family:"Kaisei Decol",serif;
-  font-size:16px; font-weight:700; margin:0 0 12px;
-}
-.must-card{
-  position:relative;
-  background:var(--card-solid);
-  border:2px dashed var(--red);
-}
-.must-card::after{
-  content:"重要"; position:absolute; top:-11px; right:14px;
-  background:var(--red); color:#fff; font-family:"Kaisei Decol",serif;
-  font-size:11px; padding:3px 10px; border-radius:2px; letter-spacing:.1em;
-  transform:rotate(3deg);
-}
-.must-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
-.must-list li{
-  font-size:14px; line-height:1.6; padding:10px 12px;
-  background:var(--paper2); border-radius:var(--radius-sm);
-  border:1px solid var(--grid);
-}
-.must-list b{
-  font-weight:700; color:var(--ink); background-image:linear-gradient(120deg, rgba(242,199,68,.6) 0%, rgba(242,199,68,.6) 100%);
-  background-repeat:no-repeat; background-size:100% 55%; background-position:0 88%; padding:0 1px;
-}
+        .header-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
 
-.explain-flow{display:flex; flex-direction:column; gap:2px; margin-bottom:10px;}
-.explain-box{
-  padding:13px; border-radius:var(--radius-sm);
-  background:var(--paper2); border:1px dashed var(--grid);
-  font-size:14.5px; line-height:1.6;
-}
-.explain-box .tag{
-  font-family:"Kaisei Decol",serif;
-  display:inline-block; font-size:11px; font-weight:700; padding:2px 8px;
-  border-radius:20px; margin-bottom:6px;
-}
-.tag-before{background:var(--grid); color:var(--ink-soft);}
-.tag-after{background:var(--navy); color:#fff;}
-.arrow-down{
-  text-align:center; font-size:20px; color:var(--navy); margin:2px 0; font-weight:700;
-}
-.explain-note{
-  font-size:13px; color:var(--ink-soft); line-height:1.65; margin-top:10px;
-  padding-top:10px; border-top:1px dashed var(--grid);
-}
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
 
-.example-item{
-  padding:12px 0; border-bottom:1px dashed var(--grid);
-}
-.example-item:last-child{border-bottom:none; padding-bottom:0;}
-.example-item:first-child{padding-top:0;}
-.example-en{font-size:15px; font-weight:700; margin:0 0 3px;}
-.example-ja{font-size:13px; color:var(--ink-soft); margin:0;}
+        /* Main Container */
+        main {
+            flex: 1;
+            max-width: 768px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 16px 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-/* ---------- sticky-note mnemonic card ---------- */
-.mnemonic-card{
-  background:#3a3420; border:1.5px solid #7a682e; color:#f2e6b0;
-  transform:rotate(-1.2deg); box-shadow:var(--shadow-md);
-  position:relative;
-}
-.mnemonic-card::before{
-  content:"📌"; position:absolute; top:-14px; left:50%; transform:translateX(-50%) rotate(8deg);
-  font-size:20px;
-}
-.mnemonic-card .card-title{color:inherit;}
-.mnemonic-text{font-size:15px; line-height:1.7; font-weight:700; margin:0;}
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
 
-.mistake-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
-.mistake-list li{
-  font-size:13.5px; line-height:1.55; padding:10px 12px 10px 36px; position:relative;
-  background:var(--paper2); border-radius:var(--radius-sm);
-  border:1px solid var(--grid); border-left:4px solid var(--red);
-}
-.mistake-list li::before{
-  content:"⚠️"; position:absolute; left:10px; top:9px; font-size:13px;
-}
+        .screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-.check-card{ border:2px solid var(--ink); }
-.check-inner{ position:relative; }
-.check-q{font-family:"Kaisei Decol",serif; font-size:15px; font-weight:700; margin:0 0 12px;}
-.check-btn{
-  width:100%; padding:12px; border-radius:var(--radius-sm); border:1.5px solid var(--ink);
-  background:var(--ink); color:var(--paper); font-family:"Kaisei Decol",serif;
-  font-size:14.5px; font-weight:700; cursor:pointer; box-shadow:3px 3px 0 var(--red);
-  transition:transform .12s ease;
-}
-.check-btn:active{transform:translate(2px,2px); box-shadow:none;}
-.check-answer{
-  margin-top:10px; padding:12px; border-radius:var(--radius-sm);
-  background:var(--paper2); font-size:14px; line-height:1.6; display:none;
-  border:1px solid var(--grid); position:relative;
-}
-.check-answer.show{display:block; animation:fadeIn .3s ease;}
+        /* MENU SCREEN */
+        .section-title {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary-navy);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--accent-gold);
+            padding-bottom: 6px;
+        }
 
-/* ---------- stamp (hanko-style ○ mark on reveal) ---------- */
-.stamp-wrap{ position:relative; float:right; width:0; height:0; }
-.stamp{
-  position:absolute; top:-6px; right:-6px; width:58px; height:58px; border-radius:50%;
-  border:3px solid var(--red-deep); color:var(--red-deep);
-  display:flex; align-items:center; justify-content:center;
-  font-family:"Kaisei Decol",serif; font-size:13px; letter-spacing:.05em;
-  transform:rotate(-14deg) scale(0); opacity:.9; pointer-events:none;
-}
-.check-answer.show .stamp, .quiz-a.show .stamp{
-  animation: stampIn .4s cubic-bezier(.2,1.4,.5,1) forwards;
-}
-@keyframes stampIn{ to{ transform:rotate(-14deg) scale(1); } }
+        [data-theme="dark"] .section-title {
+            color: var(--accent-gold);
+        }
 
-/* ---------- quiz screen ---------- */
-.quiz-wrap{padding:10px 4px;}
-.quiz-progress{
-  font-family:"Kaisei Decol",serif;
-  font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:14px; font-weight:700;
-}
-.quiz-card{
-  background:var(--card-solid); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
-  border:2px solid var(--ink); padding:28px 20px; min-height:220px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-  cursor:pointer; position:relative;
-}
-.quiz-badge{
-  font-family:"Kaisei Decol",serif;
-  font-size:11px; font-weight:700; color:#fff; background:var(--navy); padding:4px 10px; border-radius:20px; margin-bottom:14px;
-}
-.quiz-q{font-size:16.5px; font-weight:700; line-height:1.6;}
-.quiz-hint{font-size:12px; color:var(--ink-soft); margin-top:16px;}
-.quiz-a{font-size:15.5px; line-height:1.7; color:var(--ink); font-weight:700; display:none; position:relative; width:100%;}
-.quiz-a.show{display:block; animation:fadeIn .3s ease;}
-.quiz-btnrow{display:flex; gap:10px; margin-top:16px;}
-.quiz-action{
-  flex:1; padding:14px; border-radius:var(--radius-md); border:1.5px solid var(--ink);
-  font-family:"Kaisei Decol",serif; font-size:15px; font-weight:700; cursor:pointer;
-}
-.quiz-next{background:var(--ink); color:var(--paper); box-shadow:3px 3px 0 var(--navy);}
-.quiz-next:active{transform:translate(2px,2px); box-shadow:none;}
+        .card-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
 
-/* ---------- favorites / empty ---------- */
-.empty-state{text-align:center; padding:60px 20px; color:var(--ink-soft);}
-.empty-state .ee{font-size:46px; margin-bottom:12px;}
-.empty-state p{font-size:14px; line-height:1.6; margin:0;}
+        /* Category Items & Master Progress */
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-/* ---------- bottom tab bar ---------- */
-.tabbar{
-  position:fixed; left:0; right:0; bottom:0; z-index:60;
-  max-width:900px; margin:0 auto;
-  display:flex; justify-content:space-around;
-  padding:8px 6px calc(8px + var(--safe-bottom));
-  background:var(--paper);
-  border-top:2px solid var(--ink);
-}
-.tab-btn{
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  background:none; border:none; color:var(--ink-soft); font-size:10.5px; font-weight:700;
-  padding:4px 14px; cursor:pointer; border-radius:12px; font-family:"Zen Kaku Gothic New",sans-serif;
-}
-.tab-btn .ti{font-size:20px;}
-.tab-btn.active{color:var(--red-deep);}
+        .cat-card {
+            background: var(--bg-paper);
+            border: 1.5px solid rgba(0,0,0,0.08);
+            border-radius: var(--border-radius-sm);
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
 
-/* ---------- scroll to top ---------- */
-.top-fab{
-  position:fixed; right:18px; bottom:calc(84px + var(--safe-bottom));
-  width:42px; height:42px; border-radius:50%;
-  background:var(--ink); color:var(--paper); border:1.5px solid var(--ink); box-shadow:var(--shadow-md);
-  font-size:17px; display:none; align-items:center; justify-content:center; cursor:pointer;
-  z-index:55; max-width:900px;
-}
-.top-fab.show{display:flex; animation:fadeIn .2s ease;}
-.top-fab:active{transform:translate(2px,2px); box-shadow:none;}
+        .cat-card:hover {
+            border-color: var(--accent-gold);
+        }
 
-/* ---------- misc ---------- */
-::selection{background:rgba(242,199,68,.55);}
-.hidden{display:none !important;}
+        .cat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
 
-@media (min-width:640px){
-  .hero-title{font-size:32px;}
-  .cat-grid{flex-direction:row; flex-wrap:wrap;}
-  .cat-card{flex:1 1 calc(50% - 8px);}
-}
-</style>
+        .cat-checkbox-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .cat-checkbox-wrap input { display: none; }
+
+        .checkmark-sq {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #CBD5E0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .cat-checkbox-wrap input:checked + .checkmark-sq {
+            background: var(--primary-navy);
+            border-color: var(--primary-navy);
+        }
+
+        .cat-checkbox-wrap input:checked + .checkmark-sq .icon {
+            display: block;
+            fill: #FFF;
+        }
+
+        .checkmark-sq .icon { display: none; width: 12px; height: 12px; }
+
+        .cat-rate {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--status-mastered);
+        }
+
+        .cat-progress-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .cat-progress-fill-mastered { height: 100%; background: var(--status-mastered); }
+        .cat-progress-fill-learning { height: 100%; background: var(--status-learning); }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: var(--bg-paper);
+            border: 1.5px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .custom-checkbox input { display: none; }
+
+        .custom-checkbox .checkmark {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #CBD5E0;
+            border-radius: 4px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox input:checked + .checkmark {
+            background: var(--primary-navy);
+            border-color: var(--primary-navy);
+        }
+
+        .custom-checkbox input:checked + .checkmark .icon { fill: #FFF; display: block; }
+        .custom-checkbox .checkmark .icon { display: none; width: 12px; height: 12px; }
+
+        .status-chip[data-status="forgot"] input:checked + .checkmark { background: var(--status-forgot); border-color: var(--status-forgot); }
+        .status-chip[data-status="learning"] input:checked + .checkmark { background: var(--status-learning); border-color: var(--status-learning); }
+        .status-chip[data-status="mastered"] input:checked + .checkmark { background: var(--status-mastered); border-color: var(--status-mastered); }
+        .status-chip[data-status="unlearned"] input:checked + .checkmark { background: var(--status-unlearned); border-color: var(--status-unlearned); }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+
+        .settings-row:last-child { border-bottom: none; }
+
+        .settings-label {
+            font-size: 14px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #CBD5E0;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--accent-gold); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        select.select-custom {
+            padding: 6px 12px;
+            border-radius: var(--border-radius-sm);
+            border: 1.5px solid rgba(0,0,0,0.15);
+            background-color: var(--card-bg);
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .start-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-gold), var(--primary-navy));
+            color: #FFFFFF;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        /* STUDY SCREEN */
+        .study-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-abort {
+            background: var(--card-bg);
+            border: 1.5px solid var(--accent-gold);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            position: relative;
+            z-index: 20;
+        }
+
+        .btn-abort:hover {
+            background: var(--light-gold);
+            color: #000;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-navy), var(--accent-gold));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Card */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 28px 24px;
+            box-shadow: var(--shadow-hover);
+            border: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            position: relative;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-tag {
+            align-self: flex-start;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--bg-paper);
+            color: var(--text-sub);
+            margin-bottom: 16px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 24px;
+        }
+
+        .reveal-btn-container {
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .reveal-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg-paper);
+            border: 1.5px dashed var(--accent-gold);
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .reveal-btn:hover {
+            background: var(--light-gold);
+            color: #000;
+        }
+
+        .answer-container {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(0,0,0,0.08);
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .answer-label {
+            font-size: 12px;
+            color: var(--accent-gold);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .answer-word {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .answer-desc {
+            font-size: 14px;
+            color: var(--text-main);
+            line-height: 1.6;
+            background: var(--bg-paper);
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            opacity: 0.4;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .action-buttons.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .status-btn {
+            border: none;
+            padding: 14px 8px;
+            border-radius: var(--border-radius-sm);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .status-btn:active { transform: scale(0.96); }
+
+        .btn-forgot { background: var(--status-forgot-bg); color: var(--status-forgot); border: 1px solid rgba(229, 62, 62, 0.3); }
+        .btn-learning { background: var(--status-learning-bg); color: var(--status-learning); border: 1px solid rgba(221, 107, 32, 0.3); }
+        .btn-mastered { background: var(--status-mastered-bg); color: var(--status-mastered); border: 1px solid rgba(56, 161, 105, 0.3); }
+
+        /* COMPLETE SCREEN */
+        .complete-card { text-align: center; padding: 40px 20px; }
+        .complete-title { font-family: 'Noto Serif JP', serif; font-size: 22px; color: var(--text-main); margin-bottom: 12px; }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 24px 0;
+            background: var(--bg-paper);
+            padding: 16px;
+            border-radius: var(--border-radius-sm);
+        }
+
+        .stat-item { display: flex; flex-direction: column; align-items: center; }
+        .stat-num { font-size: 20px; font-weight: 700; }
+        .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+
+        .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary-navy);
+            color: #FFF;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            z-index: 200;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Footer Copyright */
+        footer {
+            text-align: center;
+            padding: 16px 0 24px;
+            font-size: 12px;
+            color: var(--text-sub);
+            letter-spacing: 0.05em;
+            font-weight: 500;
+            width: 100%;
+        }
+    </style>
 </head>
-<body>
+<body data-theme="navy">
 
-<div id="app">
+    <!-- Global SVG Icons -->
+    <svg class="svg-defs">
+        <defs>
+            <g id="icon-book"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></g>
+            <g id="icon-check"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></g>
+            <g id="icon-cross"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></g>
+            <g id="icon-triangle"><path d="M12 7.77L18.39 18H5.61L12 7.77M12 4L2 20h20L12 4z"/></g>
+            <g id="icon-eye"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></g>
+            <g id="icon-settings"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></g>
+            <g id="icon-shuffle"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></g>
+            <g id="icon-trophy"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></g>
+            <g id="icon-refresh"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></g>
+            <g id="icon-arrow-left"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></g>
+        </defs>
+    </svg>
 
-  <!-- ============ TOP BAR ============ -->
-  <div class="topbar">
-    <button class="back-btn hidden" id="backBtn" onclick="goBack()">‹ 戻る</button>
-    <h1 id="topTitle">📚 ChaPpy 英語電子辞書</h1>
-  </div>
-
-  <!-- ============ HOME SCREEN ============ -->
-  <section class="screen active" id="screen-home">
-    <div class="content">
-      <div class="hero">
-        <p class="hero-title">📚 ChaPpy 英語電子辞書</p>
-        <p class="hero-sub">中学英文法を、小学生でもわかるレベルで。</p>
-      </div>
-
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="searchInput" placeholder="例：受動態、can、比較級…" oninput="onSearch()">
-        <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
-      </div>
-
-      <div id="searchResults" class="search-results hidden"></div>
-
-      <div id="homeDefault">
-        <div class="quick-row">
-          <button class="quick-btn" onclick="showFavorites()"><span class="qi">⭐</span>お気に入り</button>
-          <button class="quick-btn" onclick="startQuiz()"><span class="qi">📝</span>一問一答</button>
-          <button class="quick-btn" onclick="startQuiz(true)"><span class="qi">🎲</span>ランダム暗記</button>
+    <!-- Header -->
+    <header>
+        <div class="header-logo">
+            <svg class="icon" style="width:22px; height:22px; fill:var(--light-gold);"><use href="#icon-book"/></svg>
+            <span>ひすとり</span>
         </div>
+        <button id="btn-reset-data" class="header-btn">
+            <svg class="icon"><use href="#icon-refresh"/></svg>
+            <span>記録リセット</span>
+        </button>
+    </header>
 
-        <div class="section-title">学年からえらぶ</div>
-        <div class="cat-grid" id="catGrid"></div>
-      </div>
-    </div>
-  </section>
+    <main>
+        <!-- MENU SCREEN -->
+        <section id="screen-menu" class="screen active">
+            
+            <!-- Category Selection -->
+            <div class="card-panel">
+                <div class="section-title">
+                    <svg class="icon"><use href="#icon-book"/></svg>
+                    <span>1. 学習カテゴリーと理解度</span>
+                </div>
+                <div class="category-list" id="category-options">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
 
-  <!-- ============ GRADE SCREEN ============ -->
-  <section class="screen" id="screen-grade">
-    <div class="content">
-      <div class="grade-hero">
-        <h2 id="gradeTitle"></h2>
-        <p id="gradeDesc"></p>
-      </div>
-      <div class="toc-scroll" id="tocScroll"></div>
-      <div class="unit-list" id="unitList"></div>
-    </div>
-  </section>
+            <!-- Status Filter Selection -->
+            <div class="card-panel">
+                <div class="section-title">
+                    <svg class="icon"><use href="#icon-check"/></svg>
+                    <span>2. 出題状態の絞り込み（複数選択可）</span>
+                </div>
+                <div class="option-grid">
+                    <label class="custom-checkbox status-chip" data-status="forgot">
+                        <input type="checkbox" value="forgot" checked>
+                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
+                        <span class="label-text">🔴 忘れた (<span id="count-forgot">0</span>)</span>
+                    </label>
+                    <label class="custom-checkbox status-chip" data-status="learning">
+                        <input type="checkbox" value="learning" checked>
+                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
+                        <span class="label-text">🟡 学習中 (<span id="count-learning">0</span>)</span>
+                    </label>
+                    <label class="custom-checkbox status-chip" data-status="mastered">
+                        <input type="checkbox" value="mastered">
+                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
+                        <span class="label-text">🟢 覚えた (<span id="count-mastered">0</span>)</span>
+                    </label>
+                    <label class="custom-checkbox status-chip" data-status="unlearned">
+                        <input type="checkbox" value="unlearned" checked>
+                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
+                        <span class="label-text">⚪ 未学習 (<span id="count-unlearned">0</span>)</span>
+                    </label>
+                </div>
+            </div>
 
-  <!-- ============ UNIT DETAIL SCREEN ============ -->
-  <section class="screen" id="screen-unit">
-    <div class="content" id="unitContent"></div>
-  </section>
+            <!-- Enhanced Settings -->
+            <div class="card-panel">
+                <div class="section-title">
+                    <svg class="icon"><use href="#icon-settings"/></svg>
+                    <span>3. 環境・出題設定</span>
+                </div>
+                
+                <!-- Color Theme -->
+                <div class="settings-row">
+                    <span class="settings-label">カラーテーマ</span>
+                    <select id="setting-theme" class="select-custom">
+                        <option value="navy">1. アカデミックネイビー</option>
+                        <option value="green">2. 抹茶・クラシック</option>
+                        <option value="brown">3. レトロ羊皮紙</option>
+                        <option value="dark">4. ミッドナイト（ダーク）</option>
+                        <option value="cherry">5. さくらチェリー</option>
+                        <option value="sol">6. Sol（太陽光・温もり）</option>
+                    </select>
+                </div>
 
-  <!-- ============ QUIZ SCREEN ============ -->
-  <section class="screen" id="screen-quiz">
-    <div class="content quiz-wrap">
-      <div class="quiz-progress" id="quizProgress"></div>
-      <div class="quiz-card" id="quizCard" onclick="revealQuizAnswer()">
-        <div class="quiz-badge" id="quizBadge"></div>
-        <p class="quiz-q" id="quizQ"></p>
-        <p class="quiz-hint" id="quizHint">タップして答えを見る</p>
-        <p class="quiz-a" id="quizA"></p>
-      </div>
-      <div class="quiz-btnrow">
-        <button class="quiz-action quiz-next" onclick="nextQuiz()">次の問題 →</button>
-      </div>
-    </div>
-  </section>
+                <!-- Auto Reveal Option -->
+                <div class="settings-row">
+                    <span class="settings-label">答えを自動で開く（アニメ省略）</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-auto-reveal">
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-  <!-- ============ FAVORITES SCREEN ============ -->
-  <section class="screen" id="screen-favorites">
-    <div class="content">
-      <div class="grade-hero">
-        <h2>⭐ お気に入り</h2>
-        <p>タップして保存した単元一覧（このセッション中のみ保存されます）</p>
-      </div>
-      <div class="unit-list" id="favList"></div>
-    </div>
-  </section>
+                <!-- Shuffle Option -->
+                <div class="settings-row">
+                    <span class="settings-label">
+                        <svg class="icon" style="fill:var(--text-sub)"><use href="#icon-shuffle"/></svg>
+                        問題をランダムシャッフル
+                    </span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-shuffle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-</div>
+                <!-- Question Limit -->
+                <div class="settings-row">
+                    <span class="settings-label">出題問題数</span>
+                    <select id="setting-count" class="select-custom">
+                        <option value="all">全問対象</option>
+                        <option value="10">10 問</option>
+                        <option value="20">20 問</option>
+                        <option value="30">30 問</option>
+                        <option value="50">50 問</option>
+                    </select>
+                </div>
+            </div>
 
-<button class="top-fab" id="topFab" onclick="scrollToTop()">↑</button>
+            <!-- Start Button -->
+            <button id="btn-start" class="start-btn">
+                <span>学習を開始する</span>
+            </button>
+        </section>
 
-<!-- ============ BOTTOM TAB BAR ============ -->
-<div class="tabbar">
-  <button class="tab-btn active" id="tab-home" onclick="goHome()"><span class="ti">🏠</span>ホーム</button>
-  <button class="tab-btn" id="tab-fav" onclick="showFavorites()"><span class="ti">⭐</span>お気に入り</button>
-  <button class="tab-btn" id="tab-quiz" onclick="startQuiz()"><span class="ti">📝</span>一問一答</button>
-  <button class="tab-btn" id="tab-top" onclick="scrollToTop()"><span class="ti">⬆️</span>トップへ</button>
-</div>
+        <!-- STUDY SCREEN -->
+        <section id="screen-study" class="screen">
+            <div class="study-header-bar">
+                <button id="btn-abort-study" class="btn-abort" type="button">
+                    <svg class="icon"><use href="#icon-arrow-left"/></svg>
+                    <span>メニューに戻る</span>
+                </button>
+                <span id="study-progress-text" class="progress-text">1 / 10</span>
+            </div>
 
-<script>
+            <div class="progress-bar-bg">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+            </div>
 
-/* ==========================================================================
-   データ本体：中学1〜3年 全文法ユニット
-   各ユニット構造:
-   {
-     id, grade(1-3), title, importance(1-5),
-     points: [ 絶対出るポイント配列 (HTML文字列可) ],
-     before: {tag, text}, after: {tag, text},   // 変形の説明（ある場合）
-     note: "説明の補足",
-     examples: [{en, ja}],
-     mnemonic: "語呂合わせ",
-     mistakes: [ "間違えやすい点" ],
-     check: {q, a}
-   }
-   ========================================================================== */
-const GRADES = [
-  {
-    key:"g1", grade:1, name:"中学1年", emoji:"📘", desc:"英語の基本のき。ここが土台！",
-    units: [
-      {
-        title:"be動詞（am / is / are）", importance:5,
-        points:[
-          "「〜です・〜にいます」を表す be動詞",
-          "主語が I → <b>am</b>",
-          "主語が he/she/it、単数 → <b>is</b>",
-          "主語が you、複数（we/they/学校名など） → <b>are</b>",
-          "否定文は be動詞のすぐ後ろに <b>not</b>",
-          "疑問文は be動詞を主語の前に出す"
-        ],
-        before:{tag:"日本語", text:"太郎は 学生 です。"},
-        after:{tag:"英語", text:"Taro is a student."},
-        note:"be動詞は「＝（イコール）」のはたらき。「太郎＝学生」のように、主語と後ろの言葉をつなぐ橋のイメージ。",
-        examples:[
-          {en:"I am a student.", ja:"私は学生です。"},
-          {en:"She is very kind.", ja:"彼女はとても親切です。"},
-          {en:"They are in the park.", ja:"彼らは公園にいます。"},
-          {en:"Is he your brother? — Yes, he is.", ja:"彼はあなたのお兄さんですか？ ―はい、そうです。"}
-        ],
-        mnemonic:"「アイ アム、ユー アー、ヒーシーイット イズ」の合言葉で主語とセットで丸暗記！",
-        mistakes:[
-          "am / is / are を一般動詞と混ぜて “I am like it.” のようにしてしまう（be動詞と一般動詞は同じ文で並べない）",
-          "疑問文で “Do you are ...?” のように do を付けてしまう（be動詞の疑問文に do は不要）"
-        ],
-        check:{q:"「彼女は先生です。」を英語にすると？", a:"She is a teacher.（主語 she → is を使う）"}
-      },
-      {
-        title:"一般動詞（現在形）", importance:5,
-        points:[
-          "be動詞以外の「〜する」を表す動詞",
-          "主語が3人称単数（he/she/it）→ 動詞の語尾に <b>-s / -es</b>",
-          "否定文：主語が I/you/複数 → <b>don't</b>＋動詞の原形　　he/she/it → <b>doesn't</b>＋動詞の原形",
-          "疑問文：<b>Do/Does</b>＋主語＋動詞の原形〜？"
-        ],
-        before:{tag:"3人称単数でない", text:"I play soccer."},
-        after:{tag:"3人称単数（he）", text:"He plays soccer."},
-        note:"主語が「彼・彼女・それ・1人の名前」のときだけ、動詞に s を付け足す。それ以外（I, you, we, they）は動詞そのまま。",
-        examples:[
-          {en:"I like music.", ja:"私は音楽が好きです。"},
-          {en:"My father works at a bank.", ja:"私の父は銀行で働いています。"},
-          {en:"She doesn't eat meat.", ja:"彼女は肉を食べません。"},
-          {en:"Does he play tennis? — No, he doesn't.", ja:"彼はテニスをしますか？ ―いいえ、しません。"}
-        ],
-        mnemonic:"「ヒーシーイット、エス（s）をつけよう」で3人称単数のsを忘れない！",
-        mistakes:[
-          "3人称単数なのに s を忘れる（“He play soccer.” ✕ → “He plays soccer.” ○）",
-          "doesn't の後ろにも s を付けてしまう（“He doesn't plays.” ✕ → doesn't の後ろは動詞の原形）"
-        ],
-        check:{q:"「彼は毎日勉強します。」を英語にすると？", a:"He studies every day.（study → studies に変化）"}
-      },
-      {
-        title:"疑問文（be動詞・一般動詞）", importance:4,
-        points:[
-          "be動詞の疑問文：be動詞を主語の前に出す（Is he ...?）",
-          "一般動詞の疑問文：文の頭に <b>Do / Does</b> を置き、動詞は原形に戻す",
-          "答え方：Yes, 主語＋be動詞/do・does．　No, 主語＋be動詞/do・does＋not．"
-        ],
-        before:{tag:"平叙文", text:"You are hungry."},
-        after:{tag:"疑問文", text:"Are you hungry?"},
-        note:"be動詞は「前に出す」だけ。一般動詞は「Do/Doesを借りてくる」というイメージ。",
-        examples:[
-          {en:"Are you a fan of soccer? — Yes, I am.", ja:"あなたはサッカーのファンですか？―はい、そうです。"},
-          {en:"Do you have a pen? — No, I don't.", ja:"ペンを持っていますか？―いいえ、持っていません。"},
-          {en:"Does she speak English? — Yes, she does.", ja:"彼女は英語を話しますか？―はい、話します。"}
-        ],
-        mnemonic:"「ビーどうしゼンブ前へ、いっぱんどうしDoたのむ」",
-        mistakes:[
-          "一般動詞の疑問文で動詞にsを残す（“Does he plays?” ✕ → “Does he play?” ○）",
-          "be動詞の疑問文にDoを付ける（“Do you are ...?” ✕）"
-        ],
-        check:{q:"“He likes dogs.” を疑問文にすると？", a:"Does he like dogs?（Doesを使い、likesはlikeに戻す）"}
-      },
-      {
-        title:"否定文", importance:4,
-        points:[
-          "be動詞の否定文：be動詞＋<b>not</b>（is not＝isn't）",
-          "一般動詞の否定文：主語＋<b>don't / doesn't</b>＋動詞の原形",
-          "can などの助動詞：<b>can't（cannot）</b>＋動詞の原形"
-        ],
-        before:{tag:"肯定文", text:"I am busy."},
-        after:{tag:"否定文", text:"I am not busy."},
-        note:"「〜ではない」と打ち消すときは、be動詞や助動詞のすぐ後ろに not を置くだけ。一般動詞は not を直接置けないので don't/doesn't に頼る。",
-        examples:[
-          {en:"She is not (isn't) at home.", ja:"彼女は家にいません。"},
-          {en:"I don't like carrots.", ja:"私はにんじんが好きではありません。"},
-          {en:"He doesn't play the piano.", ja:"彼はピアノを弾きません。"}
-        ],
-        mnemonic:"「ノット は べどうし の となり」",
-        mistakes:[
-          "一般動詞にそのままnotをつける（“I not like it.” ✕）",
-          "doesn'tの後の動詞にsを付けたままにする（“He doesn't plays.” ✕）"
-        ],
-        check:{q:"「私は魚が好きではありません。」を英語にすると？", a:"I don't like fish."}
-      },
-      {
-        title:"命令文", importance:3,
-        points:[
-          "「〜しなさい」→ 主語を消して<b>動詞の原形</b>から文を始める",
-          "「〜してはいけません」→ 文の頭に <b>Don't</b>",
-          "「〜しましょう」→ 文の頭に <b>Let's</b>",
-          "ていねいに言うときは文末や文頭に <b>please</b>"
-        ],
-        before:{tag:"ふつうの文", text:"You open the door."},
-        after:{tag:"命令文", text:"Open the door."},
-        note:"命令文は「あなたは」を隠して、いきなり動詞から始める文。主語のyouを消すのがポイント。",
-        examples:[
-          {en:"Open the window, please.", ja:"窓を開けてください。"},
-          {en:"Don't run in the hall.", ja:"廊下を走ってはいけません。"},
-          {en:"Let's go to the library.", ja:"図書館へ行きましょう。"}
-        ],
-        mnemonic:"「ドント は 動詞 の 前」「レッツ は みんなで さそう」",
-        mistakes:[
-          "命令文の頭にYouを残す（“You open the door.”は命令文ではなく平叙文）",
-          "Let'sの後を原形にせず三単現のsを付けてしまう"
-        ],
-        check:{q:"「静かにしなさい。」を英語にすると？", a:"Be quiet.（be動詞の命令文はBeから始める）"}
-      },
-      {
-        title:"疑問詞（What/Who/Where/When/Why/How）", importance:5,
-        points:[
-          "<b>What</b>＝何　<b>Who</b>＝だれ　<b>Where</b>＝どこ",
-          "<b>When</b>＝いつ　<b>Why</b>＝なぜ　<b>How</b>＝どうやって・どのくらい",
-          "疑問詞は文の一番先頭に置き、その後は疑問文の形（be動詞/do・does＋主語）を続ける"
-        ],
-        before:{tag:"be動詞疑問文", text:"Is this your bag?"},
-        after:{tag:"疑問詞疑問文", text:"What is this? — It's my bag."},
-        note:"疑問詞は「知りたいことを聞くための魔法の言葉」。まず疑問詞を置き、そのあとに普通の疑問文をくっつけるだけ。",
-        examples:[
-          {en:"What do you have in your bag?", ja:"かばんの中に何を持っていますか？"},
-          {en:"Where do you live?", ja:"あなたはどこに住んでいますか？"},
-          {en:"How do you go to school?", ja:"あなたはどうやって学校へ行きますか？"},
-          {en:"Why are you sad?", ja:"なぜ悲しいのですか？"}
-        ],
-        mnemonic:"「What誰なにWho どこWhere いつWhen なぜWhy どうHow」の五・七のリズムで暗記！",
-        mistakes:[
-          "疑問詞の後にDo/Doesを忘れる（一般動詞の疑問詞疑問文でも Do/Does は必要）",
-          "Whatの後にbe動詞と一般動詞の語順を逆にする"
-        ],
-        check:{q:"「あなたは何のスポーツが好きですか？」を英語にすると？", a:"What sport do you like?"}
-      },
-      {
-        title:"can（〜できる）", importance:4,
-        points:[
-          "can＋<b>動詞の原形</b>＝「〜できる」",
-          "否定文：<b>can't（cannot）</b>＋動詞の原形",
-          "疑問文：<b>Can</b>＋主語＋動詞の原形〜？",
-          "主語が誰でも can の形は変わらない（3単現のsは不要）"
-        ],
-        before:{tag:"能力なし", text:"I swim.（泳ぐ）"},
-        after:{tag:"能力あり", text:"I can swim.（泳げる）"},
-        note:"canは動詞に「できる力」をプラスする魔法の言葉。canの後ろの動詞は絶対に原形（sをつけない）。",
-        examples:[
-          {en:"I can play the guitar.", ja:"私はギターを弾くことができます。"},
-          {en:"She can't cook well.", ja:"彼女は上手に料理ができません。"},
-          {en:"Can you speak Japanese? — Yes, I can.", ja:"日本語を話せますか？―はい、話せます。"}
-        ],
-        mnemonic:"「キャンのあとは かならず げんけい」",
-        mistakes:[
-          "canの後の動詞にsを付ける（“He can plays.” ✕）",
-          "canとdo/doesを一緒に使ってしまう（“Can he plays?” ✕）"
-        ],
-        check:{q:"「私は自転車に乗れません。」を英語にすると？", a:"I can't (cannot) ride a bike."}
-      },
-      {
-        title:"現在進行形（be + 〜ing）", importance:4,
-        points:[
-          "「今〜しているところ」＝<b>be動詞＋動詞のing形</b>",
-          "否定文：be動詞＋not＋〜ing",
-          "疑問文：be動詞＋主語＋〜ing？",
-          "ing形の作り方：ふつうはing／eで終わる語はeを取ってing／短母音+子音で終わる語は子音を重ねてing"
-        ],
-        before:{tag:"ふだんの習慣", text:"I play soccer.（サッカーをする＝習慣）"},
-        after:{tag:"今している最中", text:"I am playing soccer.（今サッカーをしている）"},
-        note:"be動詞＋ing は「動作の途中を写真でパシャッと撮った」イメージ。まさに今やっていることを表す。",
-        examples:[
-          {en:"She is studying English now.", ja:"彼女は今、英語を勉強しています。"},
-          {en:"They are not watching TV.", ja:"彼らはテレビを見ていません。"},
-          {en:"Is he running in the park? — Yes, he is.", ja:"彼は公園を走っていますか？―はい、走っています。"}
-        ],
-        mnemonic:"「ビー＋イング、いま その しゅんかん」",
-        mistakes:[
-          "be動詞を忘れて動詞のing形だけにする（“I playing soccer.” ✕）",
-          "make→makeing のようにeを消し忘れる（正しくは making）"
-        ],
-        check:{q:"「彼らは今、昼食を食べています。」を英語にすると？", a:"They are eating lunch now."}
-      },
-      {
-        title:"過去形（規則動詞・不規則動詞）", importance:5,
-        points:[
-          "規則動詞：動詞の語尾に<b>-ed</b>をつける（play→played）",
-          "不規則動詞：形が不規則に変化（go→went, have→had, see→sawなど）",
-          "be動詞の過去形：am/is→<b>was</b>、are→<b>were</b>",
-          "否定文：<b>didn't</b>＋動詞の原形　　疑問文：<b>Did</b>＋主語＋動詞の原形〜？"
-        ],
-        before:{tag:"現在", text:"I play tennis.（現在）"},
-        after:{tag:"過去", text:"I played tennis yesterday.（過去）"},
-        note:"過去形は「もう終わったこと」を表す。didを使うときは、動詞は必ず原形に戻すのがポイント（過去のニュアンスはdidが持ってくれる）。",
-        examples:[
-          {en:"I visited Kyoto last year.", ja:"私は去年、京都を訪れました。"},
-          {en:"She went to the store yesterday.", ja:"彼女は昨日お店に行きました。"},
-          {en:"Did you watch the movie? — No, I didn't.", ja:"あなたはその映画を見ましたか？―いいえ、見ませんでした。"}
-        ],
-        mnemonic:"「ディッド の あとは げんけいに もどす」／不規則動詞は替え歌で覚える（go-went-went, see-saw-seen）",
-        mistakes:[
-          "didn'tの後の動詞を過去形のままにする（“I didn't went.” ✕ → “I didn't go.” ○）",
-          "不規則動詞にedをつけてしまう（“goed” ✕ → “went” ○）"
-        ],
-        check:{q:"「彼女は昨夜、宿題をしませんでした。」を英語にすると？", a:"She didn't do her homework last night."}
-      },
-      {
-        title:"There is / There are（〜がある・いる）", importance:3,
-        points:[
-          "単数・数えられない名詞：<b>There is</b> 〜.",
-          "複数：<b>There are</b> 〜.",
-          "否定文：There is not (isn't) / There are not (aren't) 〜.",
-          "疑問文：Is there 〜? / Are there 〜?"
-        ],
-        before:{tag:"日本語", text:"机の上に本が1冊あります。"},
-        after:{tag:"英語", text:"There is a book on the desk."},
-        note:"「〜がある／いる」と新しく紹介するときに使う表現。主語は必ず初めて話題に出るもの（すでに知っている物にはthere isは使わない）。",
-        examples:[
-          {en:"There are many students in the classroom.", ja:"教室にはたくさんの生徒がいます。"},
-          {en:"There isn't a park near my house.", ja:"私の家の近くに公園はありません。"},
-          {en:"Is there a station near here? — Yes, there is.", ja:"この近くに駅はありますか？―はい、あります。"}
-        ],
-        mnemonic:"「ゼアイズ ひとつ、ゼアアー たくさん」",
-        mistakes:[
-          "後ろの名詞が複数なのにThere isを使う（“There is two cats.” ✕ → “There are two cats.” ○）",
-          "すでに知っている（固有の）ものにThere isを使ってしまう"
-        ],
-        check:{q:"「公園に子どもたちが3人います。」を英語にすると？", a:"There are three children in the park."}
-      },
-      {
-        title:"前置詞（in / on / at など）", importance:3,
-        points:[
-          "<b>in</b>：広い場所・月・年・季節の中（in Tokyo, in April, in 2020）",
-          "<b>on</b>：面に接している・曜日・日付（on the desk, on Monday）",
-          "<b>at</b>：地点・時刻（at the station, at 7 o'clock）",
-          "<b>by</b>＝〜によって・〜までに、<b>with</b>＝〜と一緒に・〜を使って"
-        ],
-        before:{tag:"位置のイメージ", text:"箱（in）／机の上（on）／駅（at）"},
-        after:{tag:"時間のイメージ", text:"月・年（in）／曜日・日（on）／時刻（at）"},
-        note:"in・on・at は「広い→せまい→点」の順番でイメージするとわかりやすい。inは空間、onは接触、atは1点。",
-        examples:[
-          {en:"I live in Tokyo.", ja:"私は東京に住んでいます。"},
-          {en:"We have a test on Friday.", ja:"金曜日にテストがあります。"},
-          {en:"Let's meet at the station at 5.", ja:"5時に駅で会いましょう。"}
-        ],
-        mnemonic:"「インは ひろい、オンは くっつく、アットは てん」",
-        mistakes:[
-          "曜日にinを使ってしまう（“in Monday” ✕ → “on Monday” ○）",
-          "時刻にonを使ってしまう（“on 7 o'clock” ✕ → “at 7 o'clock” ○）"
-        ],
-        check:{q:"「私は日曜日に公園に行きます。」の（　）に入る前置詞は？　I go to the park （ ） Sunday.", a:"on（曜日にはonを使う）"}
-      },
-      {
-        title:"代名詞（I / you / he / she …）", importance:3,
-        points:[
-          "主格（〜は）：I, you, he, she, it, we, they",
-          "目的格（〜を・〜に）：me, you, him, her, it, us, them",
-          "動詞の後ろや前置詞の後ろには目的格を使う"
-        ],
-        before:{tag:"主格", text:"He is my friend.（彼は私の友達です）"},
-        after:{tag:"目的格", text:"I like him.（私は彼が好きです）"},
-        note:"「〜は」の形と「〜を」の形は別の単語になる。文の主人公なら主格、動作を受ける側なら目的格。",
-        examples:[
-          {en:"She helped me yesterday.", ja:"彼女は昨日私を手伝ってくれました。"},
-          {en:"I will call them tonight.", ja:"今夜彼らに電話します。"},
-          {en:"Please give it to us.", ja:"それを私たちにください。"}
-        ],
-        mnemonic:"「アイマイミー、ユーユアユー、ヒーヒズヒム」の格変化リズムで覚える",
-        mistakes:[
-          "動詞の後ろに主格を使ってしまう（“I like he.” ✕ → “I like him.” ○）"
-        ],
-        check:{q:"「私は彼女を知っています。」を英語にすると？", a:"I know her."}
-      },
-      {
-        title:"所有代名詞（mine / yours …）", importance:2,
-        points:[
-          "所有代名詞＝「〜のもの」1語で表す：mine, yours, his, hers, ours, theirs",
-          "「所有格＋名詞」を1語で言い換えたもの（my book → mine）"
-        ],
-        before:{tag:"所有格＋名詞", text:"This is my pen."},
-        after:{tag:"所有代名詞", text:"This pen is mine."},
-        note:"「私の〜」ではなく「私のもの」と名詞をまるごと1語にまとめてしまう便利な言葉。",
-        examples:[
-          {en:"Is this bag yours?", ja:"このかばんはあなたのものですか？"},
-          {en:"That car is his.", ja:"あの車は彼のものです。"},
-          {en:"These books are ours.", ja:"これらの本は私たちのものです。"}
-        ],
-        mnemonic:"「マイン・ユアーズ・ヒズ・ハーズ・アワーズ・セアーズ」で語尾のsに注目",
-        mistakes:[
-          "his以外にも所有格と所有代名詞が同じ形だと勘違いする（my→mine, your→yours、hisはhisのまま）"
-        ],
-        check:{q:"「これは私のものです。」を英語にすると？", a:"This is mine."}
-      },
-      {
-        title:"所有格（my / your / his …）", importance:2,
-        points:[
-          "所有格＝「〜の」＋必ず名詞とセットで使う：my, your, his, her, its, our, their",
-          "人の名前＋'s も所有格（Taro's bag＝太郎のかばん）"
-        ],
-        before:{tag:"名詞なし＝×", text:"This is my.（✕：名詞が必要）"},
-        after:{tag:"名詞あり＝○", text:"This is my bag.（○）"},
-        note:"所有格は1人では使えない、必ず名詞とペアになる言葉。「わたしの」だけでは文が完成しない。",
-        examples:[
-          {en:"Her dog is very cute.", ja:"彼女の犬はとてもかわいいです。"},
-          {en:"This is Taro's bag.", ja:"これは太郎のかばんです。"},
-          {en:"Our school has a big library.", ja:"私たちの学校には大きな図書館があります。"}
-        ],
-        mnemonic:"「マイ・ユア・ヒズ・ハー・イッツ・アワ・ゼア」は必ず名詞とセット！",
-        mistakes:[
-          "所有格の後に名詞を置き忘れる（“This is her.”は所有格の意味では使えない）"
-        ],
-        check:{q:"「これは彼の自転車です。」を英語にすると？", a:"This is his bike."}
-      },
-      {
-        title:"頻度を表す副詞（always/usually/sometimes/never）", importance:2,
-        points:[
-          "always（いつも）＞ usually（たいてい）＞ often（よく）＞ sometimes（時々）＞ never（決してない）",
-          "置く場所：be動詞・助動詞の<b>後ろ</b>、一般動詞の<b>前</b>"
-        ],
-        before:{tag:"be動詞文", text:"He is always kind.（彼はいつも親切）"},
-        after:{tag:"一般動詞文", text:"He always studies hard.（彼はいつも一生懸命勉強する）"},
-        note:"頻度の副詞は「動詞のすぐそば」に置くのがルール。be動詞なら後ろ、一般動詞なら前と覚える。",
-        examples:[
-          {en:"I usually get up at 7.", ja:"私はたいてい7時に起きます。"},
-          {en:"She is never late for school.", ja:"彼女は学校に決して遅刻しません。"},
-          {en:"We sometimes eat out.", ja:"私たちは時々外食します。"}
-        ],
-        mnemonic:"「オールウェイズ100％、ネバー0％」の割合で頻度を数直線でイメージ",
-        mistakes:[
-          "一般動詞の後ろに置いてしまう（“I get up always at 7.” ✕ → “I always get up at 7.” ○）"
-        ],
-        check:{q:"「私は時々図書館へ行きます。」を英語にすると？", a:"I sometimes go to the library."}
-      }
-    ]
-  },
-  {
-    key:"g2", grade:2, name:"中学2年", emoji:"📗", desc:"表現がぐっと広がる学年！",
-    units:[
-      {
-        title:"未来形（will / be going to）", importance:5,
-        points:[
-          "<b>will</b>＋動詞の原形：その場で決めたこと・予想",
-          "<b>be going to</b>＋動詞の原形：前から決めていた予定",
-          "否定文：will not（won't）／ be動詞＋not going to",
-          "疑問文：Will＋主語〜？／ be動詞＋主語＋going to〜？"
-        ],
-        before:{tag:"現在", text:"I study English.（現在の習慣）"},
-        after:{tag:"未来", text:"I will study English tomorrow.（未来の予定）"},
-        note:"will は「今決めた！」という気持ち、be going to は「前から決めていた」予定。どちらも「これから」を表すが、決めたタイミングが違う。",
-        examples:[
-          {en:"I will help you.", ja:"（今決めて）お手伝いします。"},
-          {en:"We are going to visit Osaka next week.", ja:"私たちは来週大阪を訪れる予定です。"},
-          {en:"It will rain tomorrow.", ja:"明日は雨が降るでしょう。"}
-        ],
-        mnemonic:"「ウィルは とっさに、ゴナは まえから」",
-        mistakes:[
-          "willの後にtoを入れてしまう（“will to go” ✕）",
-          "be going toのbe動詞を主語に合わせ忘れる（“I is going to” ✕）"
-        ],
-        check:{q:"「私は今夜、宿題をするつもりです。」を英語にすると？", a:"I am going to do my homework tonight."}
-      },
-      {
-        title:"助動詞（must/may/should/have to）", importance:4,
-        points:[
-          "<b>must</b>＝〜しなければならない（強い義務）",
-          "<b>have to</b>＝〜しなければならない（mustとほぼ同じ、否定は意味が変わる）",
-          "<b>must not</b>＝〜してはいけない（禁止）／<b>don't have to</b>＝〜する必要はない（不必要）",
-          "<b>should</b>＝〜すべき（アドバイス）　<b>may</b>＝〜してもよい／〜かもしれない"
-        ],
-        before:{tag:"義務", text:"You must study hard.（勉強しなければならない）"},
-        after:{tag:"禁止と不必要の違い", text:"must not＝禁止／don't have to＝不必要"},
-        note:"mustとhave toは似ているが、否定文でまったく意味が変わるのが最大のポイント。禁止なのか、不要なのかを区別しよう。",
-        examples:[
-          {en:"You must not run here.", ja:"ここで走ってはいけません。"},
-          {en:"You don't have to hurry.", ja:"急ぐ必要はありません。"},
-          {en:"You should see a doctor.", ja:"医者に診てもらうべきです。"}
-        ],
-        mnemonic:"「マストノット＝きんし、ドントハブトゥー＝ふようで区別！」",
-        mistakes:[
-          "must notとdon't have toを同じ意味だと勘違いする",
-          "has toの3単現を忘れる（“He have to go.” ✕ → “He has to go.” ○）"
-        ],
-        check:{q:"「あなたは今日、学校に来る必要はありません。」を英語にすると？", a:"You don't have to come to school today."}
-      },
-      {
-        title:"不定詞（to＋動詞の原形）の3用法", importance:5,
-        points:[
-          "<b>名詞的用法</b>：「〜すること」（主語・目的語・補語になる）",
-          "<b>形容詞的用法</b>：「〜するための・〜すべき」（名詞を後ろから修飾）",
-          "<b>副詞的用法</b>：「〜するために（目的）」「〜して（感情の原因）」"
-        ],
-        before:{tag:"名詞的", text:"I like to read books.（本を読むことが好き）"},
-        after:{tag:"形容詞的／副詞的", text:"I have a book to read.（読むための本）／ I study to pass the test.（合格するために勉強する）"},
-        note:"to＋動詞の原形は形は1つだが、働き（役割）が3つある。文の中でどこにかかっているかを見て、名詞・形容詞・副詞のどれかを判断する。",
-        examples:[
-          {en:"To swim in the sea is fun.", ja:"海で泳ぐことは楽しいです。（名詞的）"},
-          {en:"She has a lot of homework to do.", ja:"彼女にはやるべき宿題がたくさんあります。（形容詞的）"},
-          {en:"He went to the store to buy milk.", ja:"彼は牛乳を買うためにお店へ行きました。（副詞的）"},
-          {en:"I was happy to see you.", ja:"あなたに会えて嬉しかったです。（副詞的：感情の原因）"}
-        ],
-        mnemonic:"「トゥ＋動詞は、こと・ための・ために」の3点セットで暗記",
-        mistakes:[
-          "toの後ろを動詞のing形にしてしまう（“to swimming” ✕ → “to swim” ○）",
-          "3用法を区別せず全部同じ意味に訳してしまう"
-        ],
-        check:{q:"“I have many things to do.” の to do はどの用法？", a:"形容詞的用法（things を後ろから修飾＝やるべきこと）"}
-      },
-      {
-        title:"動名詞（動詞のing形＝〜すること）", importance:4,
-        points:[
-          "動詞のing形が名詞のはたらきをする＝「〜すること」",
-          "主語・目的語・補語になる",
-          "enjoy, finish, stop などの動詞は<b>動名詞のみ</b>を目的語にとる"
-        ],
-        before:{tag:"不定詞（名詞的）", text:"I like to play soccer."},
-        after:{tag:"動名詞", text:"I like playing soccer.（ほぼ同じ意味）"},
-        note:"動名詞は「動詞なのに名詞に変身したもの」。enjoyやfinishのあとは必ずing形と覚えてしまうのが近道。",
-        examples:[
-          {en:"Playing the piano is fun.", ja:"ピアノを弾くことは楽しいです。"},
-          {en:"I enjoy reading comic books.", ja:"私は漫画を読むことを楽しみます。"},
-          {en:"She finished cleaning her room.", ja:"彼女は部屋を掃除し終えました。"}
-        ],
-        mnemonic:"「エンジョイ・フィニッシュ・ストップは イング専門」",
-        mistakes:[
-          "enjoyの後にtoを使ってしまう（“enjoy to play” ✕ → “enjoy playing” ○）"
-        ],
-        check:{q:"「私は歌うことが好きです。」を動名詞を使って英語にすると？", a:"I like singing."}
-      },
-      {
-        title:"比較（比較級・最上級）", importance:5,
-        points:[
-          "比較級：形容詞/副詞＋<b>-er</b> ＋ than 〜（2つを比べる）",
-          "最上級：the＋形容詞/副詞＋<b>-est</b>（3つ以上で一番）",
-          "長い単語は <b>more</b>／<b>the most</b> を前に置く（beautiful→more beautiful）",
-          "同じくらい：<b>as … as</b> 〜"
-        ],
-        before:{tag:"比較級", text:"Ken is taller than Yuji.（健は裕二より背が高い）"},
-        after:{tag:"最上級", text:"Ken is the tallest in his class.（健はクラスで一番背が高い）"},
-        note:"2人を比べるときは -er + than、3人以上の中で一番なら the -est。長い単語には -er/-est の代わりに more/most をくっつける。",
-        examples:[
-          {en:"This book is more interesting than that one.", ja:"この本はあの本より面白いです。"},
-          {en:"She is the most popular student in our school.", ja:"彼女は私たちの学校で一番人気のある生徒です。"},
-          {en:"I am as tall as my brother.", ja:"私は兄と同じくらいの背の高さです。"}
-        ],
-        mnemonic:"「短い語は er・est、長い語は more・most」",
-        mistakes:[
-          "more と -er を両方つけてしまう（“more taller” ✕）",
-          "最上級で the を忘れる（“He is tallest.” ✕ → “He is the tallest.” ○）"
-        ],
-        check:{q:"「これはすべての中で一番簡単な問題です。」を英語にすると？", a:"This is the easiest question of all."}
-      },
-      {
-        title:"接続詞（when/if/because/that など）", importance:4,
-        points:[
-          "<b>when</b>＝〜のとき　<b>if</b>＝もし〜なら　<b>because</b>＝なぜなら〜だから",
-          "<b>that</b>＝〜ということ（think/know/hopeなどの後ろでよく使われ、省略も可）",
-          "when/ifの文が前に来るときはコンマ（,）を入れる"
-        ],
-        before:{tag:"後ろに置く", text:"I was happy when I saw you."},
-        after:{tag:"前に置く（コンマ必要）", text:"When I saw you, I was happy."},
-        note:"接続詞は2つの文をつなぐ「のり」。文の前半に置くか後半に置くかで、コンマが必要かどうかが変わる。",
-        examples:[
-          {en:"If it rains tomorrow, we will stay home.", ja:"もし明日雨が降ったら、私たちは家にいます。"},
-          {en:"I think that this movie is great.", ja:"私はこの映画は素晴らしいと思います。"},
-          {en:"He was absent because he was sick.", ja:"彼は病気だったので欠席しました。"}
-        ],
-        mnemonic:"「文の前は カンマ 忘れずに」",
-        mistakes:[
-          "if / whenの文の中でwillを使ってしまう（時・条件を表す副詞節では未来のことも現在形で表す：“If it will rain” ✕ → “If it rains” ○）"
-        ],
-        check:{q:"「もし晴れたら、私たちはピクニックに行きます。」を英語にすると？", a:"If it is sunny, we will go on a picnic."}
-      },
-      {
-        title:"SVOO（give/tell などの第4文型）", importance:3,
-        points:[
-          "動詞＋<b>人（O1）</b>＋<b>物（O2）</b>＝「人に物を〜する」",
-          "give, show, tell, teach, send などがよく使われる",
-          "書き換え：動詞＋物＋<b>to/for</b>＋人　の形にもできる"
-        ],
-        before:{tag:"SVOO", text:"I gave him a present.（彼にプレゼントをあげた）"},
-        after:{tag:"書き換え（to型）", text:"I gave a present to him.（同じ意味）"},
-        note:"「人に」「物を」の順番で動詞のすぐ後ろに2つの目的語を並べる文型。giveやtellの仲間はto、buyやmakeの仲間はforを使って書き換える。",
-        examples:[
-          {en:"My mother made me a cake.", ja:"母は私にケーキを作ってくれました。"},
-          {en:"He showed us his pictures.", ja:"彼は私たちに写真を見せてくれました。"},
-          {en:"She teaches us English.", ja:"彼女は私たちに英語を教えています。"}
-        ],
-        mnemonic:"「give/tell/show系はto、buy/make/cook系はfor」",
-        mistakes:[
-          "toとforを逆に使ってしまう（buyはfor、giveはtoが基本）"
-        ],
-        check:{q:"“I bought her a bag.” をtoかforを使って書き換えると？", a:"I bought a bag for her."}
-      },
-      {
-        title:"SVOC（call/make などの第5文型）", importance:3,
-        points:[
-          "動詞＋<b>目的語（O）</b>＋<b>補語（C）</b>＝「OをCと呼ぶ・OをCにする」",
-          "call, name, make などが代表的",
-          "O＝Cの関係が成り立つのが特徴（O is C の関係）"
-        ],
-        before:{tag:"SVOO（誤解しやすい）", text:"×（意味が違う）"},
-        after:{tag:"SVOC", text:"We call him Ken.（私たちは彼をケンと呼びます＝He is Ken）"},
-        note:"SVOOは「人と物」で別々のものだが、SVOCは目的語（O）と補語（C）がイコールの関係になっているのが最大の違い。",
-        examples:[
-          {en:"They named the baby Sora.", ja:"彼らはその赤ちゃんをソラと名付けました。"},
-          {en:"The news made her happy.", ja:"その知らせは彼女を幸せにしました。"},
-          {en:"We call this flower sakura in Japanese.", ja:"私たちは日本語でこの花をさくらと呼びます。"}
-        ],
-        mnemonic:"「O＝Cが成り立てば、それはSVOC」",
-        mistakes:[
-          "SVOOとSVOCを混同する（give型はOとOが別物、call型はO＝C）"
-        ],
-        check:{q:"「その映画は私を悲しくさせました。」を英語にすると？", a:"The movie made me sad."}
-      },
-      {
-        title:"感嘆文（What/How）", importance:2,
-        points:[
-          "<b>What</b>＋(a/an)＋形容詞＋名詞＋主語＋動詞！",
-          "<b>How</b>＋形容詞/副詞＋主語＋動詞！",
-          "「なんて〜なんだ！」という驚きや感動を表す"
-        ],
-        before:{tag:"ふつうの文", text:"This is a very beautiful flower."},
-        after:{tag:"感嘆文", text:"What a beautiful flower this is!"},
-        note:"Whatの後ろには「a/an＋形容詞＋名詞」のカタマリがくっつき、Howの後ろには形容詞や副詞だけがくる。名詞があるかないかで使い分ける。",
-        examples:[
-          {en:"What an interesting book this is!", ja:"なんて面白い本なんだ！"},
-          {en:"How fast he runs!", ja:"彼はなんて速く走るんだ！"},
-          {en:"How kind you are!", ja:"あなたはなんて親切なんだ！"}
-        ],
-        mnemonic:"「ワットは 名詞つき、ハウは 名詞なし」",
-        mistakes:[
-          "Whatの後にaを忘れる（数えられる名詞が単数のとき）",
-          "How のあとに名詞を置いてしまう（Howの後は形容詞・副詞のみ）"
-        ],
-        check:{q:"「なんて大きな犬なんだ！」を感嘆文にすると？", a:"What a big dog this is!"}
-      }
-    ]
-  },
-  {
-    key:"g3", grade:3, name:"中学3年", emoji:"📕", desc:"高校入試の得点源！ここが正念場。",
-    units:[
-      {
-        title:"受動態", importance:5,
-        points:[
-          "<b>be動詞＋過去分詞</b>＝「〜される」",
-          "現在：is/am/are＋過去分詞　　過去：was/were＋過去分詞",
-          "否定：be動詞＋not＋過去分詞　　疑問：Be動詞＋主語＋過去分詞？",
-          "「〜によって」＝<b>by</b>"
-        ],
-        before:{tag:"能動態", text:"太郎がドアを開ける。"},
-        after:{tag:"受動態", text:"ドアが（太郎によって）開けられる。"},
-        note:"受動態は「する側」ではなく「される側」を主役にした文。もともとの目的語が主語になり、動詞はbe動詞＋過去分詞に変わる。",
-        examples:[
-          {en:"This letter was written by Natsume Soseki.", ja:"この手紙は夏目漱石によって書かれました。"},
-          {en:"English is spoken in many countries.", ja:"英語は多くの国で話されています。"},
-          {en:"The window was not broken by him.", ja:"その窓は彼によって割られたのではありません。"},
-          {en:"Was this cake made by you? — Yes, it was.", ja:"このケーキはあなたが作ったのですか？―はい、そうです。"}
-        ],
-        mnemonic:"「ビー＋カコブンシで される」／ by は「〜によって」の目印",
-        mistakes:[
-          "過去分詞を使わず過去形を使ってしまう（不規則動詞はwrite-wrote-writtenのように3段活用に注意）",
-          "be動詞を主語に合わせ忘れる（複数主語なのにisのまま等）"
-        ],
-        check:{q:"「この歌は多くの人に愛されています。」を英語にすると？", a:"This song is loved by many people."}
-      },
-      {
-        title:"現在完了（have/has＋過去分詞）", importance:5,
-        points:[
-          "形：<b>have/has＋過去分詞</b>",
-          "<b>経験</b>：〜したことがある（have been to, have seen など）",
-          "<b>完了・結果</b>：ちょうど〜したところ／もう〜した（just, already, yet）",
-          "<b>継続</b>：ずっと〜している（for＋期間、since＋起点）",
-          "疑問：<b>Have/Has</b>＋主語＋過去分詞？　　否定：have/has<b>not</b>＋過去分詞"
-        ],
-        before:{tag:"過去形（過去の1点）", text:"I lived in Osaka.（過去に住んでいた＝今は？わからない）"},
-        after:{tag:"現在完了（過去〜今のつながり）", text:"I have lived in Osaka for 5 years.（5年前から今もずっと住んでいる）"},
-        note:"現在完了は「過去」と「今」をつなぐ橋。ただの過去形と違い、「その結果、今どうなっているか」に意識が向いている文法。",
-        examples:[
-          {en:"I have been to Kyoto twice.", ja:"私は京都に2回行ったことがあります。（経験）"},
-          {en:"She has just finished her homework.", ja:"彼女はちょうど宿題を終えたところです。（完了）"},
-          {en:"I have lived here since 2018.", ja:"私は2018年からここに住んでいます。（継続）"},
-          {en:"Have you ever eaten natto? — No, I haven't.", ja:"納豆を食べたことがありますか？―いいえ、ありません。（経験）"}
-        ],
-        mnemonic:"「経験は been to／完了は just・already・yet／継続は for・since」の3点セットで丸暗記",
-        mistakes:[
-          "現在完了と一緒にago（〜前に）を使ってしまう（“I have been there two years ago.” ✕ → 過去形にする）",
-          "forとsinceを逆に使う（forは期間の長さ、sinceは開始した時点）"
-        ],
-        check:{q:"「私は3年間ずっと英語を勉強しています。」を英語にすると？", a:"I have studied English for three years."}
-      },
-      {
-        title:"現在完了進行形（have/has been＋〜ing）", importance:3,
-        points:[
-          "形：<b>have/has been＋動詞のing形</b>",
-          "「（ずっと）〜し続けている」という<b>動作の継続</b>を強調",
-          "現在完了の「継続」との違い：状態動詞（know, likeなど）は現在完了進行形にしない"
-        ],
-        before:{tag:"現在完了（継続・状態）", text:"I have known him for 10 years.（状態がずっと続く）"},
-        after:{tag:"現在完了進行形（動作の継続）", text:"It has been raining since this morning.（動作がずっと続いている）"},
-        note:"「知っている」「持っている」のような状態はhave/has＋過去分詞のままでOK。「走る」「勉強する」のような動作をずっと続けているときはbeen＋ing形にする。",
-        examples:[
-          {en:"I have been studying for two hours.", ja:"私は2時間ずっと勉強し続けています。"},
-          {en:"She has been waiting for the bus since 9 a.m.", ja:"彼女は午前9時からずっとバスを待ち続けています。"},
-          {en:"It has been raining since last night.", ja:"昨夜からずっと雨が降り続いています。"}
-        ],
-        mnemonic:"「ハブ・ビーン・イングで ずっと〜し続け中」",
-        mistakes:[
-          "状態動詞（know/like/haveなど）を進行形にしてしまう（“have been knowing” ✕）"
-        ],
-        check:{q:"「彼は今朝からずっとサッカーの練習をしています。」を英語にすると？", a:"He has been practicing soccer since this morning."}
-      },
-      {
-        title:"分詞（現在分詞・過去分詞の形容詞用法）", importance:4,
-        points:[
-          "<b>現在分詞（〜ing）</b>＝「〜している」（能動・進行の意味）",
-          "<b>過去分詞（〜ed等）</b>＝「〜された」（受け身の意味）",
-          "1語なら名詞の<b>前</b>、他の語句を伴うなら名詞の<b>後ろ</b>から修飾"
-        ],
-        before:{tag:"現在分詞", text:"a sleeping baby（眠っている赤ちゃん＝赤ちゃんが眠る）"},
-        after:{tag:"過去分詞", text:"a broken window（割られた窓＝窓が割られる）"},
-        note:"「〜している」なら現在分詞、「〜される・〜された」なら過去分詞と覚える。名詞を後ろから説明するときは、分詞のあとに他の語句がついている場合。",
-        examples:[
-          {en:"The boy playing soccer is my brother.", ja:"サッカーをしている少年は私の弟です。"},
-          {en:"This is a picture painted by a famous artist.", ja:"これは有名な芸術家によって描かれた絵です。"},
-          {en:"I have a broken phone.", ja:"私は壊れた電話を持っています。"}
-        ],
-        mnemonic:"「イングは している側、過去分詞は される側」",
-        mistakes:[
-          "現在分詞と過去分詞を意味的に逆に使ってしまう（“an excited game” ✕ → “an exciting game” ○、人が興奮＝excited、物がわくわくさせる＝exciting）"
-        ],
-        check:{q:"「あの走っている犬を見て。」を英語にすると？", a:"Look at that running dog. / Look at the dog running over there."}
-      },
-      {
-        title:"関係代名詞（who / which / that）", importance:5,
-        points:[
-          "<b>who</b>：先行詞が<b>人</b>（主格・目的格）",
-          "<b>which</b>：先行詞が<b>もの・動物</b>",
-          "<b>that</b>：人・もの両方に使える万能タイプ",
-          "先行詞（説明したい名詞）の直後に関係代名詞＋説明が続く"
-        ],
-        before:{tag:"2つの文", text:"I have a friend. + He can speak French."},
-        after:{tag:"関係代名詞で1文に", text:"I have a friend who can speak French.（フランス語を話せる友達）"},
-        note:"関係代名詞は「後ろから名詞をくわしく説明するのり」。2つの文を1つにまとめて、名詞をもっと詳しく紹介できる。",
-        examples:[
-          {en:"The girl who is singing over there is Mika.", ja:"あそこで歌っている女の子はミカです。"},
-          {en:"This is the book which I bought yesterday.", ja:"これは私が昨日買った本です。"},
-          {en:"I know a boy that runs very fast.", ja:"私はとても速く走る男の子を知っています。"}
-        ],
-        mnemonic:"「ヒトはwho、モノはwhich、まよったらthat」",
-        mistakes:[
-          "先行詞が人なのにwhichを使ってしまう",
-          "関係代名詞の後ろに主語を重ねて置いてしまう（“a friend who he can speak” ✕）"
-        ],
-        check:{q:"「これは私の母が作ったケーキです。」を関係代名詞whichを使って英語にすると？", a:"This is the cake which my mother made."}
-      },
-      {
-        title:"間接疑問文", importance:4,
-        points:[
-          "疑問文が他の文の一部（目的語）になったもの",
-          "語順が<b>疑問詞＋主語＋動詞</b>のふつうの文の語順に変わる（疑問文の倒置をやめる）",
-          "know, tell, wonder などの後ろによく使われる"
-        ],
-        before:{tag:"ふつうの疑問文", text:"Where does he live?"},
-        after:{tag:"間接疑問文", text:"I don't know where he lives.（彼がどこに住んでいるか知りません）"},
-        note:"疑問文をそのまま文の中に組み込むと、doやdoesが消えて動詞が主語に合わせた形に戻り、語順も「疑問詞＋主語＋動詞」という普通の文の順番になる。",
-        examples:[
-          {en:"Do you know what this word means?", ja:"あなたはこの単語が何を意味するか知っていますか？"},
-          {en:"I don't know who that man is.", ja:"私はあの男性が誰なのか知りません。"},
-          {en:"Please tell me when the train will arrive.", ja:"電車がいつ到着するか教えてください。"}
-        ],
-        mnemonic:"「疑問詞のあとは ふつうの語順に もどす」",
-        mistakes:[
-          "間接疑問文の中でも疑問文の語順のままにしてしまう（“I know where does he live.” ✕ → “I know where he lives.” ○）"
-        ],
-        check:{q:"「彼女がなぜ怒っているのか私にはわかりません。」を英語にすると？", a:"I don't know why she is angry."}
-      }
-    ]
-  }
-];
+            <!-- Main Card -->
+            <div class="question-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px;">
+                    <span id="card-status-tag" class="card-tag">未学習</span>
+                    <span id="study-category-label" style="font-size: 11px; color: var(--text-sub);">カテゴリー</span>
+                </div>
+                
+                <!-- Question -->
+                <div id="card-question" class="question-text">
+                    問題文がここに表示されます。
+                </div>
 
-/* IDを割り当て + フラット化して扱いやすくする */
-let uidCounter = 0;
-const ALL_UNITS = [];
-GRADES.forEach(g=>{
-  g.units.forEach(u=>{
-    u.id = "u" + (uidCounter++);
-    u.grade = g.grade;
-    u.gradeKey = g.key;
-    u.gradeName = g.name;
-    ALL_UNITS.push(u);
-  });
-});
+                <!-- Reveal Button -->
+                <div id="reveal-container" class="reveal-btn-container">
+                    <button id="btn-reveal" class="reveal-btn">
+                        <svg class="icon"><use href="#icon-eye"/></svg>
+                        <span>答えを表示する</span>
+                    </button>
+                </div>
 
-/* ==========================================================================
-   状態管理（すべてメモリ内 / このセッション限り）
-   ========================================================================== */
-const state = {
-  favorites: new Set(),
-  history: [],           // 画面遷移の履歴（戻るボタン用）
-  currentGrade: null,
-  quizPool: [],
-  quizIndex: 0
-};
+                <!-- Answer Section -->
+                <div id="answer-container" class="answer-container">
+                    <div class="answer-label">正解キーワード</div>
+                    <div id="card-answer-word" class="answer-word">正解単語</div>
+                    <div id="card-answer-desc" class="answer-desc">解説テキストがここに表示されます。</div>
+                </div>
+            </div>
 
-/* ==========================================================================
-   画面遷移
-   ========================================================================== */
-function showScreen(id, title, showBack){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.getElementById("topTitle").textContent = title;
-  document.getElementById("backBtn").classList.toggle("hidden", !showBack);
-  window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
-  setActiveTab(id);
-}
+            <!-- Action Buttons -->
+            <div id="action-buttons" class="action-buttons">
+                <button class="status-btn btn-forgot" data-action="forgot">
+                    <svg class="icon" style="width:24px; height:24px;"><use href="#icon-cross"/></svg>
+                    <span>忘れた</span>
+                </button>
+                <button class="status-btn btn-learning" data-action="learning">
+                    <svg class="icon" style="width:24px; height:24px;"><use href="#icon-triangle"/></svg>
+                    <span>学習中</span>
+                </button>
+                <button class="status-btn btn-mastered" data-action="mastered">
+                    <svg class="icon" style="width:24px; height:24px;"><use href="#icon-check"/></svg>
+                    <span>覚えた</span>
+                </button>
+            </div>
+        </section>
 
-function setActiveTab(id){
-  document.getElementById("tab-home").classList.toggle("active", id==="screen-home");
-  document.getElementById("tab-fav").classList.toggle("active", id==="screen-favorites");
-  document.getElementById("tab-quiz").classList.toggle("active", id==="screen-quiz");
-}
+        <!-- COMPLETE SCREEN -->
+        <section id="screen-complete" class="screen">
+            <div class="card-panel complete-card">
+                <svg class="icon" style="width: 56px; height: 56px; fill: var(--accent-gold); margin-bottom: 16px;"><use href="#icon-trophy"/></svg>
+                <h2 class="complete-title">学習セッション完了！</h2>
+                <p style="color: var(--text-sub); font-size: 14px;">選択されたすべての問題を解き終えました。</p>
 
-function goHome(){
-  state.history = [];
-  showScreen("screen-home","📚 ChaPpy 英語電子辞書", false);
-}
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <span id="stat-total" class="stat-num">0</span>
+                        <span class="stat-label">解いた問題数</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="stat-mastered" class="stat-num" style="color: var(--status-mastered);">0</span>
+                        <span class="stat-label">覚えた</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="stat-learning" class="stat-num" style="color: var(--status-learning);">0</span>
+                        <span class="stat-label">学習中</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="stat-forgot" class="stat-num" style="color: var(--status-forgot);">0</span>
+                        <span class="stat-label">忘れた</span>
+                    </div>
+                </div>
 
-function goBack(){
-  state.history.pop();
-  const prev = state.history[state.history.length-1];
-  if(!prev){ goHome(); return; }
-  if(prev.type==="grade") openGrade(prev.key, false);
-  else if(prev.type==="home") goHome();
-  else goHome();
-}
+                <button id="btn-back-menu" class="start-btn">
+                    <span>メニューに戻る</span>
+                </button>
+            </div>
+        </section>
+    </main>
 
-function pushHistory(entry){ state.history.push(entry); }
+    <!-- Global Footer Copyright -->
+    <footer>
+        &copy; HoshiNet
+    </footer>
 
-/* ==========================================================================
-   ホーム：カテゴリーカード描画
-   ========================================================================== */
-function renderCategoryCards(){
-  const grid = document.getElementById("catGrid");
-  grid.innerHTML = GRADES.map(g=>`
-    <div class="cat-card g${g.grade}" data-tab="${g.name}" onclick="openGrade('${g.key}', true)">
-      <div class="cat-emoji">${g.emoji}</div>
-      <div class="cat-info">
-        <p class="cat-name">${g.name}</p>
-        <p class="cat-desc">${g.desc}（全${g.units.length}単元）</p>
-      </div>
-      <div class="cat-arrow">›</div>
-    </div>
-  `).join("");
-}
-renderCategoryCards();
+    <div id="toast" class="toast">記録をリセットしました</div>
 
-/* ==========================================================================
-   検索（リアルタイム）
-   ========================================================================== */
-function onSearch(){
-  const q = document.getElementById("searchInput").value.trim();
-  const clearBtn = document.getElementById("searchClear");
-  const resultsBox = document.getElementById("searchResults");
-  const defaultBox = document.getElementById("homeDefault");
-  clearBtn.style.display = q ? "flex" : "none";
+    <!-- JavaScript Data & Logic -->
+    <script>
+        // ---------------------------------------------------------
+        // 1. DATA DEFINITION
+        // ---------------------------------------------------------
+        const historyData = [
+            { id: 1, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ニューヨーク", q: "1929年10月、株式市場の大暴落が発生し世界恐慌の引き金となったアメリカの都市はどこ？", desc: "ウォール街の株式暴落から世界的な不景気が始まりました。" },
+            { id: 2, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "世界恐慌", q: "1929年にアメリカから始まり、全世界に広がった深刻な経済不況を何というか？", desc: "資本主義諸国に甚大な経済的打撃を与えました。" },
+            { id: 3, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ローズベルト", q: "世界恐慌に対して新規巻き直し政策（ニューディール政策）を実施したアメリカ大統領は誰？", desc: "積極的な政府介入による経済復興を図りました。" },
+            { id: 4, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ニューディール", q: "ローズベルト大統領が行った、公共事業や雇用創出による景気回復政策を何政策という？", desc: "TVA（テネシー川流域開発公社）などが有名です。" },
+            { id: 5, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "植民地", q: "英・仏などの大国が自国の経済圏を守るため利用した、従属的な領土・地域を何というか？", desc: "ブロック経済の基盤となりました。" },
+            { id: 6, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ブロック経済", q: "英・仏などが自国と植民地間の貿易を優遇し、他国の購買を排除した経済体制を何という？", desc: "植民地を持たない国の不満を高め戦争の原因となりました。" },
+            { id: 7, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ファシズム", q: "民主主義を否定し、独裁政治や軍国主義を強めた排的な政治運動・思想を何という？", desc: "イタリアやドイツで台頭しました。" },
+            { id: 8, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ムッソリーニ", q: "イタリアでファシスト党を率いて独裁政治を行った人物は誰？", desc: "1922年にローマ進軍を行い政権を握りました。" },
+            { id: 9, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ヒトラー", q: "ドイツでナチス（国家社会主義ドイツ労働者党）を率いて独裁を行った人物は誰？", desc: "全権委任法を成立させ独裁体制を確立しました。" },
+            { id: 10, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ナチス", q: "ヒトラーが率いた「国家社会主義ドイツ労働者党」の略称は？", desc: "ユダヤ人迫害や他国への侵略を推進しました。" },
+            { id: 11, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "独ソ不可侵条約", q: "1939年にドイツとソ連の間で電撃的に結ばれた相互不侵略の条約は？", desc: "これによりドイツはポーランド侵攻を開始しました。" },
+            { id: 12, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ポーランド", q: "1939年9月、ドイツが侵攻し第二次世界大戦の発端となった国はどこ？", desc: "英仏がドイツに宣言し第二次世界大戦が勃発。" },
+            { id: 13, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "第二次世界大戦", q: "1939年から1945年まで、全世界を巻き込んで行われた人類史上最大の戦争は？", desc: "枢軸国と連合国の戦いとなりました。" },
+            { id: 14, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "大西洋憲章", q: "1941年にローズベルトとチャーチルが発表した、戦後構想の共同宣言は？", desc: "国際連合設立の基本理念となりました。" },
+            { id: 15, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ユダヤ人", q: "ナチス・ドイツによってホロコースト（大虐殺）の対象とされた民族は？", desc: "数百万人が強制収容所で犠牲となりました。" },
+            { id: 16, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "レジスタンス", q: "ファシズムやドイツの軍事占領に対し、ナチス占領下で行われた抵抗運動を何という？", desc: "フランスなどで活発に行われました。" },
+            { id: 17, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "連合国", q: "第二次世界大戦で、日・独・伊の枢軸国と対抗したアメリカ・イギリス・ソ連・中国などの陣営は？", desc: "戦後の国連常任理事国の母体となりました。" },
+            { id: 18, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ドイツ", q: "ヨーロッパ戦線で枢軸国の中心となり、1945年5月に無条件降伏した国は？", desc: "降伏後、東西に分割占領されました。" },
+            { id: 19, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ヤルタ会談", q: "1945年2月、米・英・ソの首脳が戦後処理やソ連の対日参戦について協議した会談は？", desc: "ローズベルト、チャーチル、スターリンが参加。" },
+            { id: 20, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "憲政の常道", q: "大正末期から昭和初期にかけて、衆議院の第一党が内閣を組織する慣例を何といった？", desc: "加藤高明内閣から五・一五事件まで続きました。" },
+            { id: 21, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "関東大震災", q: "1923年9月1日、首都圏に甚大な被害をもたらした大地震は？", desc: "復興とともに経済（震災手形）への影響が広がりました。" },
+            { id: 22, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "二十一か条の要求", q: "1915年、日本が中国（袁世凱政権）に対して突きつけた権益要求は？", desc: "中国で激しい反日運動を引き起こしました。" },
+            { id: 23, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "米騒動", q: "1918年、米価の高騰に対し富山県の主婦らの行動から全国に広がった民衆運動は？", desc: "これにより寺内正毅内閣が倒れ、原敬政党内閣が誕生。" },
+            { id: 24, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "シベリア出兵", q: "ロシア革命に対する干渉のため、日本が1918年に軍隊を派兵した出来事は？", desc: "米価高騰を招き、米騒動のきっかけとなりました。" },
+            { id: 25, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "満25歳", q: "1925年の普通選挙法で、選挙権が与えられたのは「何歳以上の男子」？", desc: "納税要件が撤廃されました。" },
+            { id: 26, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "蒋介石", q: "孫文の死後、中国国民党を率いて北伐を完成させた指導者は誰？", desc: "南京に国民政府を樹立しました。" },
+            { id: 27, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "柳条湖事件", q: "1931年、関東軍が奉天郊外の線路を爆破し、満洲事変の発端となった事件は？", desc: "中国軍の仕業として攻撃を開始しました。" },
+            { id: 28, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "満洲国", q: "1932年、日本が中国東北部に樹立宣言させた傀儡国家は？", desc: "元清朝皇帝の溥儀を執政（のち皇帝）としました。" },
+            { id: 29, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "五・一五事件", q: "1932年、海軍青年将校らが犬養毅首相を暗殺した事件は？", desc: "これにより政党内閣の時代（憲政の常道）が終了しました。" },
+            { id: 30, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "二・二六事件", q: "1936年、陸軍皇道派の青年将校らが大臣らを暗殺し東京中心部を占拠した事件は？", desc: "軍部の発言力が決定的に強まりました。" },
+            { id: 31, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "重化学工業", q: "昭和恐慌以降、金属・機械・化学などの工業分野が急速に発達した。この工業を何という？", desc: "軍需産業を中心に発展しました。" },
+            { id: 32, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "毛沢東", q: "中国共産党を率い、農村を拠点に抵抗運動を展開した指導者は？", desc: "のちに中華人民共和国を建国。" },
+            { id: 33, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "盧溝橋事件", q: "1937年7月、北京郊外で日中両軍が衝突し、日中戦争の発端となった事件は？", desc: "本格的な全面戦争へ突入しました。" },
+            { id: 34, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日中戦争", q: "1937年から1945年まで続いた、日本と中国の全面的な戦争は？", desc: "長期化し日本の国力を消耗させました。" },
+            { id: 35, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "抗日民族統一戦線", q: "日中戦争に対抗するため、中国国民党と共産党が協力して結成した組織は？", desc: "第二次国共合作が成立しました。" },
+            { id: 36, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日独防共協定", q: "1936年、共産主義（ソ連）に対抗するために日本とドイツが結んだ協定は？", desc: "のちにイタリアも加わり三国協定へ。" },
+            { id: 37, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日独伊三国同盟", q: "1940年、日本・ドイツ・イタリアの間で結ばれた軍事同盟は？", desc: "アメリカとの対立を決定づけました。" },
+            { id: 38, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日ソ中立条約", q: "1941年、北方での安全を確保するために日本とソ連が結んだ条約は？", desc: "南進政策を進める契機となりました。" },
+            { id: 39, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "インドシナ", q: "日本が資源確保のため進駐した、東南アジアのフランス領地域（現ベトナム等）は？", desc: "これに対しアメリカは石油の対日制限を行いました。" },
+            { id: 40, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "石油", q: "アメリカが日本への全面禁輸を行い、日本を追い詰めた重要な軍事資源は？", desc: "ABCD包囲網による経済封鎖の中核。" },
+            { id: 41, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "東條英機", q: "開戦時の首相であり、陸軍大臣も兼任して太平洋戦争を開戦させた人物は？", desc: "敗戦後、A級戦犯として処刑。" },
+            { id: 42, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "真珠湾", q: "1941年12月8日、日本海軍が奇襲攻撃を行ったハワイの米軍基地はどこ？", desc: "太平洋戦争の開戦となりました。" },
+            { id: 43, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "太平洋戦争", q: "1941年から1945年まで、日本と米英などの連合国との間で行われた戦争は？", desc: "アジア太平洋全域が戦場となりました。" },
+            { id: 44, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "大東亜共栄圏", q: "日本が欧米の支配を脱し、アジア中心の共栄圏を作ると主張したスローガンは？", desc: "実際は日本の侵略・支配の口実とされました。" },
+            { id: 45, cat: "c3", catName: "戦時体制と戦後改革", word: "国家総動員法", q: "1938年に制定され、議会の承認なしに物資や労働力を戦争に動員できるようにした法律は？", desc: "近衛文麿内閣のもとで成立。" },
+            { id: 46, cat: "c3", catName: "戦時体制と戦後改革", word: "大政翼賛会", q: "1940年、すべての政党が解散して統合された全国的な戦争協力組織は？", desc: "政党政治が完全に消滅しました。" },
+            { id: 47, cat: "c3", catName: "戦時体制と戦後改革", word: "配給制", q: "物資不足のため、米や衣料などの生活必需品をチケットと引き換えに供給した制度は？", desc: "切符制や通帳制が用いられました。" },
+            { id: 48, cat: "c3", catName: "戦時体制と戦後改革", word: "国民学校", q: "1941年、小学校から改称され、皇国の道の修練を目的とした初等教育機関は？", desc: "軍国主義的教育が強化されました。" },
+            { id: 49, cat: "c3", catName: "戦時体制と戦後改革", word: "学徒出陣", q: "1943年、兵力不足を補うため文科系大学生の徴兵猶予を停止して出征させたことを何という？", desc: "神宮外苑での壮行会が有名です。" },
+            { id: 50, cat: "c3", catName: "戦時体制と戦後改革", word: "勤労動員", q: "中学生や女学生、未婚女性などが軍需工場などで労働に従事させられたことを何という？", desc: "女子挺身隊などが組織されました。" },
+            { id: 51, cat: "c3", catName: "戦時体制と戦後改革", word: "疎開", q: "空襲の危険を避けるため、都市の児童を農村へ集団で避難させたことを何という？", desc: "学童疎開が行われました。" },
+            { id: 52, cat: "c3", catName: "戦時体制と戦後改革", word: "サイパン島", q: "1944年に日本軍が全滅（玉砕）し、米軍のB29による日本本土空襲の拠点となった島は？", desc: "この陥落により東條英機内閣が辞職。" },
+            { id: 53, cat: "c3", catName: "戦時体制と戦後改革", word: "東京大空襲", q: "1945年3月10日、B29の大群により東京の下町を中心に約10万人が犠牲となった空襲は？", desc: "一夜にして都市が焦土と化しました。" },
+            { id: 54, cat: "c3", catName: "戦時体制と戦後改革", word: "沖縄戦", q: "1945年3月〜6月、国内で唯一の本格的な地上戦が行われ、住民多数が犠牲となった戦いは？", desc: "県民の4人に1人が亡くなったと言われます。" },
+            { id: 55, cat: "c3", catName: "戦時体制と戦後改革", word: "原子爆弾", q: "1945年8月、広島と長崎に投下された人類史上初の核兵器は？", desc: "甚大な放射能被害をもたらしました。" },
+            { id: 56, cat: "c3", catName: "戦時体制と戦後改革", word: "広島", q: "1945年8月6日、世界で初めて原子爆弾が投下された都市はどこ？", desc: "ウラン型原爆が投下されました。" },
+            { id: 57, cat: "c3", catName: "戦時体制と戦後改革", word: "長崎", q: "1945年8月9日、2発目の原子爆弾が投下された九州の都市はどこ？", desc: "プルトニウム型原爆が投下されました。" },
+            { id: 58, cat: "c3", catName: "戦時体制と戦後改革", word: "ポツダム宣言", q: "1945年7月、連合国が日本に対し無条件降伏を求めた共同宣言は？", desc: "日本は8月14日に受諾を決定。" },
+            { id: 59, cat: "c3", catName: "戦時体制と戦後改革", word: "8月15日", q: "昭和天皇の玉音放送により、日本国民に終戦が知らされた日は何月何日？", desc: "終戦記念日となっています。" },
+            { id: 60, cat: "c3", catName: "戦時体制と戦後改革", word: "GHQ", q: "連合国軍最高司令官総司令部の略称で、戦後日本の占領政策を行った機関は？", desc: "General Headquartersの略。" },
+            { id: 61, cat: "c3", catName: "戦時体制と戦後改革", word: "マッカーサー", q: "GHQの最高司令官として日本の民主化政策を指導したアメリカの将軍は誰？", desc: "厚木基地に降り立った姿が有名です。" },
+            { id: 62, cat: "c3", catName: "戦時体制と戦後改革", word: "戦後改革", q: "GHQの指令のもと、日本の非軍事化と民主化を推進した一連の改革を何という？", desc: "五大改革指令などが発せられました。" },
+            { id: 63, cat: "c3", catName: "戦時体制と戦後改革", word: "東京裁判", q: "極東国際軍事裁判の通称で、日本の戦争指導者をA級戦犯として裁いた裁判は？", desc: "東條英機らに死刑が言い渡されました。" },
+            { id: 64, cat: "c3", catName: "戦時体制と戦後改革", word: "満20歳に選挙権", q: "1945年の衆議院議員選挙法改正により、性別を問わず与えられた新たな選挙権の条件は？", desc: "女性参政権が初めて認められました。" },
+            { id: 65, cat: "c3", catName: "戦時体制と戦後改革", word: "財閥解体", q: "経済の民主化のため、三井・三菱・住友・安田などの大資本解体を命じた改革は？", desc: "独占禁止法なども制定されました。" },
+            { id: 66, cat: "c3", catName: "戦時体制と戦後改革", word: "農地改革", q: "地主の持つ小作地を政府が買い上げ、小作人に安く売り渡して自作農を創設した改革は？", desc: "寄土地主制が解体されました。" },
+            { id: 67, cat: "c3", catName: "戦時体制と戦後改革", word: "日本国憲法", q: "1946年11月3日公布、1947年5月3日施行された現在の日本の最高法規は？", desc: "大日本帝国憲法から全面改正。" },
+            { id: 68, cat: "c3", catName: "戦時体制と戦後改革", word: "国民主権", q: "日本国憲法の三原則の一つで、国の政治のあり方を最終的に決定する権利は国民にあるとする原則は？", desc: "天皇は「象徴」となりました。" },
+            { id: 69, cat: "c3", catName: "戦時体制と戦後改革", word: "基本的人権の尊重", q: "日本国憲法の三原則の一つで、人間が生まれながらにして持つ権利を冒すことのできない永久の権利として保障することは？", desc: "平等権・自由権・社会権など。" },
+            { id: 70, cat: "c3", catName: "戦時体制と戦後改革", word: "平和主義", q: "日本国憲法の三原則の一つで、第9条に明記された戦争の放棄と戦力の不保持を定める原則は？", desc: "交戦権の否認。" },
+            { id: 71, cat: "c3", catName: "戦時体制と戦後改革", word: "民法が改正", q: "戦後の改定により、従来の「家」制度や家長権が廃止され、両性の本質的平等が定められた法律改正は？", desc: "家族関係が大きく民主化されました。" },
+            { id: 72, cat: "c3", catName: "戦時体制と戦後改革", word: "教育基本法", q: "1947年に制定され、教育の機会均等や義務教育9年（6・3制）などを定めた法律は？", desc: "教育勅語が失効しました。" },
+            { id: 73, cat: "c3", catName: "戦時体制と戦後改革", word: "沖縄を失う", q: "サンフランシスコ平和条約等により、日本本土から切り離され米軍の直接支配下に置かれた地域（表現）は？", desc: "1972年の復帰まで米軍政下。" },
+            { id: 74, cat: "c3", catName: "戦時体制と戦後改革", word: "北方領土", q: "終戦直前にソ連により占拠され、現在も返還を求めている択捉・国後・色丹・歯舞の島々は？", desc: "未解決の領土問題。" },
+            { id: 75, cat: "c4", catName: "冷戦と現代の世界・日本", word: "国際連合", q: "1945年10月に発足した、世界の平和と安全を維持するための国際機関は？", desc: "本部はニューヨーク。国際連盟の反省を生かして設立。" },
+            { id: 76, cat: "c4", catName: "冷戦と現代の世界・日本", word: "冷戦", q: "第二次大戦後、米を中心とする資本主義陣営とソ連を中心とする社会主義陣営の対立状態を何という？", desc: "「冷たい戦争（Cold War）」の略。" },
+            { id: 77, cat: "c4", catName: "冷戦と現代の世界・日本", word: "NATO", q: "北大西洋条約機構の略称で、アメリカを中心とする西側陣営の軍事同盟は？", desc: "North Atlantic Treaty Organization." },
+            { id: 78, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ワルシャワ条約機構", q: "NATOに対抗してソ連と東欧社会主義諸国が結成した軍事同盟は？", desc: "1991年のソ連解体に伴い解散。" },
+            { id: 79, cat: "c4", catName: "冷戦と現代の世界・日本", word: "中華人民共和国", q: "1949年、毛沢東を主席として建国された社会主義国家は？", desc: "国民党の蒋介石は台湾へ逃れました。" },
+            { id: 80, cat: "c4", catName: "冷戦と現代の世界・日本", word: "大韓民国", q: "1948年、朝鮮半島の38度線以南に成立した親米の国家（韓国）は？", desc: "李承晩が初代大統領。" },
+            { id: 81, cat: "c4", catName: "冷戦と現代の世界・日本", word: "朝鮮民主主義人民共和国", q: "1948年、朝鮮半島の38度線以北に成立した親ソの国家（北朝鮮）は？", desc: "金日成が指導者。" },
+            { id: 82, cat: "c4", catName: "冷戦と現代の世界・日本", word: "朝鮮戦争", q: "1950年、北朝鮮の南進から始まり、米ソの代理戦争となった戦いは？", desc: "1953年に休戦協定締結。" },
+            { id: 83, cat: "c4", catName: "冷戦と現代の世界・日本", word: "特需景気", q: "朝鮮戦争に際し、米軍からの物資調達（特需）によって日本経済が急速に回復した景気を何という？", desc: "戦後復興の大きな足がかりとなりました。" },
+            { id: 84, cat: "c4", catName: "冷戦と現代の世界・日本", word: "自衛隊", q: "1950年の警察予備隊、保安隊を経て1954年に発足した日本の防衛組織は？", desc: "陸・海・空の3部隊で構成。" },
+            { id: 85, cat: "c4", catName: "冷戦と現代の世界・日本", word: "サンフランシスコ平和条約", q: "1951年、日本が48カ国と講和条約を結び、主権を回復した条約は？", desc: "吉田茂首相が署名。ソ連などは拒否。" },
+            { id: 86, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日米安全保障条約", q: "平和条約と同時に結ばれ、米軍の日本駐留を認めた条約は？", desc: "1960年に改定（安保闘争）。" },
+            { id: 87, cat: "c4", catName: "冷戦と現代の世界・日本", word: "自由民主党", q: "1955年の保守合同により結成され、以後長期間政権を担当した政党は？", desc: "自民党。" },
+            { id: 88, cat: "c4", catName: "冷戦と現代の世界・日本", word: "55年体制", q: "1955年から1993年まで続いた、自民党が与党、社会党が野党第一党として対立した政治体制は？", desc: "細川連立内閣の誕生で崩壊。" },
+            { id: 89, cat: "c4", catName: "冷戦と現代の世界・日本", word: "安保闘争", q: "1960年の日米安保条約改定に対し、激しい反対運動が巻き起こった出来事は？", desc: "岸信介内閣が退陣に追い込まれました。" },
+            { id: 90, cat: "c4", catName: "冷戦と現代の世界・日本", word: "アジアアフリカ会議", q: "1955年、インドネシアのバンドンで開かれ「平和十原則」を採択した非同盟諸国の会議は？", desc: "バンドン会議とも呼ばれます。" },
+            { id: 91, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日ソ共同宣言", q: "1956年、鳩山一郎首相のもとでソ連との国交回復を果たし、日本の国連加盟が実現した宣言は？", desc: "戦争状態が正式に終了。" },
+            { id: 92, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日韓基本条約", q: "1965年、佐藤栄作内閣のもとで韓国との国交を正常化した条約は？", desc: "請求権問題の解決などが図られました。" },
+            { id: 93, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ベトナム戦争", q: "1960年代〜70年代、南北ベトナムの対立にアメリカが直接介入して泥沼化した戦争は？", desc: "激しい反戦運動が世界中で展開。" },
+            { id: 94, cat: "c4", catName: "冷戦と現代の世界・日本", word: "沖縄県が日本に復帰", q: "1972年、佐藤栄作内閣のもとで非核三原則を掲げ、アメリカから日本へ返還された出来事は？", desc: "「本土並み」返還が実現。" },
+            { id: 95, cat: "c4", catName: "冷戦と現代の世界・日本", word: "非核三原則", q: "「持たず、作らず、持ち込ませず」という日本の核兵器に関する基本方針は？", desc: "佐藤栄作がノーベル平和賞を受賞。" },
+            { id: 96, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日中共同声明", q: "1972年、田中角栄首相が訪中し、中国との国交正常化を果たした宣言は？", desc: "台湾との外交関係は終了。" },
+            { id: 97, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日中平和友好条約", q: "1978年、福田赳夫内閣のもとで中国と締結された正式な条約は？", desc: "平和友好関係が確立されました。" },
+            { id: 98, cat: "c4", catName: "冷戦と現代の世界・日本", word: "高度経済成長", q: "1950年代半ばから1970年代初頭にかけて、日本が年平均10%以上の経済成長を遂げた現象は？", desc: "「もはや戦後ではない」と表現されました。" },
+            { id: 99, cat: "c4", catName: "冷戦と現代の世界・日本", word: "新幹線", q: "1964年の東京オリンピック直前に開業した世界初の高速鉄道（東海道〜）は？", desc: "夢の超特急と呼ばれました。" },
+            { id: 100, cat: "c4", catName: "冷戦と現代の世界・日本", word: "東京オリンピック", q: "1964年、アジアで初めて開催された夏季オリンピック競技大会は？", desc: "インフラ整備が大きく進みました。" },
+            { id: 101, cat: "c4", catName: "冷戦と現代の世界・日本", word: "公害", q: "高度経済成長の影で、水俣病・イタイイタイ病・四日市ぜんそくなどの深刻な被害をもたらした問題は？", desc: "四大公害病が発生。" },
+            { id: 102, cat: "c4", catName: "冷戦と現代の世界・日本", word: "公害対策基本法", q: "1967年に制定され、環境汚染の防止と被害者の保護を図った法律は？", desc: "1971年には環境庁が発足。" },
+            { id: 103, cat: "c4", catName: "冷戦と現代の世界・日本", word: "石油危機(オイルショック)", q: "1973年の第四次中東戦争をきっかけに原油価格が高騰し、狂乱物価を招いた混乱は？", desc: "高度経済成長が終焉を迎えました。" },
+            { id: 104, cat: "c4", catName: "冷戦と現代の世界・日本", word: "テレビ放送", q: "1953年に本放送が始まり、三種の神器（白黒テレビ等）として大衆文化を象徴したメディアは？", desc: "情報化社会の第一歩。" },
+            { id: 105, cat: "c4", catName: "冷戦と現代の世界・日本", word: "川端康成", q: "1968年、「雪国」などの作品で日本人初のノーベル文学賞を受賞した作家は誰？", desc: "美しい日本の情緒を描きました。" },
+            { id: 106, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ベルリンの壁", q: "1989年に崩壊し、東西冷戦の象徴的終焉を示したドイツの建造物は？", desc: "翌1990年にドイツ再統一。" },
+            { id: 107, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ソ連解体⇨ロシア", q: "1991年、社会主義の超大国が解体され、国際社会における冷戦が完全に終結した出来事は？", desc: "ロシア連邦などが独立。" },
+            { id: 108, cat: "c4", catName: "冷戦と現代の世界・日本", word: "PKO", q: "国連平和維持活動の略称で、1992年の協力法制定により自衛隊がカンボジア等へ派遣された活動は？", desc: "Peacekeeping Operations." },
+            { id: 109, cat: "c4", catName: "冷戦と現代の世界・日本", word: "サミット", q: "主要国首脳会議の通称で、1975年から毎年開催されている国際経済政治の協議の場は？", desc: "G7サミット。" },
+            { id: 110, cat: "c4", catName: "冷戦と現代の世界・日本", word: "EU", q: "1993年のマーストリヒト条約により発足したヨーロッパ連合の略称は？", desc: "通貨ユーロを導入。" },
+            { id: 111, cat: "c4", catName: "冷戦と現代の世界・日本", word: "南北問題", q: "北半球の先進工業国と南半球の途上国との間に存在する経済的格差の問題を何という？", desc: "南々問題（途上国間の格差）も派生。" },
+            { id: 112, cat: "c4", catName: "冷戦と現代の世界・日本", word: "地域紛争", q: "冷戦集結後、民族や宗教の対立が表面化して世界各地（中東や旧ユーゴ等）で頻発した紛争は？", desc: "難民問題などが深刻化。" },
+            { id: 113, cat: "c4", catName: "冷戦と現代の世界・日本", word: "同時多発テロ", q: "2001年9月11日、ハイジャックされた旅客機が米の超高層ビル等に突入したテロ事件は？", desc: "「対テロ戦争」の始まり。" },
+            { id: 114, cat: "c4", catName: "冷戦と現代の世界・日本", word: "NGO", q: "非政府組織の略称で、国境を越えて人権・環境・支援活動を行う民間団体は？", desc: "Non-Governmental Organization." },
+            { id: 115, cat: "c4", catName: "冷戦と現代の世界・日本", word: "NPO", q: "非営利組織の略称で、福祉や環境などの社会貢献活動を行う営利を目的としない団体は？", desc: "1998年に特定非営利活動促進法制定。" },
+            { id: 116, cat: "c4", catName: "冷戦と現代の世界・日本", word: "バブル経済", q: "1980年代後半、地価や株価が実体経済から離れて異常高騰し、のちに崩壊した現象は？", desc: "「失われた10年（20年）」の引き金。" },
+            { id: 117, cat: "c4", catName: "冷戦と現代の世界・日本", word: "平成", q: "1989年から2019年まで続いた日本の元号は？", desc: "バブル崩壊や東日本大震災などを経験。" },
+            { id: 118, cat: "c4", catName: "冷戦と現代の世界・日本", word: "令和", q: "2019年5月1日、天皇譲位に伴い新たに始まった日本の元号は？", desc: "「万葉集」が出典。" },
+            { id: 119, cat: "c4", catName: "冷戦と現代の世界・日本", word: "グローバル化", q: "人・モノ・金・情報が国境を越えて世界規模で自由に行き来する現象を何という？", desc: "地球一体化。" },
+            { id: 120, cat: "c4", catName: "冷戦と現代の世界・日本", word: "地球温暖化", q: "温室効果ガスの増加により地球全体の平均気温が上昇している環境問題は？", desc: "京都議定書やパリ協定で削減枠組み。" },
+            { id: 121, cat: "c4", catName: "冷戦と現代の世界・日本", word: "阪神淡路大震災", q: "1995年1月15日、神戸市などを大都市直下型地震が襲い、甚大な被害を出した震災は？", desc: "ボランティア活動が活発化。" },
+            { id: 122, cat: "c4", catName: "冷戦と現代の世界・日本", word: "SDGs", q: "2015年に国連で採択された「持続可能な開発目標」の英語略称は？", desc: "17の目標と169のターゲット。" },
+            { id: 123, cat: "c4", catName: "冷戦と現代の世界・日本", word: "少子高齢化", q: "出生率が低下すると同時に、平均寿命が伸びて高齢者の割合が高まる現象は？", desc: "社会保障費の増大や労働力不足が課題。" },
+            { id: 124, cat: "c4", catName: "冷戦と現代の世界・日本", word: "世界金融危機", q: "2008年、米サブプライムローン問題からリーマン・ショックへ及んだ世界的大不況は？", desc: "世界的な景気後退を引き起こしました。" }
+        ];
 
-  if(!q){
-    resultsBox.classList.add("hidden");
-    defaultBox.classList.remove("hidden");
-    return;
-  }
-  defaultBox.classList.add("hidden");
-  resultsBox.classList.remove("hidden");
+        const categories = [
+            { id: "c1", name: "1. 世界恐慌と第二次世界大戦" },
+            { id: "c2", name: "2. 日本の中国侵略と太平洋戦争" },
+            { id: "c3", name: "3. 戦時体制と戦後改革" },
+            { id: "c4", name: "4. 冷戦と現代の世界・日本" }
+        ];
 
-  const qLower = q.toLowerCase();
-  const hits = ALL_UNITS.filter(u=>{
-    const hay = (u.title + " " + u.points.join(" ") + " " + (u.note||"") + " " +
-                 u.examples.map(e=>e.en+" "+e.ja).join(" ") + " " + u.mnemonic + " " +
-                 u.mistakes.join(" ")).toLowerCase();
-    return hay.includes(qLower);
-  });
+        // ---------------------------------------------------------
+        // 2. STATE MANAGEMENT & LOCAL STORAGE
+        // ---------------------------------------------------------
+        const STORAGE_KEY_STATUS = 'histori_status_v2';
+        const STORAGE_KEY_THEME = 'histori_theme_v2';
+        let userStatus = {};
 
-  if(hits.length===0){
-    resultsBox.innerHTML = `<div class="search-empty">😢「${escapeHtml(q)}」に一致する単元が見つかりませんでした。</div>`;
-    return;
-  }
+        function loadUserStatus() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_STATUS);
+                if (stored) userStatus = JSON.parse(stored);
+            } catch(e) { console.error(e); }
+        }
 
-  resultsBox.innerHTML = hits.map(u=>`
-    <div class="search-hit" onclick="openUnitFromSearch('${u.id}')">
-      <span class="badge">${u.gradeName}</span>
-      <div style="flex:1;min-width:0;">
-        <p class="hit-title">${u.title}</p>
-        <span class="hit-snip">${u.points[0].replace(/<[^>]+>/g,'')}</span>
-      </div>
-      <div class="unit-chevron">›</div>
-    </div>
-  `).join("");
-}
+        function saveUserStatus() {
+            try {
+                localStorage.setItem(STORAGE_KEY_STATUS, JSON.stringify(userStatus));
+            } catch(e) { console.error(e); }
+        }
 
-function clearSearch(){
-  document.getElementById("searchInput").value = "";
-  onSearch();
-  document.getElementById("searchInput").focus();
-}
+        function getItemStatus(id) {
+            return userStatus[id] || 'unlearned';
+        }
 
-function openUnitFromSearch(id){
-  const u = ALL_UNITS.find(x=>x.id===id);
-  state.currentGrade = GRADES.find(g=>g.key===u.gradeKey);
-  pushHistory({type:"grade", key:u.gradeKey});
-  openUnit(id);
-}
+        function applyTheme(themeName) {
+            document.body.setAttribute('data-theme', themeName);
+            localStorage.setItem(STORAGE_KEY_THEME, themeName);
+        }
 
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'navy';
+            applyTheme(savedTheme);
+            document.getElementById('setting-theme').value = savedTheme;
+        }
 
-/* ==========================================================================
-   学年画面
-   ========================================================================== */
-function openGrade(key, addHistory){
-  const g = GRADES.find(x=>x.key===key);
-  state.currentGrade = g;
-  if(addHistory) pushHistory({type:"grade", key:key});
+        // ---------------------------------------------------------
+        // 3. UI CONTROLLER & APP LOGIC
+        // ---------------------------------------------------------
+        let currentDeck = [];
+        let currentIndex = 0;
+        let sessionStats = { forgot: 0, learning: 0, mastered: 0 };
 
-  document.getElementById("gradeTitle").textContent = g.emoji + " " + g.name;
-  document.getElementById("gradeDesc").textContent = g.desc + "／全" + g.units.length + "単元を完全収録";
+        const screens = {
+            menu: document.getElementById('screen-menu'),
+            study: document.getElementById('screen-study'),
+            complete: document.getElementById('screen-complete')
+        };
 
-  document.getElementById("tocScroll").innerHTML = g.units.map((u,i)=>`
-    <button class="toc-chip" onclick="scrollToUnitCard('${u.id}')">${i+1}. ${u.title.split("（")[0]}</button>
-  `).join("");
+        function switchScreen(screenName) {
+            Object.keys(screens).forEach(key => {
+                screens[key].classList.remove('active');
+            });
+            setTimeout(() => {
+                screens[screenName].classList.add('active');
+                window.scrollTo(0, 0);
+            }, 50);
+        }
 
-  document.getElementById("unitList").innerHTML = g.units.map((u,i)=>`
-    <div class="unit-card" id="card-${u.id}" onclick="openUnit('${u.id}')">
-      <div class="unit-num">${i+1}</div>
-      <div class="unit-main">
-        <p class="unit-name">${u.title}</p>
-        <span class="unit-stars">${starString(u.importance)}</span>
-      </div>
-      <button class="unit-fav-star ${state.favorites.has(u.id)?'on':''}" onclick="event.stopPropagation(); toggleFav('${u.id}', this)">★</button>
-      <div class="unit-chevron">›</div>
-    </div>
-  `).join("");
+        function renderCategories() {
+            const container = document.getElementById('category-options');
+            
+            container.innerHTML = categories.map(cat => {
+                const catItems = historyData.filter(i => i.cat === cat.id);
+                const total = catItems.length;
+                let mastered = 0, learning = 0;
+                
+                catItems.forEach(item => {
+                    const st = getItemStatus(item.id);
+                    if (st === 'mastered') mastered++;
+                    else if (st === 'learning') learning++;
+                });
 
-  showScreen("screen-grade", g.name, true);
-}
+                const masteredPercent = Math.round((mastered / total) * 100);
+                const learningPercent = Math.round((learning / total) * 100);
 
-function scrollToUnitCard(id){
-  const el = document.getElementById("card-"+id);
-  if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
-}
+                return `
+                    <div class="cat-card" onclick="toggleCatCheckbox('${cat.id}')">
+                        <div class="cat-header">
+                            <label class="cat-checkbox-wrap" onclick="event.stopPropagation()">
+                                <input type="checkbox" id="chk-${cat.id}" value="${cat.id}" checked>
+                                <span class="checkmark-sq"><svg class="icon"><use href="#icon-check"/></svg></span>
+                                <span>${cat.name}</span>
+                            </label>
+                            <span class="cat-rate">理解度: ${masteredPercent}%</span>
+                        </div>
+                        <div class="cat-progress-bg">
+                            <div class="cat-progress-fill-mastered" style="width: ${masteredPercent}%"></div>
+                            <div class="cat-progress-fill-learning" style="width: ${learningPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-function starString(n){
-  return "★".repeat(n) + "☆".repeat(5-n);
-}
+        function toggleCatCheckbox(catId) {
+            const chk = document.getElementById(`chk-${catId}`);
+            if (chk) chk.checked = !chk.checked;
+        }
 
-/* ==========================================================================
-   単元詳細画面
-   ========================================================================== */
-function openUnit(id, addHistory){
-  const u = ALL_UNITS.find(x=>x.id===id);
-  pushHistory({type:"unit", id:id});
+        function updateCounts() {
+            let counts = { forgot: 0, learning: 0, mastered: 0, unlearned: 0 };
+            historyData.forEach(item => {
+                const status = getItemStatus(item.id);
+                counts[status]++;
+            });
 
-  const isFav = state.favorites.has(u.id);
+            document.getElementById('count-forgot').innerText = counts.forgot;
+            document.getElementById('count-learning').innerText = counts.learning;
+            document.getElementById('count-mastered').innerText = counts.mastered;
+            document.getElementById('count-unlearned').innerText = counts.unlearned;
 
-  document.getElementById("unitContent").innerHTML = `
-    <div class="unit-head">
-      <div class="unit-head-top">
-        <div>
-          <h2>${u.title}</h2>
-          <div class="stars-row">${starString(u.importance)}</div>
-        </div>
-        <button class="fav-toggle ${isFav?'on':''}" id="unitFavBtn" onclick="toggleFav('${u.id}', this, true)">★</button>
-      </div>
-    </div>
+            renderCategories();
+        }
 
-    <div class="card must-card">
-      <p class="card-title">🎯 テストで絶対出る！！</p>
-      <ul class="must-list">
-        ${u.points.map(p=>`<li>${p}</li>`).join("")}
-      </ul>
-    </div>
+        function buildDeck() {
+            const selectedCats = Array.from(document.querySelectorAll('#category-options input[type="checkbox"]:checked')).map(cb => cb.value);
+            const selectedStatuses = Array.from(document.querySelectorAll('.status-chip input:checked')).map(cb => cb.value);
 
-    <div class="card">
-      <p class="card-title">🌟 小学生でもわかる説明</p>
-      <div class="explain-flow">
-        <div class="explain-box"><span class="tag tag-before">${u.before.tag}</span><br>${u.before.text}</div>
-        <div class="arrow-down">↓</div>
-        <div class="explain-box"><span class="tag tag-after">${u.after.tag}</span><br>${u.after.text}</div>
-      </div>
-      <p class="explain-note">${u.note}</p>
-    </div>
+            if (selectedCats.length === 0) {
+                alert("カテゴリーを1つ以上選択してください。");
+                return false;
+            }
+            if (selectedStatuses.length === 0) {
+                alert("出題状態の絞り込みを1つ以上選択してください。");
+                return false;
+            }
 
-    <div class="card">
-      <p class="card-title">📝 例文</p>
-      ${u.examples.map(e=>`
-        <div class="example-item">
-          <p class="example-en">${e.en}</p>
-          <p class="example-ja">${e.ja}</p>
-        </div>
-      `).join("")}
-    </div>
+            let filtered = historyData.filter(item => {
+                return selectedCats.includes(item.cat) && selectedStatuses.includes(getItemStatus(item.id));
+            });
 
-    <div class="card mnemonic-card">
-      <p class="card-title">💡 覚え方（語呂合わせ）</p>
-      <p class="mnemonic-text">${u.mnemonic}</p>
-    </div>
+            if (filtered.length === 0) {
+                alert("条件に一致する問題がありません。選択条件を変更してください。");
+                return false;
+            }
 
-    <div class="card">
-      <p class="card-title">⚠️ 間違えやすいポイント</p>
-      <ul class="mistake-list">
-        ${u.mistakes.map(m=>`<li>${m}</li>`).join("")}
-      </ul>
-    </div>
+            if (document.getElementById('setting-shuffle').checked) {
+                filtered = filtered.sort(() => Math.random() - 0.5);
+            }
 
-    <div class="card check-card">
-      <p class="card-title">📝 5秒チェック</p>
-      <div class="check-inner">
-        <p class="check-q">Q. ${u.check.q}</p>
-        <button class="check-btn" onclick="revealCheck(this)">答えを見る</button>
-        <div class="check-answer">
-          <div class="stamp-wrap"><div class="stamp">できた</div></div>
-          A. ${u.check.a}
-        </div>
-      </div>
-    </div>
-  `;
+            const limitVal = document.getElementById('setting-count').value;
+            if (limitVal !== 'all') {
+                filtered = filtered.slice(0, parseInt(limitVal, 10));
+            }
 
-  showScreen("screen-unit", u.gradeName, true);
-}
+            currentDeck = filtered;
+            currentIndex = 0;
+            sessionStats = { forgot: 0, learning: 0, mastered: 0 };
+            return true;
+        }
 
-function revealCheck(btn){
-  const ans = btn.nextElementSibling;
-  ans.classList.add("show");
-  btn.style.display = "none";
-}
+        function renderQuestion() {
+            const item = currentDeck[currentIndex];
+            const currentStatus = getItemStatus(item.id);
 
-/* ==========================================================================
-   お気に入り
-   ========================================================================== */
-function toggleFav(id, el, isDetail){
-  if(state.favorites.has(id)){ state.favorites.delete(id); el.classList.remove("on"); }
-  else { state.favorites.add(id); el.classList.add("on"); }
+            document.getElementById('study-category-label').innerText = item.catName;
+            document.getElementById('study-progress-text').innerText = `${currentIndex + 1} / ${currentDeck.length}`;
+            const fillPercent = ((currentIndex) / currentDeck.length) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${fillPercent}%`;
 
-  // グレード画面のスターも同期
-  const cardStar = document.querySelector(`#card-${id} .unit-fav-star`);
-  if(cardStar) cardStar.classList.toggle("on", state.favorites.has(id));
-}
+            const tag = document.getElementById('card-status-tag');
+            const statusMap = {
+                forgot: { text: "🔴 忘れた", bg: "var(--status-forgot-bg)", color: "var(--status-forgot)" },
+                learning: { text: "🟡 学習中", bg: "var(--status-learning-bg)", color: "var(--status-learning)" },
+                mastered: { text: "🟢 覚えた", bg: "var(--status-mastered-bg)", color: "var(--status-mastered)" },
+                unlearned: { text: "⚪ 未学習", bg: "var(--bg-paper)", color: "var(--text-sub)" }
+            };
+            const sInfo = statusMap[currentStatus];
+            tag.innerText = sInfo.text;
+            tag.style.background = sInfo.bg;
+            tag.style.color = sInfo.color;
 
-function showFavorites(){
-  const list = Array.from(state.favorites).map(id=>ALL_UNITS.find(u=>u.id===id)).filter(Boolean);
-  const box = document.getElementById("favList");
+            document.getElementById('card-question').innerText = item.q;
+            document.getElementById('card-answer-word').innerText = item.word;
+            document.getElementById('card-answer-desc').innerText = item.desc;
 
-  if(list.length===0){
-    box.innerHTML = `<div class="empty-state"><div class="ee">⭐</div><p>まだお気に入りがありません。<br>単元画面の星マークをタップして登録しよう！</p></div>`;
-  } else {
-    box.innerHTML = list.map(u=>`
-      <div class="unit-card" onclick="openUnit('${u.id}')">
-        <div class="unit-num">${u.gradeName.slice(-2,-1)}</div>
-        <div class="unit-main">
-          <p class="unit-name">${u.title}</p>
-          <span class="unit-stars">${starString(u.importance)}</span>
-        </div>
-        <button class="unit-fav-star on" onclick="event.stopPropagation(); toggleFavInList('${u.id}')">★</button>
-        <div class="unit-chevron">›</div>
-      </div>
-    `).join("");
-  }
-  pushHistory({type:"home"});
-  showScreen("screen-favorites","⭐ お気に入り", true);
-}
+            const isAutoReveal = document.getElementById('setting-auto-reveal').checked;
+            if (isAutoReveal) {
+                revealAnswer();
+            } else {
+                document.getElementById('reveal-container').style.display = 'block';
+                document.getElementById('answer-container').style.display = 'none';
+                document.getElementById('action-buttons').classList.remove('active');
+            }
+        }
 
-function toggleFavInList(id){
-  state.favorites.delete(id);
-  showFavorites();
-}
+        function revealAnswer() {
+            document.getElementById('reveal-container').style.display = 'none';
+            document.getElementById('answer-container').style.display = 'block';
+            document.getElementById('action-buttons').classList.add('active');
+        }
 
-/* ==========================================================================
-   一問一答（クイズ）モード
-   ========================================================================== */
-function startQuiz(shuffleAll){
-  state.quizPool = ALL_UNITS.slice();
-  shuffleArray(state.quizPool);
-  state.quizIndex = 0;
-  pushHistory({type:"home"});
-  showScreen("screen-quiz","📝 一問一答", true);
-  renderQuiz();
-}
+        function recordAndNext(actionStatus) {
+            const item = currentDeck[currentIndex];
+            userStatus[item.id] = actionStatus;
+            saveUserStatus();
 
-function shuffleArray(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-}
+            sessionStats[actionStatus]++;
 
-function renderQuiz(){
-  if(state.quizPool.length===0){ startQuiz(); return; }
-  if(state.quizIndex >= state.quizPool.length){ state.quizIndex = 0; shuffleArray(state.quizPool); }
+            currentIndex++;
+            if (currentIndex < currentDeck.length) {
+                renderQuestion();
+            } else {
+                showCompleteScreen();
+            }
+        }
 
-  const u = state.quizPool[state.quizIndex];
-  document.getElementById("quizProgress").textContent = `${state.quizIndex+1} / ${state.quizPool.length} 問　（${u.gradeName}・${u.title}）`;
-  document.getElementById("quizBadge").textContent = u.gradeName;
-  document.getElementById("quizQ").textContent = "Q. " + u.check.q;
-  document.getElementById("quizA").innerHTML = '<span class="stamp-wrap"><span class="stamp">できた</span></span>A. ' + u.check.a;
-  document.getElementById("quizA").classList.remove("show");
-  document.getElementById("quizHint").style.display = "block";
-}
+        function showCompleteScreen() {
+            document.getElementById('progress-bar-fill').style.width = `100%`;
+            document.getElementById('stat-total').innerText = currentDeck.length;
+            document.getElementById('stat-mastered').innerText = sessionStats.mastered;
+            document.getElementById('stat-learning').innerText = sessionStats.learning;
+            document.getElementById('stat-forgot').innerText = sessionStats.forgot;
+            updateCounts();
+            switchScreen('complete');
+        }
 
-function revealQuizAnswer(){
-  document.getElementById("quizA").classList.add("show");
-  document.getElementById("quizHint").style.display = "none";
-}
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2000);
+        }
 
-function nextQuiz(){
-  state.quizIndex++;
-  renderQuiz();
-}
+        // ---------------------------------------------------------
+        // 4. INITIALIZATION & EVENTS
+        // ---------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserStatus();
+            loadTheme();
+            updateCounts();
 
-/* ==========================================================================
-   トップへ戻るFAB
-   ========================================================================== */
-window.addEventListener("scroll", ()=>{
-  const fab = document.getElementById("topFab");
-  if(window.scrollY > 400) fab.classList.add("show");
-  else fab.classList.remove("show");
-});
-function scrollToTop(){ window.scrollTo({top:0, behavior:"smooth"}); }
+            // Theme Switcher Event
+            document.getElementById('setting-theme').addEventListener('change', (e) => {
+                applyTheme(e.target.value);
+            });
 
-/* 初期化：ホーム画面の履歴を1つ積んでおく */
-pushHistory({type:"home"});
+            // Start Event
+            document.getElementById('btn-start').addEventListener('click', () => {
+                if (buildDeck()) {
+                    switchScreen('study');
+                    renderQuestion();
+                }
+            });
 
-</script>
+            // Reveal Event
+            document.getElementById('btn-reveal').addEventListener('click', revealAnswer);
+
+            // 【即時強制移動】メニューに戻るボタン
+            const btnAbort = document.getElementById('btn-abort-study');
+            if (btnAbort) {
+                btnAbort.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateCounts();
+                    switchScreen('menu');
+                });
+            }
+
+            // Action Buttons Event
+            document.querySelectorAll('#action-buttons button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const action = e.currentTarget.getAttribute('data-action');
+                    recordAndNext(action);
+                });
+            });
+
+            // Back to Menu Event
+            document.getElementById('btn-back-menu').addEventListener('click', () => {
+                updateCounts();
+                switchScreen('menu');
+            });
+
+            // Reset Event
+            document.getElementById('btn-reset-data').addEventListener('click', () => {
+                if (confirm("これまでの「覚えた」「忘れた」などの学習記録をすべて初期化しますか？")) {
+                    userStatus = {};
+                    saveUserStatus();
+                    updateCounts();
+                    showToast("学習記録をリセットしました");
+                }
+            });
+        });
+    </script>
 </body>
 </html>
