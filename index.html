@@ -1,1356 +1,1682 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="academic">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ひすとり - 満点突破一問一答</title>
-    <!-- Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
-    
-    <style>
-        /* テーマ別カラー変数（デフォルト：アカデミックネイビー） */
-        :root {
-            --primary-navy: #1B2A4A;
-            --secondary-navy: #2C3E50;
-            --accent-gold: #C5A059;
-            --light-gold: #F4E8C1;
-            --bg-paper: #F8F9FA;
-            --card-bg: #FFFFFF;
-            --text-main: #2D3748;
-            --text-sub: #718096;
-            
-            --status-forgot: #E53E3E;
-            --status-forgot-bg: #FFF5F5;
-            --status-learning: #DD6B20;
-            --status-learning-bg: #FFFAF0;
-            --status-mastered: #38A169;
-            --status-mastered-bg: #F0FFF4;
-            --status-unlearned: #A0AEC0;
-
-            --border-radius-sm: 8px;
-            --border-radius-md: 16px;
-            --border-radius-lg: 24px;
-            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        /* 1. アカデミックネイビー (Default) */
-        [data-theme="navy"] {
-            --primary-navy: #1B2A4A;
-            --secondary-navy: #2C3E50;
-            --accent-gold: #C5A059;
-            --light-gold: #F4E8C1;
-            --bg-paper: #F8F9FA;
-            --card-bg: #FFFFFF;
-            --text-main: #2D3748;
-            --text-sub: #718096;
-        }
-
-        /* 2. クラシックグリーン（抹茶・和風教科書） */
-        [data-theme="green"] {
-            --primary-navy: #1F3A2B;
-            --secondary-navy: #2D4A3E;
-            --accent-gold: #709775;
-            --light-gold: #D8E2DC;
-            --bg-paper: #F4F6F4;
-            --card-bg: #FFFFFF;
-            --text-main: #243028;
-            --text-sub: #637568;
-        }
-
-        /* 3. モカブラウン（レトロ羊皮紙風） */
-        [data-theme="brown"] {
-            --primary-navy: #3D2314;
-            --secondary-navy: #54331D;
-            --accent-gold: #A9714B;
-            --light-gold: #EFE3C8;
-            --bg-paper: #F9F6F0;
-            --card-bg: #FFFFFF;
-            --text-main: #332720;
-            --text-sub: #7A695D;
-        }
-
-        /* 4. ミッドナイトダーク（目に優しい夜間モード） */
-        [data-theme="dark"] {
-            --primary-navy: #121824;
-            --secondary-navy: #1E293B;
-            --accent-gold: #38BDF8;
-            --light-gold: #1E293B;
-            --bg-paper: #0F172A;
-            --card-bg: #1E293B;
-            --text-main: #F1F5F9;
-            --text-sub: #94A3B8;
-        }
-
-        /* 5. さくらチェリー（フェミニン・文房具風） */
-        [data-theme="cherry"] {
-            --primary-navy: #4A1D2F;
-            --secondary-navy: #632B41;
-            --accent-gold: #D9779B;
-            --light-gold: #FCE7F0;
-            --bg-paper: #FFF5F8;
-            --card-bg: #FFFFFF;
-            --text-main: #3B202B;
-            --text-sub: #805B6B;
-        }
-
-        /* 6. Sol（太陽光・温もり） */
-        [data-theme="sol"] {
-            --primary-navy: #7A431D;
-            --secondary-navy: #9C5B28;
-            --accent-gold: #E68A00;
-            --light-gold: #FFE2B3;
-            --bg-paper: #FFFBF2;
-            --card-bg: #FFFFFF;
-            --text-main: #3D2B1F;
-            --text-sub: #8C7361;
-        }
-
-        /* Solテーマ特有の太陽光降り注ぐエフェクト */
-        [data-theme="sol"]::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: 
-                radial-gradient(circle at 50% -20%, rgba(255, 220, 130, 0.35) 0%, rgba(255, 200, 80, 0.12) 45%, transparent 75%),
-                linear-gradient(135deg, rgba(255, 235, 170, 0.18) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-paper);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.3s, color 0.3s;
-            position: relative;
-        }
-
-        .icon {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-            vertical-align: middle;
-            display: inline-block;
-        }
-
-        /* Header */
-        header {
-            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
-            color: #FFFFFF;
-            padding: 14px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-logo {
-            font-family: 'Noto Serif JP', serif;
-            font-size: 20px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--light-gold);
-        }
-
-        .header-btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #FFFFFF;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .header-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        /* Main Container */
-        main {
-            flex: 1;
-            max-width: 768px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px 16px 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .screen {
-            display: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .screen.active {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* MENU SCREEN */
-        .section-title {
-            font-family: 'Noto Serif JP', serif;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--primary-navy);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 2px solid var(--accent-gold);
-            padding-bottom: 6px;
-        }
-
-        [data-theme="dark"] .section-title {
-            color: var(--accent-gold);
-        }
-
-        .card-panel {
-            background: var(--card-bg);
-            border-radius: var(--border-radius-md);
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-subtle);
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-
-        /* Category Items & Master Progress */
-        .category-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .cat-card {
-            background: var(--bg-paper);
-            border: 1.5px solid rgba(0,0,0,0.08);
-            border-radius: var(--border-radius-sm);
-            padding: 12px 14px;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        .cat-card:hover {
-            border-color: var(--accent-gold);
-        }
-
-        .cat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .cat-checkbox-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .cat-checkbox-wrap input { display: none; }
-
-        .checkmark-sq {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #CBD5E0;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--card-bg);
-            flex-shrink: 0;
-            transition: all 0.2s;
-        }
-
-        .cat-checkbox-wrap input:checked + .checkmark-sq {
-            background: var(--primary-navy);
-            border-color: var(--primary-navy);
-        }
-
-        .cat-checkbox-wrap input:checked + .checkmark-sq .icon {
-            display: block;
-            fill: #FFF;
-        }
-
-        .checkmark-sq .icon { display: none; width: 12px; height: 12px; }
-
-        .cat-rate {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--status-mastered);
-        }
-
-        .cat-progress-bg {
-            width: 100%;
-            height: 6px;
-            background: rgba(0,0,0,0.08);
-            border-radius: 3px;
-            overflow: hidden;
-            display: flex;
-        }
-
-        .cat-progress-fill-mastered { height: 100%; background: var(--status-mastered); }
-        .cat-progress-fill-learning { height: 100%; background: var(--status-learning); }
-
-        .option-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 10px;
-        }
-
-        .custom-checkbox {
-            display: flex;
-            align-items: center;
-            padding: 12px 14px;
-            background: var(--bg-paper);
-            border: 1.5px solid rgba(0,0,0,0.1);
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-            font-size: 14px;
-            color: var(--text-main);
-        }
-
-        .custom-checkbox input { display: none; }
-
-        .custom-checkbox .checkmark {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #CBD5E0;
-            border-radius: 4px;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            background: var(--card-bg);
-            flex-shrink: 0;
-        }
-
-        .custom-checkbox input:checked + .checkmark {
-            background: var(--primary-navy);
-            border-color: var(--primary-navy);
-        }
-
-        .custom-checkbox input:checked + .checkmark .icon { fill: #FFF; display: block; }
-        .custom-checkbox .checkmark .icon { display: none; width: 12px; height: 12px; }
-
-        .status-chip[data-status="forgot"] input:checked + .checkmark { background: var(--status-forgot); border-color: var(--status-forgot); }
-        .status-chip[data-status="learning"] input:checked + .checkmark { background: var(--status-learning); border-color: var(--status-learning); }
-        .status-chip[data-status="mastered"] input:checked + .checkmark { background: var(--status-mastered); border-color: var(--status-mastered); }
-        .status-chip[data-status="unlearned"] input:checked + .checkmark { background: var(--status-unlearned); border-color: var(--status-unlearned); }
-
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px dashed rgba(0,0,0,0.1);
-        }
-
-        .settings-row:last-child { border-bottom: none; }
-
-        .settings-label {
-            font-size: 14px;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
-        }
-
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #CBD5E0;
-            transition: .3s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider { background-color: var(--accent-gold); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        select.select-custom {
-            padding: 6px 12px;
-            border-radius: var(--border-radius-sm);
-            border: 1.5px solid rgba(0,0,0,0.15);
-            background-color: var(--card-bg);
-            font-size: 14px;
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .start-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--accent-gold), var(--primary-navy));
-            color: #FFFFFF;
-            border: none;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            border-radius: var(--border-radius-md);
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-        }
-
-        /* STUDY SCREEN */
-        .study-header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .btn-abort {
-            background: var(--card-bg);
-            border: 1.5px solid var(--accent-gold);
-            color: var(--text-main);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.2s;
-            position: relative;
-            z-index: 20;
-        }
-
-        .btn-abort:hover {
-            background: var(--light-gold);
-            color: #000;
-        }
-
-        .progress-text {
-            font-size: 14px;
-            color: var(--text-sub);
-            font-weight: 700;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: rgba(0,0,0,0.08);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-navy), var(--accent-gold));
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        /* Card */
-        .question-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius-lg);
-            padding: 28px 24px;
-            box-shadow: var(--shadow-hover);
-            border: 1px solid rgba(0,0,0,0.05);
-            margin-bottom: 24px;
-            position: relative;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-tag {
-            align-self: flex-start;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 500;
-            background: var(--bg-paper);
-            color: var(--text-sub);
-            margin-bottom: 16px;
-        }
-
-        .question-text {
-            font-size: 18px;
-            font-weight: 500;
-            line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 24px;
-        }
-
-        .reveal-btn-container {
-            margin-top: auto;
-            text-align: center;
-        }
-
-        .reveal-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--bg-paper);
-            border: 1.5px dashed var(--accent-gold);
-            color: var(--text-main);
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .reveal-btn:hover {
-            background: var(--light-gold);
-            color: #000;
-        }
-
-        .answer-container {
-            display: none;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid rgba(0,0,0,0.08);
-            animation: slideDown 0.3s ease-out forwards;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .answer-label {
-            font-size: 12px;
-            color: var(--accent-gold);
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-bottom: 6px;
-        }
-
-        .answer-word {
-            font-family: 'Noto Serif JP', serif;
-            font-size: 26px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 12px;
-            letter-spacing: 0.02em;
-        }
-
-        .answer-desc {
-            font-size: 14px;
-            color: var(--text-main);
-            line-height: 1.6;
-            background: var(--bg-paper);
-            padding: 12px 16px;
-            border-radius: var(--border-radius-sm);
-            border-left: 3px solid var(--accent-gold);
-        }
-
-        /* Action Buttons */
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-            opacity: 0.4;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .action-buttons.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .status-btn {
-            border: none;
-            padding: 14px 8px;
-            border-radius: var(--border-radius-sm);
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            transition: transform 0.1s, box-shadow 0.2s;
-        }
-
-        .status-btn:active { transform: scale(0.96); }
-
-        .btn-forgot { background: var(--status-forgot-bg); color: var(--status-forgot); border: 1px solid rgba(229, 62, 62, 0.3); }
-        .btn-learning { background: var(--status-learning-bg); color: var(--status-learning); border: 1px solid rgba(221, 107, 32, 0.3); }
-        .btn-mastered { background: var(--status-mastered-bg); color: var(--status-mastered); border: 1px solid rgba(56, 161, 105, 0.3); }
-
-        /* COMPLETE SCREEN */
-        .complete-card { text-align: center; padding: 40px 20px; }
-        .complete-title { font-family: 'Noto Serif JP', serif; font-size: 22px; color: var(--text-main); margin-bottom: 12px; }
-
-        .stats-container {
-            display: flex;
-            justify-content: space-around;
-            margin: 24px 0;
-            background: var(--bg-paper);
-            padding: 16px;
-            border-radius: var(--border-radius-sm);
-        }
-
-        .stat-item { display: flex; flex-direction: column; align-items: center; }
-        .stat-num { font-size: 20px; font-weight: 700; }
-        .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
-
-        .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--primary-navy);
-            color: #FFF;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-            z-index: 200;
-        }
-
-        .toast.show { transform: translateX(-50%) translateY(0); }
-
-        /* Footer Copyright */
-        footer {
-            text-align: center;
-            padding: 16px 0 24px;
-            font-size: 12px;
-            color: var(--text-sub);
-            letter-spacing: 0.05em;
-            font-weight: 500;
-            width: 100%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ひすとり - 満点突破一問一答 (全411問)</title>
+  <!-- PeerJS WebRTC Library -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       テーマ別 カラー & エフェクト定義
+       ========================================== */
+    :root[data-theme="academic"] {
+      --bg-main: #f0f4f8; --card-bg: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border-color: #1e293b; --primary-yellow: #ffd54f;
+    }
+    :root[data-theme="green"] {
+      --bg-main: #f0fdf4; --card-bg: #ffffff; --text-main: #064e3b; --text-muted: #047857; --border-color: #064e3b; --primary-yellow: #fef08a;
+    }
+    :root[data-theme="mocha"] {
+      --bg-main: #fdf8f6; --card-bg: #ffffff; --text-main: #431407; --text-muted: #78350f; --border-color: #431407; --primary-yellow: #fde68a;
+    }
+    :root[data-theme="dark"] {
+      --bg-main: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: #38bdf8; --primary-yellow: #fde047;
+    }
+    :root[data-theme="sunlight"] {
+      --bg-main: #fffbeb; --card-bg: #ffffff; --text-main: #451a03; --text-muted: #78350f; --border-color: #78350f; --primary-yellow: #fde047;
+    }
+    :root[data-theme="sakura"] {
+      --bg-main: #fff1f2; --card-bg: #ffffff; --text-main: #881337; --text-muted: #9f1239; --border-color: #881337; --primary-yellow: #fecdd3;
+    }
+    :root[data-theme="lavender"] {
+      --bg-main: #faf5ff; --card-bg: #ffffff; --text-main: #581c87; --text-muted: #6b21a8; --border-color: #581c87; --primary-yellow: #e9d5ff;
+    }
+
+    /* VIP+ ぼかし背景 */
+    .vip-bg-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background-size: cover; background-position: center; filter: blur(12px) brightness(0.8);
+      transform: scale(1.05); z-index: -3; display: none; transition: opacity 0.5s ease;
+    }
+    body.vip-active .vip-bg-overlay { display: block; }
+
+    /* アニメーション背景キャンバス */
+    #themeCanvas {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: -2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Zen Maru Gothic', 'Plus Jakarta Sans', sans-serif; }
+
+    body {
+      background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding: 20px;
+      position: relative; overflow-x: hidden; transition: background-color 0.3s ease;
+    }
+
+    body.font-large { font-size: 115%; }
+    body.font-xlarge { font-size: 130%; }
+
+    .app-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    /* トップナビ */
+    .top-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card-bg); border: 3.5px solid var(--border-color);
+      border-radius: 16px; padding: 12px 20px; box-shadow: 4px 4px 0px var(--border-color);
+    }
+
+    .nav-brand { font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+    .nav-tools { display: flex; align-items: center; gap: 10px; }
+
+    .btn-neo {
+      border: 3px solid var(--border-color); padding: 10px 18px; border-radius: 14px;
+      font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 4px 4px 0px var(--border-color);
+      transition: all 0.15s ease; background: #ffffff; color: #0f172a;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; user-select: none;
+    }
+    .btn-neo:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--border-color); }
+    .btn-neo:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--border-color); }
+    .btn-primary-yellow { background: var(--primary-yellow); }
+    .btn-primary-blue { background: #3b82f6; color: white; }
+
+    /* ヒーローロビー */
+    .hero-container {
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, max-height 0.5s ease;
+      opacity: 1; max-height: 1000px; overflow: hidden;
+    }
+    .hero-container.fade-out-up {
+      opacity: 0; transform: translateY(-100%); max-height: 0; margin-bottom: 0; padding: 0; pointer-events: none;
+    }
+
+    .hero-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 868px) { .hero-grid { grid-template-columns: 1fr 1fr; } .hero-main-card { grid-column: span 2; } }
+
+    .neo-card {
+      background: var(--card-bg); border: 3.5px solid var(--border-color);
+      border-radius: 24px; box-shadow: 6px 6px 0px var(--border-color); padding: 24px; position: relative;
+    }
+    .hero-main-card {
+      display: flex; flex-direction: column; justify-content: space-between; min-height: 240px;
+      background: linear-gradient(135deg, var(--card-bg) 0%, #fffde7 100%);
+    }
+
+    .badge-sub {
+      display: inline-block; background: var(--border-color); color: #fff;
+      font-size: 0.8rem; font-weight: 800; padding: 4px 12px; border-radius: 8px; margin-bottom: 8px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 900; line-height: 1.2; color: var(--text-main); }
+    .hero-title span.highlight {
+      background: var(--primary-yellow); padding: 2px 10px; border-radius: 8px; border: 2.5px solid var(--border-color); color: #0f172a; display: inline-block;
+    }
+
+    .stat-card { display: flex; flex-direction: column; justify-content: space-between; }
+    .stat-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); }
+    .stat-value { font-size: 2.2rem; font-weight: 900; color: var(--text-main); margin: 6px 0; }
+
+    .user-avatar-btn {
+      width: 44px; height: 44px; border-radius: 50%; border: 2.5px solid var(--border-color);
+      background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; cursor: pointer; box-shadow: 2px 2px 0px var(--border-color);
+    }
+
+    /* カテゴリー拡散展開 */
+    .category-center-section { text-align: center; margin: 10px 0; }
+    .btn-open-category { font-size: 1.1rem; padding: 14px 32px; background: var(--primary-yellow); }
+
+    .category-spread-container {
+      display: none; background: var(--card-bg); border: 3.5px solid var(--border-color);
+      border-radius: 24px; box-shadow: 6px 6px 0px var(--border-color); padding: 24px; margin-top: 16px;
+      animation: spreadAnimation 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .category-spread-container.active { display: block; }
+    @keyframes spreadAnimation { 0% { opacity: 0; transform: scale(0.8) translateY(-20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+    .category-spread-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+    .category-check-card {
+      background: var(--bg-main); border: 2.5px solid var(--border-color); border-radius: 16px;
+      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; transition: all 0.2s ease;
+    }
+    .category-check-card.selected { background: #eff6ff; border-color: #2563eb; }
+
+    .custom-checkbox {
+      width: 22px; height: 22px; border: 2.5px solid var(--border-color); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; background: #fff;
+    }
+    .category-check-card.selected .custom-checkbox { background: #2563eb; border-color: #2563eb; color: white; }
+
+    /* クイズ＆対戦 メイン */
+    .quiz-container { display: none; flex-direction: column; gap: 20px; }
+    .quiz-container.active { display: flex; }
+
+    .battle-status-bar {
+      display: none; background: var(--border-color); color: white; padding: 14px 24px;
+      border-radius: 16px; justify-content: space-between; align-items: center; font-weight: 800; box-shadow: 4px 4px 0px var(--border-color);
+    }
+    .battle-status-bar.active { display: flex; }
+
+    .question-card {
+      background: var(--card-bg); border: 4px solid var(--border-color); border-radius: 24px;
+      box-shadow: 6px 6px 0px var(--border-color); padding: 32px 24px; text-align: center;
+      min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;
+    }
+
+    .question-card p.question-text {
+      color: #0f172a !important; font-size: 1.45rem; font-weight: 800; line-height: 1.6; margin-bottom: 20px;
+    }
+
+    .answer-box {
+      font-size: 1.6rem; font-weight: 900; color: #2563eb; background: #f1f5f9;
+      padding: 14px 28px; border-radius: 16px; border: 2.5px dashed #94a3b8;
+      min-width: 280px; min-height: 64px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    }
+
+    ruby { ruby-position: over; }
+    rt { font-size: 0.55em; color: #d97706; font-weight: 800; }
+
+    /* 一問一答評価ボタン群（右から：わかった、微妙、わからない） */
+    .eval-buttons-grid {
+      display: flex; gap: 12px; width: 100%; max-width: 540px;
+      flex-direction: row-reverse; /* 右から順に配置 */
+      margin-top: 10px;
+    }
+    .eval-buttons-grid .btn-neo { flex: 1; font-size: 0.95rem; }
+
+    /* カウントダウン */
+    .countdown-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background: rgba(255,255,255,0.95); border-radius: 20px;
+      display: none; justify-content: center; align-items: center; z-index: 10;
+    }
+    .countdown-overlay.active { display: flex; }
+    .countdown-number { font-size: 6rem; font-weight: 900; color: #2563eb; animation: popIn 0.5s ease; }
+    @keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+    .typing-container { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-top: 10px; }
+    .typing-input {
+      flex: 1; padding: 12px 18px; font-size: 1.1rem; font-weight: 800;
+      border: 3px solid var(--border-color); border-radius: 14px; outline: none;
+    }
+
+    /* モーダル */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: var(--card-bg); border: 4px solid var(--border-color);
+      border-radius: 24px; box-shadow: 8px 8px 0px var(--border-color);
+      padding: 28px; width: 90%; max-width: 560px; position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title { font-size: 1.35rem; font-weight: 900; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+    /* 360度 スキルツリー */
+    .skill-tree-canvas-wrapper {
+      position: relative; width: 100%; height: 380px; background: #0f172a;
+      border-radius: 16px; border: 3px solid var(--border-color); overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .skill-tree-svg { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
+    .center-player-node {
+      position: absolute; width: 54px; height: 54px; border-radius: 50%; background: #ffd54f;
+      border: 3px solid #1e293b; display: flex; justify-content: center; align-items: center;
+      font-size: 1.8rem; z-index: 5; box-shadow: 0 0 15px rgba(255,213,79,0.8);
+    }
+    .word-node {
+      position: absolute; padding: 6px 12px; border-radius: 12px; background: #ffffff;
+      border: 2.5px solid #1e293b; font-size: 0.75rem; font-weight: 900; color: #0f172a;
+      z-index: 4; transform: translate(-50%, -50%); white-space: nowrap; transition: all 0.3s ease;
+    }
+    .word-node .fog-layer {
+      position: absolute; top:-4px; left:-4px; right:-4px; bottom:-4px;
+      background: linear-gradient(135deg, rgba(148,163,184,0.95), rgba(203,213,225,0.95));
+      backdrop-filter: blur(4px); border-radius: 12px; display: flex; justify-content: center; align-items: center;
+      color: #475569; font-size: 0.7rem; font-weight: 800; transition: opacity 1.2s ease, filter 1.2s ease;
+      z-index: 6; pointer-events: none;
+    }
+    .word-node.unlocked .fog-layer { opacity: 0; filter: blur(10px); }
+
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; }
+    .toast {
+      background: var(--border-color); color: white; padding: 12px 20px; border-radius: 12px;
+      font-weight: 800; box-shadow: 4px 4px 0px rgba(0,0,0,0.2); margin-top: 8px;
+      display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
 </head>
-<body data-theme="navy">
+<body>
 
-    <!-- Global SVG Icons -->
-    <svg class="svg-defs">
-        <defs>
-            <g id="icon-book"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></g>
-            <g id="icon-check"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></g>
-            <g id="icon-cross"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></g>
-            <g id="icon-triangle"><path d="M12 7.77L18.39 18H5.61L12 7.77M12 4L2 20h20L12 4z"/></g>
-            <g id="icon-eye"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></g>
-            <g id="icon-settings"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></g>
-            <g id="icon-shuffle"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></g>
-            <g id="icon-trophy"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></g>
-            <g id="icon-refresh"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></g>
-            <g id="icon-arrow-left"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></g>
-        </defs>
-    </svg>
+  <!-- アニメーション背景＆VIP+ overlay -->
+  <div id="vipBgOverlay" class="vip-bg-overlay"></div>
+  <canvas id="themeCanvas"></canvas>
 
-    <!-- Header -->
-    <header>
-        <div class="header-logo">
-            <svg class="icon" style="width:22px; height:22px; fill:var(--light-gold);"><use href="#icon-book"/></svg>
-            <span>ひすとり</span>
-        </div>
-        <button id="btn-reset-data" class="header-btn">
-            <svg class="icon"><use href="#icon-refresh"/></svg>
-            <span>記録リセット</span>
+  <div class="app-container">
+
+    <!-- ナビゲーション -->
+    <div class="top-nav">
+      <div class="nav-brand">
+        <i class="fa-solid fa-graduation-cap" style="color: #2563eb;"></i> ひすとり - 満点突破一問一答
+      </div>
+      <div class="nav-tools">
+        <button class="btn-neo" onclick="openModal('skillModal')"><i class="fa-solid fa-tree"></i> スキルツリー</button>
+        <button class="btn-neo" onclick="openModal('settingsModal')"><i class="fa-solid fa-gear"></i> 設定</button>
+        <button id="btnVipSettings" class="btn-neo" style="display: none; background: #e0e7ff;" onclick="openModal('vipSettingsModal')"><i class="fa-solid fa-crown"></i> VIP+ 背景</button>
+        <button id="btnLogin" class="btn-neo btn-primary-yellow" onclick="openModal('loginModal')">
+          <i class="fa-solid fa-user"></i> <span id="loginBtnText">ログイン</span>
         </button>
-    </header>
+      </div>
+    </div>
 
-    <main>
-        <!-- MENU SCREEN -->
-        <section id="screen-menu" class="screen active">
-            
-            <!-- Category Selection -->
-            <div class="card-panel">
-                <div class="section-title">
-                    <svg class="icon"><use href="#icon-book"/></svg>
-                    <span>1. 学習カテゴリーと理解度</span>
-                </div>
-                <div class="category-list" id="category-options">
-                    <!-- Populated by JS -->
-                </div>
+    <!-- ヒーローロビー -->
+    <div id="heroSection" class="hero-container">
+      <div class="hero-grid">
+        <div class="neo-card hero-main-card">
+          <div>
+            <div class="badge-sub">HISTORY // BATTLE ACADEMY</div>
+            <h1 class="hero-title">ひすとり <span class="highlight">ー 満点突破</span></h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px; font-weight: 700;">
+              全411問の歴史単語を完全収録！<br>「タイピングモード」と「一問一答モード」で歴史を極めよう！
+            </p>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+            <button id="btnStartStudy" class="btn-neo btn-primary-yellow" onclick="startSoloStudy()"><i class="fa-solid fa-play"></i> 学習を開始</button>
+            <button id="btnOpenOnlineModal" class="btn-neo" onclick="openModal('onlineModal')"><i class="fa-solid fa-network-wired"></i> ONLINE 対戦（数字4桁）</button>
+          </div>
+        </div>
+
+        <div class="neo-card stat-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="stat-label">PLAYER</span>
+            <div id="userAvatarBtn" class="user-avatar-btn" onclick="openModal('avatarModal')">🎓</div>
+          </div>
+          <div id="userNameDisplay" style="font-size: 1.1rem; font-weight: 900; margin-top: 4px;">ゲスト</div>
+          <div style="border-top: 2px solid #cbd5e1; padding-top: 8px; margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800;">
+              <span>Lv.<span id="userLevel">1</span></span>
+              <span>XP: <span id="userXp">0</span></span>
             </div>
+          </div>
+        </div>
 
-            <!-- Status Filter Selection -->
-            <div class="card-panel">
-                <div class="section-title">
-                    <svg class="icon"><use href="#icon-check"/></svg>
-                    <span>2. 出題状態の絞り込み（複数選択可）</span>
-                </div>
-                <div class="option-grid">
-                    <label class="custom-checkbox status-chip" data-status="forgot">
-                        <input type="checkbox" value="forgot" checked>
-                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
-                        <span class="label-text">🔴 忘れた (<span id="count-forgot">0</span>)</span>
-                    </label>
-                    <label class="custom-checkbox status-chip" data-status="learning">
-                        <input type="checkbox" value="learning" checked>
-                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
-                        <span class="label-text">🟡 学習中 (<span id="count-learning">0</span>)</span>
-                    </label>
-                    <label class="custom-checkbox status-chip" data-status="mastered">
-                        <input type="checkbox" value="mastered">
-                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
-                        <span class="label-text">🟢 覚えた (<span id="count-mastered">0</span>)</span>
-                    </label>
-                    <label class="custom-checkbox status-chip" data-status="unlearned">
-                        <input type="checkbox" value="unlearned" checked>
-                        <span class="checkmark"><svg class="icon"><use href="#icon-check"/></svg></span>
-                        <span class="label-text">⚪ 未学習 (<span id="count-unlearned">0</span>)</span>
-                    </label>
-                </div>
+        <div class="neo-card stat-card">
+          <span class="stat-label">MASTERED</span>
+          <div id="userMastered" class="stat-value">0</div>
+          <div style="border-top: 2px solid #cbd5e1; padding-top: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800;">
+              <span>🪙 <span id="userCoins">20</span></span>
+              <span id="lobbyStatusText" style="color: #10b981;">READY</span>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <!-- Enhanced Settings -->
-            <div class="card-panel">
-                <div class="section-title">
-                    <svg class="icon"><use href="#icon-settings"/></svg>
-                    <span>3. 環境・出題設定</span>
-                </div>
-                
-                <!-- Color Theme -->
-                <div class="settings-row">
-                    <span class="settings-label">カラーテーマ</span>
-                    <select id="setting-theme" class="select-custom">
-                        <option value="navy">1. アカデミックネイビー</option>
-                        <option value="green">2. 抹茶・クラシック</option>
-                        <option value="brown">3. レトロ羊皮紙</option>
-                        <option value="dark">4. ミッドナイト（ダーク）</option>
-                        <option value="cherry">5. さくらチェリー</option>
-                        <option value="sol">6. Sol（太陽光・温もり）</option>
-                    </select>
-                </div>
+    <!-- カテゴリー拡散展開 -->
+    <div id="categoryCenterSection" class="category-center-section">
+      <button class="btn-neo btn-open-category" onclick="toggleCategorySpread()">
+        <i class="fa-solid fa-folder-open"></i> 出題カテゴリーを選択・開く
+      </button>
 
-                <!-- Auto Reveal Option -->
-                <div class="settings-row">
-                    <span class="settings-label">答えを自動で開く（アニメ省略）</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="setting-auto-reveal">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+      <div id="categorySpreadContainer" class="category-spread-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 1.1rem; font-weight: 900;"><i class="fa-solid fa-list-check"></i> カテゴリー複数選択</h3>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-neo" style="padding: 4px 12px; font-size: 0.8rem;" onclick="selectAllCategories(true)">全選択</button>
+            <button class="btn-neo" style="padding: 4px 12px; font-size: 0.8rem;" onclick="selectAllCategories(false)">全解除</button>
+          </div>
+        </div>
+        <div id="categorySpreadGrid" class="category-spread-grid"></div>
+      </div>
+    </div>
 
-                <!-- Shuffle Option -->
-                <div class="settings-row">
-                    <span class="settings-label">
-                        <svg class="icon" style="fill:var(--text-sub)"><use href="#icon-shuffle"/></svg>
-                        問題をランダムシャッフル
-                    </span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="setting-shuffle" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
+    <!-- 対戦ステータスバー -->
+    <div id="battleStatusBar" class="battle-status-bar">
+      <div><span id="p1Avatar">🎓</span> <span id="p1Name">You</span>: <span id="p1Score">0</span> pt</div>
+      <div id="matchTimerText" style="color: #fde047; font-size: 1.15rem;">対戦準備完了</div>
+      <div id="multiPlayerList" style="font-size: 0.85rem; display: flex; gap: 12px;"></div>
+    </div>
 
-                <!-- Question Limit -->
-                <div class="settings-row">
-                    <span class="settings-label">出題問題数</span>
-                    <select id="setting-count" class="select-custom">
-                        <option value="all">全問対象</option>
-                        <option value="10">10 問</option>
-                        <option value="20">20 問</option>
-                        <option value="30">30 問</option>
-                        <option value="50">50 問</option>
-                    </select>
-                </div>
-            </div>
+    <!-- クイズメインエリア -->
+    <div id="quizContainer" class="quiz-container">
+      <div class="question-card">
+        <div id="countdownOverlay" class="countdown-overlay">
+          <div id="countdownNumber" class="countdown-number">3</div>
+        </div>
 
-            <!-- Start Button -->
-            <button id="btn-start" class="start-btn">
-                <span>学習を開始する</span>
-            </button>
-        </section>
+        <div style="font-size: 0.85rem; font-weight: 800; color: #64748b; margin-bottom: 12px;">
+          <span id="currentCategoryBadge" class="badge-sub">歴史</span>
+          <span id="questionNumText" style="margin-left: 8px;">Q.1 / 10</span>
+        </div>
+        
+        <p id="questionDisplay" class="question-text">ここに問題文が表示されます。</p>
 
-        <!-- STUDY SCREEN -->
-        <section id="screen-study" class="screen">
-            <div class="study-header-bar">
-                <button id="btn-abort-study" class="btn-abort" type="button">
-                    <svg class="icon"><use href="#icon-arrow-left"/></svg>
-                    <span>メニューに戻る</span>
-                </button>
-                <span id="study-progress-text" class="progress-text">1 / 10</span>
-            </div>
+        <div id="answerDisplay" class="answer-box">
+          <span style="color: #94a3b8; font-size: 0.95rem;">【答えを見る】またはタイピングで回答</span>
+        </div>
 
-            <div class="progress-bar-bg">
-                <div id="progress-bar-fill" class="progress-bar-fill"></div>
-            </div>
+        <!-- タイピングモード用 入力エリア -->
+        <div id="typingArea" class="typing-container">
+          <input type="text" id="typingInput" class="typing-input" placeholder="ここに回答を入力してEnter..." autocomplete="off">
+          <button id="btnSubmitTyping" class="btn-neo btn-primary-yellow" onclick="submitTypingAnswer()">送信</button>
+        </div>
 
-            <!-- Main Card -->
-            <div class="question-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px;">
-                    <span id="card-status-tag" class="card-tag">未学習</span>
-                    <span id="study-category-label" style="font-size: 11px; color: var(--text-sub);">カテゴリー</span>
-                </div>
-                
-                <!-- Question -->
-                <div id="card-question" class="question-text">
-                    問題文がここに表示されます。
-                </div>
+        <!-- 一問一答モード用 「答えを見る」ボタン -->
+        <div id="studyControlButtons" style="display: flex; gap: 12px; margin-top: 14px;">
+          <button id="btnShowAnswer" class="btn-neo btn-primary-blue" onclick="toggleAnswer()"><i class="fa-solid fa-eye"></i> 答えを見る</button>
+        </div>
 
-                <!-- Reveal Button -->
-                <div id="reveal-container" class="reveal-btn-container">
-                    <button id="btn-reveal" class="reveal-btn">
-                        <svg class="icon"><use href="#icon-eye"/></svg>
-                        <span>答えを表示する</span>
-                    </button>
-                </div>
+        <!-- タイピング後の「次の問題へ」ボタン -->
+        <div id="nextQuestionArea" style="display: none; margin-top: 16px;">
+          <button id="btnNextQuestion" class="btn-neo btn-primary-yellow" style="font-size: 1.1rem; padding: 12px 28px;" onclick="goToNextQuestion()">次の問題へ ➔</button>
+        </div>
+      </div>
 
-                <!-- Answer Section -->
-                <div id="answer-container" class="answer-container">
-                    <div class="answer-label">正解キーワード</div>
-                    <div id="card-answer-word" class="answer-word">正解単語</div>
-                    <div id="card-answer-desc" class="answer-desc">解説テキストがここに表示されます。</div>
-                </div>
-            </div>
+      <!-- 一問一答モード用 評価ボタン群（右から：わかった、微妙、わからない） -->
+      <div id="evalControlButtons" class="eval-buttons-grid" style="display: none;">
+        <!-- 右端 -->
+        <button class="btn-neo" onclick="handleAnswerEval(2)" style="background: #f0fdf4; border-color: #10b981;">
+          <i class="fa-solid fa-check" style="color:#10b981;"></i> わかった
+        </button>
+        <!-- 中央 -->
+        <button class="btn-neo" onclick="handleAnswerEval(1)" style="background: #fffbeb; border-color: #f59e0b;">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i> 微妙
+        </button>
+        <!-- 左端 -->
+        <button class="btn-neo" onclick="handleAnswerEval(0)" style="background: #fef2f2; border-color: #ef4444;">
+          <i class="fa-solid fa-xmark" style="color:#ef4444;"></i> わからない
+        </button>
+      </div>
 
-            <!-- Action Buttons -->
-            <div id="action-buttons" class="action-buttons">
-                <button class="status-btn btn-forgot" data-action="forgot">
-                    <svg class="icon" style="width:24px; height:24px;"><use href="#icon-cross"/></svg>
-                    <span>忘れた</span>
-                </button>
-                <button class="status-btn btn-learning" data-action="learning">
-                    <svg class="icon" style="width:24px; height:24px;"><use href="#icon-triangle"/></svg>
-                    <span>学習中</span>
-                </button>
-                <button class="status-btn btn-mastered" data-action="mastered">
-                    <svg class="icon" style="width:24px; height:24px;"><use href="#icon-check"/></svg>
-                    <span>覚えた</span>
-                </button>
-            </div>
-        </section>
+      <div style="text-align: center; margin-top: 8px;">
+        <button class="btn-neo" style="font-size: 0.85rem; padding: 6px 16px;" onclick="exitQuizToLobby()"><i class="fa-solid fa-arrow-left"></i> ロビーへ戻る</button>
+      </div>
+    </div>
 
-        <!-- COMPLETE SCREEN -->
-        <section id="screen-complete" class="screen">
-            <div class="card-panel complete-card">
-                <svg class="icon" style="width: 56px; height: 56px; fill: var(--accent-gold); margin-bottom: 16px;"><use href="#icon-trophy"/></svg>
-                <h2 class="complete-title">学習セッション完了！</h2>
-                <p style="color: var(--text-sub); font-size: 14px;">選択されたすべての問題を解き終えました。</p>
+  </div>
 
-                <div class="stats-container">
-                    <div class="stat-item">
-                        <span id="stat-total" class="stat-num">0</span>
-                        <span class="stat-label">解いた問題数</span>
-                    </div>
-                    <div class="stat-item">
-                        <span id="stat-mastered" class="stat-num" style="color: var(--status-mastered);">0</span>
-                        <span class="stat-label">覚えた</span>
-                    </div>
-                    <div class="stat-item">
-                        <span id="stat-learning" class="stat-num" style="color: var(--status-learning);">0</span>
-                        <span class="stat-label">学習中</span>
-                    </div>
-                    <div class="stat-item">
-                        <span id="stat-forgot" class="stat-num" style="color: var(--status-forgot);">0</span>
-                        <span class="stat-label">忘れた</span>
-                    </div>
-                </div>
+  <!-- モーダル群 -->
+  <div id="onlineModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-users"></i> 数字4桁 対戦ロビー</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div style="background: #f1f5f9; padding: 16px; border-radius: 16px; border: 2.5px solid #1e293b; text-align: center;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px;">部屋を作る (ホスト)</div>
+          <button class="btn-neo btn-primary-yellow" style="width: 100%;" onclick="createRoomHost()">4桁コード発行</button>
+          <div id="createdRoomCode" style="font-size: 1.8rem; font-weight: 900; color: #2563eb; margin-top: 8px;">----</div>
+        </div>
 
-                <button id="btn-back-menu" class="start-btn">
-                    <span>メニューに戻る</span>
-                </button>
-            </div>
-        </section>
-    </main>
+        <div style="background: #f1f5f9; padding: 16px; border-radius: 16px; border: 2.5px solid #1e293b;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px;">コードを入力して参加</div>
+          <input type="text" id="joinRoomCodeInput" maxlength="4" placeholder="例: 1234" style="width: 100%; padding: 8px; border: 2px solid #1e293b; border-radius: 8px; font-weight: 900; text-align: center; font-size: 1.2rem; margin-bottom: 8px;">
+          <button class="btn-neo btn-primary-blue" style="width: 100%;" onclick="joinRoomGuest()">参加する</button>
+        </div>
+      </div>
 
-    <!-- Global Footer Copyright -->
-    <footer>
-        &copy; HoshiNet
-    </footer>
+      <div style="background: #fffbeb; padding: 12px; border-radius: 12px; border: 2px solid #f59e0b; margin-bottom: 16px;">
+        <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 6px;">現在の参加者:</div>
+        <div id="roomMemberList" style="font-weight: 800; font-size: 0.95rem; color: #0f172a;">(待機中...)</div>
+      </div>
 
-    <div id="toast" class="toast">記録をリセットしました</div>
+      <div style="display: flex; justify-content: space-between;">
+        <button id="btnHostStartSelect" class="btn-neo btn-primary-yellow" style="display: none;" onclick="openModal('gameModeModal')">モードを選択して開始</button>
+        <button class="btn-neo" onclick="closeModal('onlineModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
 
-    <!-- JavaScript Data & Logic -->
-    <script>
-        // ---------------------------------------------------------
-        // 1. DATA DEFINITION
-        // ---------------------------------------------------------
-        const historyData = [
-            { id: 1, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ニューヨーク", q: "1929年10月、株式市場の大暴落が発生し世界恐慌の引き金となったアメリカの都市はどこ？", desc: "ウォール街の株式暴落から世界的な不景気が始まりました。" },
-            { id: 2, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "世界恐慌", q: "1929年にアメリカから始まり、全世界に広がった深刻な経済不況を何というか？", desc: "資本主義諸国に甚大な経済的打撃を与えました。" },
-            { id: 3, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ローズベルト", q: "世界恐慌に対して新規巻き直し政策（ニューディール政策）を実施したアメリカ大統領は誰？", desc: "積極的な政府介入による経済復興を図りました。" },
-            { id: 4, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ニューディール", q: "ローズベルト大統領が行った、公共事業や雇用創出による景気回復政策を何政策という？", desc: "TVA（テネシー川流域開発公社）などが有名です。" },
-            { id: 5, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "植民地", q: "英・仏などの大国が自国の経済圏を守るため利用した、従属的な領土・地域を何というか？", desc: "ブロック経済の基盤となりました。" },
-            { id: 6, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ブロック経済", q: "英・仏などが自国と植民地間の貿易を優遇し、他国の購買を排除した経済体制を何という？", desc: "植民地を持たない国の不満を高め戦争の原因となりました。" },
-            { id: 7, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ファシズム", q: "民主主義を否定し、独裁政治や軍国主義を強めた排的な政治運動・思想を何という？", desc: "イタリアやドイツで台頭しました。" },
-            { id: 8, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ムッソリーニ", q: "イタリアでファシスト党を率いて独裁政治を行った人物は誰？", desc: "1922年にローマ進軍を行い政権を握りました。" },
-            { id: 9, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ヒトラー", q: "ドイツでナチス（国家社会主義ドイツ労働者党）を率いて独裁を行った人物は誰？", desc: "全権委任法を成立させ独裁体制を確立しました。" },
-            { id: 10, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ナチス", q: "ヒトラーが率いた「国家社会主義ドイツ労働者党」の略称は？", desc: "ユダヤ人迫害や他国への侵略を推進しました。" },
-            { id: 11, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "独ソ不可侵条約", q: "1939年にドイツとソ連の間で電撃的に結ばれた相互不侵略の条約は？", desc: "これによりドイツはポーランド侵攻を開始しました。" },
-            { id: 12, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ポーランド", q: "1939年9月、ドイツが侵攻し第二次世界大戦の発端となった国はどこ？", desc: "英仏がドイツに宣言し第二次世界大戦が勃発。" },
-            { id: 13, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "第二次世界大戦", q: "1939年から1945年まで、全世界を巻き込んで行われた人類史上最大の戦争は？", desc: "枢軸国と連合国の戦いとなりました。" },
-            { id: 14, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "大西洋憲章", q: "1941年にローズベルトとチャーチルが発表した、戦後構想の共同宣言は？", desc: "国際連合設立の基本理念となりました。" },
-            { id: 15, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ユダヤ人", q: "ナチス・ドイツによってホロコースト（大虐殺）の対象とされた民族は？", desc: "数百万人が強制収容所で犠牲となりました。" },
-            { id: 16, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "レジスタンス", q: "ファシズムやドイツの軍事占領に対し、ナチス占領下で行われた抵抗運動を何という？", desc: "フランスなどで活発に行われました。" },
-            { id: 17, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "連合国", q: "第二次世界大戦で、日・独・伊の枢軸国と対抗したアメリカ・イギリス・ソ連・中国などの陣営は？", desc: "戦後の国連常任理事国の母体となりました。" },
-            { id: 18, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ドイツ", q: "ヨーロッパ戦線で枢軸国の中心となり、1945年5月に無条件降伏した国は？", desc: "降伏後、東西に分割占領されました。" },
-            { id: 19, cat: "c1", catName: "世界恐慌と第二次世界大戦", word: "ヤルタ会談", q: "1945年2月、米・英・ソの首脳が戦後処理やソ連の対日参戦について協議した会談は？", desc: "ローズベルト、チャーチル、スターリンが参加。" },
-            { id: 20, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "憲政の常道", q: "大正末期から昭和初期にかけて、衆議院の第一党が内閣を組織する慣例を何といった？", desc: "加藤高明内閣から五・一五事件まで続きました。" },
-            { id: 21, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "関東大震災", q: "1923年9月1日、首都圏に甚大な被害をもたらした大地震は？", desc: "復興とともに経済（震災手形）への影響が広がりました。" },
-            { id: 22, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "二十一か条の要求", q: "1915年、日本が中国（袁世凱政権）に対して突きつけた権益要求は？", desc: "中国で激しい反日運動を引き起こしました。" },
-            { id: 23, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "米騒動", q: "1918年、米価の高騰に対し富山県の主婦らの行動から全国に広がった民衆運動は？", desc: "これにより寺内正毅内閣が倒れ、原敬政党内閣が誕生。" },
-            { id: 24, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "シベリア出兵", q: "ロシア革命に対する干渉のため、日本が1918年に軍隊を派兵した出来事は？", desc: "米価高騰を招き、米騒動のきっかけとなりました。" },
-            { id: 25, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "満25歳", q: "1925年の普通選挙法で、選挙権が与えられたのは「何歳以上の男子」？", desc: "納税要件が撤廃されました。" },
-            { id: 26, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "蒋介石", q: "孫文の死後、中国国民党を率いて北伐を完成させた指導者は誰？", desc: "南京に国民政府を樹立しました。" },
-            { id: 27, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "柳条湖事件", q: "1931年、関東軍が奉天郊外の線路を爆破し、満洲事変の発端となった事件は？", desc: "中国軍の仕業として攻撃を開始しました。" },
-            { id: 28, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "満洲国", q: "1932年、日本が中国東北部に樹立宣言させた傀儡国家は？", desc: "元清朝皇帝の溥儀を執政（のち皇帝）としました。" },
-            { id: 29, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "五・一五事件", q: "1932年、海軍青年将校らが犬養毅首相を暗殺した事件は？", desc: "これにより政党内閣の時代（憲政の常道）が終了しました。" },
-            { id: 30, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "二・二六事件", q: "1936年、陸軍皇道派の青年将校らが大臣らを暗殺し東京中心部を占拠した事件は？", desc: "軍部の発言力が決定的に強まりました。" },
-            { id: 31, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "重化学工業", q: "昭和恐慌以降、金属・機械・化学などの工業分野が急速に発達した。この工業を何という？", desc: "軍需産業を中心に発展しました。" },
-            { id: 32, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "毛沢東", q: "中国共産党を率い、農村を拠点に抵抗運動を展開した指導者は？", desc: "のちに中華人民共和国を建国。" },
-            { id: 33, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "盧溝橋事件", q: "1937年7月、北京郊外で日中両軍が衝突し、日中戦争の発端となった事件は？", desc: "本格的な全面戦争へ突入しました。" },
-            { id: 34, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日中戦争", q: "1937年から1945年まで続いた、日本と中国の全面的な戦争は？", desc: "長期化し日本の国力を消耗させました。" },
-            { id: 35, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "抗日民族統一戦線", q: "日中戦争に対抗するため、中国国民党と共産党が協力して結成した組織は？", desc: "第二次国共合作が成立しました。" },
-            { id: 36, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日独防共協定", q: "1936年、共産主義（ソ連）に対抗するために日本とドイツが結んだ協定は？", desc: "のちにイタリアも加わり三国協定へ。" },
-            { id: 37, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日独伊三国同盟", q: "1940年、日本・ドイツ・イタリアの間で結ばれた軍事同盟は？", desc: "アメリカとの対立を決定づけました。" },
-            { id: 38, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "日ソ中立条約", q: "1941年、北方での安全を確保するために日本とソ連が結んだ条約は？", desc: "南進政策を進める契機となりました。" },
-            { id: 39, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "インドシナ", q: "日本が資源確保のため進駐した、東南アジアのフランス領地域（現ベトナム等）は？", desc: "これに対しアメリカは石油の対日制限を行いました。" },
-            { id: 40, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "石油", q: "アメリカが日本への全面禁輸を行い、日本を追い詰めた重要な軍事資源は？", desc: "ABCD包囲網による経済封鎖の中核。" },
-            { id: 41, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "東條英機", q: "開戦時の首相であり、陸軍大臣も兼任して太平洋戦争を開戦させた人物は？", desc: "敗戦後、A級戦犯として処刑。" },
-            { id: 42, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "真珠湾", q: "1941年12月8日、日本海軍が奇襲攻撃を行ったハワイの米軍基地はどこ？", desc: "太平洋戦争の開戦となりました。" },
-            { id: 43, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "太平洋戦争", q: "1941年から1945年まで、日本と米英などの連合国との間で行われた戦争は？", desc: "アジア太平洋全域が戦場となりました。" },
-            { id: 44, cat: "c2", catName: "日本の中国侵略と太平洋戦争", word: "大東亜共栄圏", q: "日本が欧米の支配を脱し、アジア中心の共栄圏を作ると主張したスローガンは？", desc: "実際は日本の侵略・支配の口実とされました。" },
-            { id: 45, cat: "c3", catName: "戦時体制と戦後改革", word: "国家総動員法", q: "1938年に制定され、議会の承認なしに物資や労働力を戦争に動員できるようにした法律は？", desc: "近衛文麿内閣のもとで成立。" },
-            { id: 46, cat: "c3", catName: "戦時体制と戦後改革", word: "大政翼賛会", q: "1940年、すべての政党が解散して統合された全国的な戦争協力組織は？", desc: "政党政治が完全に消滅しました。" },
-            { id: 47, cat: "c3", catName: "戦時体制と戦後改革", word: "配給制", q: "物資不足のため、米や衣料などの生活必需品をチケットと引き換えに供給した制度は？", desc: "切符制や通帳制が用いられました。" },
-            { id: 48, cat: "c3", catName: "戦時体制と戦後改革", word: "国民学校", q: "1941年、小学校から改称され、皇国の道の修練を目的とした初等教育機関は？", desc: "軍国主義的教育が強化されました。" },
-            { id: 49, cat: "c3", catName: "戦時体制と戦後改革", word: "学徒出陣", q: "1943年、兵力不足を補うため文科系大学生の徴兵猶予を停止して出征させたことを何という？", desc: "神宮外苑での壮行会が有名です。" },
-            { id: 50, cat: "c3", catName: "戦時体制と戦後改革", word: "勤労動員", q: "中学生や女学生、未婚女性などが軍需工場などで労働に従事させられたことを何という？", desc: "女子挺身隊などが組織されました。" },
-            { id: 51, cat: "c3", catName: "戦時体制と戦後改革", word: "疎開", q: "空襲の危険を避けるため、都市の児童を農村へ集団で避難させたことを何という？", desc: "学童疎開が行われました。" },
-            { id: 52, cat: "c3", catName: "戦時体制と戦後改革", word: "サイパン島", q: "1944年に日本軍が全滅（玉砕）し、米軍のB29による日本本土空襲の拠点となった島は？", desc: "この陥落により東條英機内閣が辞職。" },
-            { id: 53, cat: "c3", catName: "戦時体制と戦後改革", word: "東京大空襲", q: "1945年3月10日、B29の大群により東京の下町を中心に約10万人が犠牲となった空襲は？", desc: "一夜にして都市が焦土と化しました。" },
-            { id: 54, cat: "c3", catName: "戦時体制と戦後改革", word: "沖縄戦", q: "1945年3月〜6月、国内で唯一の本格的な地上戦が行われ、住民多数が犠牲となった戦いは？", desc: "県民の4人に1人が亡くなったと言われます。" },
-            { id: 55, cat: "c3", catName: "戦時体制と戦後改革", word: "原子爆弾", q: "1945年8月、広島と長崎に投下された人類史上初の核兵器は？", desc: "甚大な放射能被害をもたらしました。" },
-            { id: 56, cat: "c3", catName: "戦時体制と戦後改革", word: "広島", q: "1945年8月6日、世界で初めて原子爆弾が投下された都市はどこ？", desc: "ウラン型原爆が投下されました。" },
-            { id: 57, cat: "c3", catName: "戦時体制と戦後改革", word: "長崎", q: "1945年8月9日、2発目の原子爆弾が投下された九州の都市はどこ？", desc: "プルトニウム型原爆が投下されました。" },
-            { id: 58, cat: "c3", catName: "戦時体制と戦後改革", word: "ポツダム宣言", q: "1945年7月、連合国が日本に対し無条件降伏を求めた共同宣言は？", desc: "日本は8月14日に受諾を決定。" },
-            { id: 59, cat: "c3", catName: "戦時体制と戦後改革", word: "8月15日", q: "昭和天皇の玉音放送により、日本国民に終戦が知らされた日は何月何日？", desc: "終戦記念日となっています。" },
-            { id: 60, cat: "c3", catName: "戦時体制と戦後改革", word: "GHQ", q: "連合国軍最高司令官総司令部の略称で、戦後日本の占領政策を行った機関は？", desc: "General Headquartersの略。" },
-            { id: 61, cat: "c3", catName: "戦時体制と戦後改革", word: "マッカーサー", q: "GHQの最高司令官として日本の民主化政策を指導したアメリカの将軍は誰？", desc: "厚木基地に降り立った姿が有名です。" },
-            { id: 62, cat: "c3", catName: "戦時体制と戦後改革", word: "戦後改革", q: "GHQの指令のもと、日本の非軍事化と民主化を推進した一連の改革を何という？", desc: "五大改革指令などが発せられました。" },
-            { id: 63, cat: "c3", catName: "戦時体制と戦後改革", word: "東京裁判", q: "極東国際軍事裁判の通称で、日本の戦争指導者をA級戦犯として裁いた裁判は？", desc: "東條英機らに死刑が言い渡されました。" },
-            { id: 64, cat: "c3", catName: "戦時体制と戦後改革", word: "満20歳に選挙権", q: "1945年の衆議院議員選挙法改正により、性別を問わず与えられた新たな選挙権の条件は？", desc: "女性参政権が初めて認められました。" },
-            { id: 65, cat: "c3", catName: "戦時体制と戦後改革", word: "財閥解体", q: "経済の民主化のため、三井・三菱・住友・安田などの大資本解体を命じた改革は？", desc: "独占禁止法なども制定されました。" },
-            { id: 66, cat: "c3", catName: "戦時体制と戦後改革", word: "農地改革", q: "地主の持つ小作地を政府が買い上げ、小作人に安く売り渡して自作農を創設した改革は？", desc: "寄土地主制が解体されました。" },
-            { id: 67, cat: "c3", catName: "戦時体制と戦後改革", word: "日本国憲法", q: "1946年11月3日公布、1947年5月3日施行された現在の日本の最高法規は？", desc: "大日本帝国憲法から全面改正。" },
-            { id: 68, cat: "c3", catName: "戦時体制と戦後改革", word: "国民主権", q: "日本国憲法の三原則の一つで、国の政治のあり方を最終的に決定する権利は国民にあるとする原則は？", desc: "天皇は「象徴」となりました。" },
-            { id: 69, cat: "c3", catName: "戦時体制と戦後改革", word: "基本的人権の尊重", q: "日本国憲法の三原則の一つで、人間が生まれながらにして持つ権利を冒すことのできない永久の権利として保障することは？", desc: "平等権・自由権・社会権など。" },
-            { id: 70, cat: "c3", catName: "戦時体制と戦後改革", word: "平和主義", q: "日本国憲法の三原則の一つで、第9条に明記された戦争の放棄と戦力の不保持を定める原則は？", desc: "交戦権の否認。" },
-            { id: 71, cat: "c3", catName: "戦時体制と戦後改革", word: "民法が改正", q: "戦後の改定により、従来の「家」制度や家長権が廃止され、両性の本質的平等が定められた法律改正は？", desc: "家族関係が大きく民主化されました。" },
-            { id: 72, cat: "c3", catName: "戦時体制と戦後改革", word: "教育基本法", q: "1947年に制定され、教育の機会均等や義務教育9年（6・3制）などを定めた法律は？", desc: "教育勅語が失効しました。" },
-            { id: 73, cat: "c3", catName: "戦時体制と戦後改革", word: "沖縄を失う", q: "サンフランシスコ平和条約等により、日本本土から切り離され米軍の直接支配下に置かれた地域（表現）は？", desc: "1972年の復帰まで米軍政下。" },
-            { id: 74, cat: "c3", catName: "戦時体制と戦後改革", word: "北方領土", q: "終戦直前にソ連により占拠され、現在も返還を求めている択捉・国後・色丹・歯舞の島々は？", desc: "未解決の領土問題。" },
-            { id: 75, cat: "c4", catName: "冷戦と現代の世界・日本", word: "国際連合", q: "1945年10月に発足した、世界の平和と安全を維持するための国際機関は？", desc: "本部はニューヨーク。国際連盟の反省を生かして設立。" },
-            { id: 76, cat: "c4", catName: "冷戦と現代の世界・日本", word: "冷戦", q: "第二次大戦後、米を中心とする資本主義陣営とソ連を中心とする社会主義陣営の対立状態を何という？", desc: "「冷たい戦争（Cold War）」の略。" },
-            { id: 77, cat: "c4", catName: "冷戦と現代の世界・日本", word: "NATO", q: "北大西洋条約機構の略称で、アメリカを中心とする西側陣営の軍事同盟は？", desc: "North Atlantic Treaty Organization." },
-            { id: 78, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ワルシャワ条約機構", q: "NATOに対抗してソ連と東欧社会主義諸国が結成した軍事同盟は？", desc: "1991年のソ連解体に伴い解散。" },
-            { id: 79, cat: "c4", catName: "冷戦と現代の世界・日本", word: "中華人民共和国", q: "1949年、毛沢東を主席として建国された社会主義国家は？", desc: "国民党の蒋介石は台湾へ逃れました。" },
-            { id: 80, cat: "c4", catName: "冷戦と現代の世界・日本", word: "大韓民国", q: "1948年、朝鮮半島の38度線以南に成立した親米の国家（韓国）は？", desc: "李承晩が初代大統領。" },
-            { id: 81, cat: "c4", catName: "冷戦と現代の世界・日本", word: "朝鮮民主主義人民共和国", q: "1948年、朝鮮半島の38度線以北に成立した親ソの国家（北朝鮮）は？", desc: "金日成が指導者。" },
-            { id: 82, cat: "c4", catName: "冷戦と現代の世界・日本", word: "朝鮮戦争", q: "1950年、北朝鮮の南進から始まり、米ソの代理戦争となった戦いは？", desc: "1953年に休戦協定締結。" },
-            { id: 83, cat: "c4", catName: "冷戦と現代の世界・日本", word: "特需景気", q: "朝鮮戦争に際し、米軍からの物資調達（特需）によって日本経済が急速に回復した景気を何という？", desc: "戦後復興の大きな足がかりとなりました。" },
-            { id: 84, cat: "c4", catName: "冷戦と現代の世界・日本", word: "自衛隊", q: "1950年の警察予備隊、保安隊を経て1954年に発足した日本の防衛組織は？", desc: "陸・海・空の3部隊で構成。" },
-            { id: 85, cat: "c4", catName: "冷戦と現代の世界・日本", word: "サンフランシスコ平和条約", q: "1951年、日本が48カ国と講和条約を結び、主権を回復した条約は？", desc: "吉田茂首相が署名。ソ連などは拒否。" },
-            { id: 86, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日米安全保障条約", q: "平和条約と同時に結ばれ、米軍の日本駐留を認めた条約は？", desc: "1960年に改定（安保闘争）。" },
-            { id: 87, cat: "c4", catName: "冷戦と現代の世界・日本", word: "自由民主党", q: "1955年の保守合同により結成され、以後長期間政権を担当した政党は？", desc: "自民党。" },
-            { id: 88, cat: "c4", catName: "冷戦と現代の世界・日本", word: "55年体制", q: "1955年から1993年まで続いた、自民党が与党、社会党が野党第一党として対立した政治体制は？", desc: "細川連立内閣の誕生で崩壊。" },
-            { id: 89, cat: "c4", catName: "冷戦と現代の世界・日本", word: "安保闘争", q: "1960年の日米安保条約改定に対し、激しい反対運動が巻き起こった出来事は？", desc: "岸信介内閣が退陣に追い込まれました。" },
-            { id: 90, cat: "c4", catName: "冷戦と現代の世界・日本", word: "アジアアフリカ会議", q: "1955年、インドネシアのバンドンで開かれ「平和十原則」を採択した非同盟諸国の会議は？", desc: "バンドン会議とも呼ばれます。" },
-            { id: 91, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日ソ共同宣言", q: "1956年、鳩山一郎首相のもとでソ連との国交回復を果たし、日本の国連加盟が実現した宣言は？", desc: "戦争状態が正式に終了。" },
-            { id: 92, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日韓基本条約", q: "1965年、佐藤栄作内閣のもとで韓国との国交を正常化した条約は？", desc: "請求権問題の解決などが図られました。" },
-            { id: 93, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ベトナム戦争", q: "1960年代〜70年代、南北ベトナムの対立にアメリカが直接介入して泥沼化した戦争は？", desc: "激しい反戦運動が世界中で展開。" },
-            { id: 94, cat: "c4", catName: "冷戦と現代の世界・日本", word: "沖縄県が日本に復帰", q: "1972年、佐藤栄作内閣のもとで非核三原則を掲げ、アメリカから日本へ返還された出来事は？", desc: "「本土並み」返還が実現。" },
-            { id: 95, cat: "c4", catName: "冷戦と現代の世界・日本", word: "非核三原則", q: "「持たず、作らず、持ち込ませず」という日本の核兵器に関する基本方針は？", desc: "佐藤栄作がノーベル平和賞を受賞。" },
-            { id: 96, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日中共同声明", q: "1972年、田中角栄首相が訪中し、中国との国交正常化を果たした宣言は？", desc: "台湾との外交関係は終了。" },
-            { id: 97, cat: "c4", catName: "冷戦と現代の世界・日本", word: "日中平和友好条約", q: "1978年、福田赳夫内閣のもとで中国と締結された正式な条約は？", desc: "平和友好関係が確立されました。" },
-            { id: 98, cat: "c4", catName: "冷戦と現代の世界・日本", word: "高度経済成長", q: "1950年代半ばから1970年代初頭にかけて、日本が年平均10%以上の経済成長を遂げた現象は？", desc: "「もはや戦後ではない」と表現されました。" },
-            { id: 99, cat: "c4", catName: "冷戦と現代の世界・日本", word: "新幹線", q: "1964年の東京オリンピック直前に開業した世界初の高速鉄道（東海道〜）は？", desc: "夢の超特急と呼ばれました。" },
-            { id: 100, cat: "c4", catName: "冷戦と現代の世界・日本", word: "東京オリンピック", q: "1964年、アジアで初めて開催された夏季オリンピック競技大会は？", desc: "インフラ整備が大きく進みました。" },
-            { id: 101, cat: "c4", catName: "冷戦と現代の世界・日本", word: "公害", q: "高度経済成長の影で、水俣病・イタイイタイ病・四日市ぜんそくなどの深刻な被害をもたらした問題は？", desc: "四大公害病が発生。" },
-            { id: 102, cat: "c4", catName: "冷戦と現代の世界・日本", word: "公害対策基本法", q: "1967年に制定され、環境汚染の防止と被害者の保護を図った法律は？", desc: "1971年には環境庁が発足。" },
-            { id: 103, cat: "c4", catName: "冷戦と現代の世界・日本", word: "石油危機(オイルショック)", q: "1973年の第四次中東戦争をきっかけに原油価格が高騰し、狂乱物価を招いた混乱は？", desc: "高度経済成長が終焉を迎えました。" },
-            { id: 104, cat: "c4", catName: "冷戦と現代の世界・日本", word: "テレビ放送", q: "1953年に本放送が始まり、三種の神器（白黒テレビ等）として大衆文化を象徴したメディアは？", desc: "情報化社会の第一歩。" },
-            { id: 105, cat: "c4", catName: "冷戦と現代の世界・日本", word: "川端康成", q: "1968年、「雪国」などの作品で日本人初のノーベル文学賞を受賞した作家は誰？", desc: "美しい日本の情緒を描きました。" },
-            { id: 106, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ベルリンの壁", q: "1989年に崩壊し、東西冷戦の象徴的終焉を示したドイツの建造物は？", desc: "翌1990年にドイツ再統一。" },
-            { id: 107, cat: "c4", catName: "冷戦と現代の世界・日本", word: "ソ連解体⇨ロシア", q: "1991年、社会主義の超大国が解体され、国際社会における冷戦が完全に終結した出来事は？", desc: "ロシア連邦などが独立。" },
-            { id: 108, cat: "c4", catName: "冷戦と現代の世界・日本", word: "PKO", q: "国連平和維持活動の略称で、1992年の協力法制定により自衛隊がカンボジア等へ派遣された活動は？", desc: "Peacekeeping Operations." },
-            { id: 109, cat: "c4", catName: "冷戦と現代の世界・日本", word: "サミット", q: "主要国首脳会議の通称で、1975年から毎年開催されている国際経済政治の協議の場は？", desc: "G7サミット。" },
-            { id: 110, cat: "c4", catName: "冷戦と現代の世界・日本", word: "EU", q: "1993年のマーストリヒト条約により発足したヨーロッパ連合の略称は？", desc: "通貨ユーロを導入。" },
-            { id: 111, cat: "c4", catName: "冷戦と現代の世界・日本", word: "南北問題", q: "北半球の先進工業国と南半球の途上国との間に存在する経済的格差の問題を何という？", desc: "南々問題（途上国間の格差）も派生。" },
-            { id: 112, cat: "c4", catName: "冷戦と現代の世界・日本", word: "地域紛争", q: "冷戦集結後、民族や宗教の対立が表面化して世界各地（中東や旧ユーゴ等）で頻発した紛争は？", desc: "難民問題などが深刻化。" },
-            { id: 113, cat: "c4", catName: "冷戦と現代の世界・日本", word: "同時多発テロ", q: "2001年9月11日、ハイジャックされた旅客機が米の超高層ビル等に突入したテロ事件は？", desc: "「対テロ戦争」の始まり。" },
-            { id: 114, cat: "c4", catName: "冷戦と現代の世界・日本", word: "NGO", q: "非政府組織の略称で、国境を越えて人権・環境・支援活動を行う民間団体は？", desc: "Non-Governmental Organization." },
-            { id: 115, cat: "c4", catName: "冷戦と現代の世界・日本", word: "NPO", q: "非営利組織の略称で、福祉や環境などの社会貢献活動を行う営利を目的としない団体は？", desc: "1998年に特定非営利活動促進法制定。" },
-            { id: 116, cat: "c4", catName: "冷戦と現代の世界・日本", word: "バブル経済", q: "1980年代後半、地価や株価が実体経済から離れて異常高騰し、のちに崩壊した現象は？", desc: "「失われた10年（20年）」の引き金。" },
-            { id: 117, cat: "c4", catName: "冷戦と現代の世界・日本", word: "平成", q: "1989年から2019年まで続いた日本の元号は？", desc: "バブル崩壊や東日本大震災などを経験。" },
-            { id: 118, cat: "c4", catName: "冷戦と現代の世界・日本", word: "令和", q: "2019年5月1日、天皇譲位に伴い新たに始まった日本の元号は？", desc: "「万葉集」が出典。" },
-            { id: 119, cat: "c4", catName: "冷戦と現代の世界・日本", word: "グローバル化", q: "人・モノ・金・情報が国境を越えて世界規模で自由に行き来する現象を何という？", desc: "地球一体化。" },
-            { id: 120, cat: "c4", catName: "冷戦と現代の世界・日本", word: "地球温暖化", q: "温室効果ガスの増加により地球全体の平均気温が上昇している環境問題は？", desc: "京都議定書やパリ協定で削減枠組み。" },
-            { id: 121, cat: "c4", catName: "冷戦と現代の世界・日本", word: "阪神淡路大震災", q: "1995年1月15日、神戸市などを大都市直下型地震が襲い、甚大な被害を出した震災は？", desc: "ボランティア活動が活発化。" },
-            { id: 122, cat: "c4", catName: "冷戦と現代の世界・日本", word: "SDGs", q: "2015年に国連で採択された「持続可能な開発目標」の英語略称は？", desc: "17の目標と169のターゲット。" },
-            { id: 123, cat: "c4", catName: "冷戦と現代の世界・日本", word: "少子高齢化", q: "出生率が低下すると同時に、平均寿命が伸びて高齢者の割合が高まる現象は？", desc: "社会保障費の増大や労働力不足が課題。" },
-            { id: 124, cat: "c4", catName: "冷戦と現代の世界・日本", word: "世界金融危機", q: "2008年、米サブプライムローン問題からリーマン・ショックへ及んだ世界的大不況は？", desc: "世界的な景気後退を引き起こしました。" }
-        ];
+  <div id="gameModeModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-gamepad"></i> 対戦モードの選択</h2>
+      <div id="modeSpeed" class="mode-select-card selected" onclick="selectMode('speed')" style="border:3px solid #1e293b; padding:12px; border-radius:12px; margin-bottom:10px; cursor:pointer;">
+        <div style="font-weight: 900; font-size: 1.1rem;">⚡ スピードアンサー</div>
+        <div style="font-size: 0.85rem; color: #475569; margin-top: 4px;">同時出題！タイピング速度を競い、各問の順位ボードを表示します。</div>
+      </div>
+      <div id="modeSurvival" class="mode-select-card" onclick="selectMode('survival')" style="border:3px solid #1e293b; padding:12px; border-radius:12px; margin-bottom:10px; cursor:pointer;">
+        <div style="font-weight: 900; font-size: 1.1rem;">🔥 サバイバル</div>
+        <div style="font-size: 0.85rem; color: #475569; margin-top: 4px;">制限時間内に何問解けるかを競います。</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-neo btn-primary-yellow" onclick="confirmAndStartBattle()">対戦をスタート！</button>
+      </div>
+    </div>
+  </div>
 
-        const categories = [
-            { id: "c1", name: "1. 世界恐慌と第二次世界大戦" },
-            { id: "c2", name: "2. 日本の中国侵略と太平洋戦争" },
-            { id: "c3", name: "3. 戦時体制と戦後改革" },
-            { id: "c4", name: "4. 冷戦と現代の世界・日本" }
-        ];
+  <div id="speedRankModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center;">
+      <h2 id="rankModalTitle" class="modal-title" style="justify-content: center;"><i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> スピード結果</h2>
+      <div id="speedRankContent" style="margin: 20px 0; font-weight: 800; font-size: 1.1rem;"></div>
+      <p id="rankSubNotice" style="color: #64748b; font-weight: 700; font-size: 0.85rem;">2秒後に次の問題へ進みます...</p>
+      <button id="btnFinishRank" class="btn-neo btn-primary-yellow" style="display: none; margin: 0 auto;" onclick="closeModal('speedRankModal'); exitQuizToLobby();">ロビーへ戻る</button>
+    </div>
+  </div>
 
-        // ---------------------------------------------------------
-        // 2. STATE MANAGEMENT & LOCAL STORAGE
-        // ---------------------------------------------------------
-        const STORAGE_KEY_STATUS = 'histori_status_v2';
-        const STORAGE_KEY_THEME = 'histori_theme_v2';
-        let userStatus = {};
+  <div id="skillModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-tree"></i> 360度 習得スキルツリー</h2>
+      <p style="font-weight: 700; color: #64748b; font-size: 0.85rem; margin-bottom: 12px;">学習で覚えた単語の「霧」がフェードアウトして解禁されます！</p>
+      <div class="skill-tree-canvas-wrapper" id="skillTreeCanvasWrapper">
+        <svg class="skill-tree-svg" id="skillTreeSvg"></svg>
+        <div class="center-player-node" id="treeCenterAvatar">🎓</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-neo" onclick="closeModal('skillModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
 
-        function loadUserStatus() {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY_STATUS);
-                if (stored) userStatus = JSON.parse(stored);
-            } catch(e) { console.error(e); }
-        }
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-gear"></i> アプリ各種設定</h2>
+      
+      <!-- 回答モード選択 -->
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">回答モード:</label>
+        <select id="studyModeSelect" onchange="changeStudyMode(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="typing">⌨️ タイピングモード (入力＆送信で正誤判定)</option>
+          <option value="flashcard">🎴 一問一答モード (答えを見る➔わかった/微妙/わからない)</option>
+        </select>
+      </div>
 
-        function saveUserStatus() {
-            try {
-                localStorage.setItem(STORAGE_KEY_STATUS, JSON.stringify(userStatus));
-            } catch(e) { console.error(e); }
-        }
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">1回あたりの出題数:</label>
+        <select id="questionCountSelect" onchange="changeQuestionCount(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="10">10 問</option>
+          <option value="20">20 問</option>
+          <option value="30">30 問</option>
+          <option value="50">50 問</option>
+          <option value="all">全問題 (カテゴリー内の全問題)</option>
+        </select>
+      </div>
 
-        function getItemStatus(id) {
-            return userStatus[id] || 'unlearned';
-        }
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">デザインテーマ (アニメーション背景):</label>
+        <select id="themeSelect" onchange="changeTheme(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="academic">アカデミックネイビー</option>
+          <option value="green">クラシックグリーン</option>
+          <option value="mocha">モカブラウン</option>
+          <option value="dark">サイバーダーク</option>
+          <option value="sunlight">☀️ 太陽の光 (降り注ぐ木漏れ日)</option>
+          <option value="sakura">🌸 桜吹雪 (舞い散る花びら)</option>
+          <option value="lavender">🪻 ラベンダー & 蝶</option>
+        </select>
+      </div>
 
-        function applyTheme(themeName) {
-            document.body.setAttribute('data-theme', themeName);
-            localStorage.setItem(STORAGE_KEY_THEME, themeName);
-        }
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">文字サイズ:</label>
+        <select onchange="changeFontSize(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="normal">標準</option>
+          <option value="large">大</option>
+          <option value="xlarge">特大</option>
+        </select>
+      </div>
 
-        function loadTheme() {
-            const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'navy';
-            applyTheme(savedTheme);
-            document.getElementById('setting-theme').value = savedTheme;
-        }
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn-neo" onclick="closeModal('settingsModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
 
-        // ---------------------------------------------------------
-        // 3. UI CONTROLLER & APP LOGIC
-        // ---------------------------------------------------------
-        let currentDeck = [];
-        let currentIndex = 0;
-        let sessionStats = { forgot: 0, learning: 0, mastered: 0 };
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-right-to-bracket"></i> アカウントログイン</h2>
+      <div style="margin-bottom: 12px;">
+        <label style="font-weight: 800; font-size: 0.85rem;">ユーザーID / プレイヤー名:</label>
+        <input type="text" id="loginIdInput" placeholder="例: ひすとりマスター" style="width: 100%; padding: 10px; border: 2.5px solid #1e293b; border-radius: 10px; font-weight: 800; margin-top: 4px;">
+      </div>
+      <button class="btn-neo btn-primary-yellow" style="width: 100%; margin-bottom: 12px;" onclick="handleLoginSubmit()">ログイン</button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-neo" style="flex:1; font-size:0.8rem;" onclick="quickSocialLogin('Google')"><i class="fa-brands fa-google"></i> Google</button>
+        <button class="btn-neo" style="flex:1; font-size:0.8rem;" onclick="quickSocialLogin('Apple')"><i class="fa-brands fa-apple"></i> Apple</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-neo" onclick="closeModal('loginModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
 
-        const screens = {
-            menu: document.getElementById('screen-menu'),
-            study: document.getElementById('screen-study'),
-            complete: document.getElementById('screen-complete')
-        };
+  <div id="avatarModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-face-smile"></i> アイコンの変更</h2>
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0;">
+        <div class="btn-neo" onclick="chooseAvatar('🎓')">🎓</div>
+        <div class="btn-neo" onclick="chooseAvatar('⚔️')">⚔️</div>
+        <div class="btn-neo" onclick="chooseAvatar('🌟')">🌟</div>
+        <div class="btn-neo" onclick="chooseAvatar('👑')">👑</div>
+        <div class="btn-neo" onclick="chooseAvatar('🦊')">🦊</div>
+        <div class="btn-neo" onclick="chooseAvatar('🐉')">🐉</div>
+        <div class="btn-neo" onclick="chooseAvatar('🚀')">🚀</div>
+        <div class="btn-neo" onclick="chooseAvatar('💎')">💎</div>
+        <div class="btn-neo" onclick="chooseAvatar('⚡')">⚡</div>
+        <div class="btn-neo" onclick="chooseAvatar('🎯')">🎯</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn-neo" onclick="closeModal('avatarModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
 
-        function switchScreen(screenName) {
-            Object.keys(screens).forEach(key => {
-                screens[key].classList.remove('active');
-            });
-            setTimeout(() => {
-                screens[screenName].classList.add('active');
-                window.scrollTo(0, 0);
-            }, 50);
-        }
+  <div id="vipSettingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-crown" style="color: #f59e0b;"></i> VIP+ 専用背景設定</h2>
+      <input type="text" id="bgUrlInput" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 10px; border: 2.5px solid #1e293b; border-radius: 10px; font-weight: 700; margin-bottom: 12px;">
+      <input type="file" id="bgFileInput" accept="image/*" style="margin-bottom: 20px;">
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="btn-neo" onclick="resetBgImage()">リセット</button>
+        <button class="btn-neo btn-primary-yellow" onclick="saveBgImage()">背景を適用</button>
+      </div>
+    </div>
+  </div>
 
-        function renderCategories() {
-            const container = document.getElementById('category-options');
-            
-            container.innerHTML = categories.map(cat => {
-                const catItems = historyData.filter(i => i.cat === cat.id);
-                const total = catItems.length;
-                let mastered = 0, learning = 0;
-                
-                catItems.forEach(item => {
-                    const st = getItemStatus(item.id);
-                    if (st === 'mastered') mastered++;
-                    else if (st === 'learning') learning++;
-                });
+  <div id="toastContainer" class="toast-container"></div>
 
-                const masteredPercent = Math.round((mastered / total) * 100);
-                const learningPercent = Math.round((learning / total) * 100);
+  <script>
+    // ==========================================
+    // 全411単語 完全データベース (誤字補正＆ルビ付与)
+    // ==========================================
+    const rawWordList = [
+      // --- 1. 原始・古代文明 ---
+      { id: 1, c: "原始・古代文明", q: "人類の初期段階にあたる、最も古い化石人類は？", a: "猿人", ruby: "<ruby>猿人<rt>えんじん</rt></ruby>" },
+      { id: 2, c: "原始・古代文明", q: "火や言葉を使い始めたとされる人類は？", a: "原人", ruby: "<ruby>原人<rt>げんじん</rt></ruby>" },
+      { id: 3, c: "原始・古代文明", q: "現代の人類の直接の祖先にあたる分類は？", a: "新人", ruby: "<ruby>新人<rt>しんじん</rt></ruby>" },
+      { id: 4, c: "原始・古代文明", q: "打製石器を使い、狩猟や採集を行っていた時代は？", a: "旧石器時代", ruby: "<ruby>旧石器時代<rt>きゅうせっきじだい</rt></ruby>" },
+      { id: 5, c: "原始・古代文明", q: "石を打ち欠いて作った石器は？", a: "打製石器", ruby: "<ruby>打製石器<rt>だせいせっき</rt></ruby>" },
+      { id: 6, c: "原始・古代文明", q: "磨製石器や土器を使い農耕が始まった時代は？", a: "新石器時代", ruby: "<ruby>新石器時代<rt>しんせっきじだい</rt></ruby>" },
+      { id: 7, c: "原始・古代文明", q: "石を磨いて表面を整えた石器は？", a: "磨製石器", ruby: "<ruby>磨製石器<rt>ませいせっき</rt></ruby>" },
+      { id: 8, c: "原始・古代文明", q: "粘土を焼いて作られた調理や保存の道具は？", a: "土器", ruby: "<ruby>土器<rt>どき</rt></ruby>" },
+      { id: 9, c: "原始・古代文明", q: "ナイル川流域で栄えた文明は？", a: "エジプト文化", ruby: "<ruby>エジプト文化<rt>えじぷとぶんか</rt></ruby>" },
+      { id: 10, c: "原始・古代文明", q: "エジプトで用いられた太陽に基づく暦は？", a: "太陽暦", ruby: "<ruby>太陽暦<rt>たいようれき</rt></ruby>" },
+      { id: 11, c: "原始・古代文明", q: "エジプトで使われた文字は？", a: "象形文字", ruby: "<ruby>象形文字<rt>しょうけいもじ</rt></ruby>" },
+      { id: 12, c: "原始・古代文明", q: "チグリス・ユーフラテス川流域の文明は？", a: "メソポタミア文化", ruby: "<ruby>メソポタミア文化<rt>めそぽたみあぶんか</rt></ruby>" },
+      { id: 13, c: "原始・古代文明", q: "メソポタミアで粘土板に刻まれた文字は？", a: "くさび形文字", ruby: "<ruby>くさび形文字<rt>くさびがたもじ</rt></ruby>" },
+      { id: 14, c: "原始・古代文明", q: "インダス川流域で栄えた古代文明は？", a: "インダス文明", ruby: "<ruby>インダス文明<rt>いんだすぶんめい</rt></ruby>" },
+      { id: 15, c: "原始・古代文明", q: "黄河や長江の流域で栄えた文明は？", a: "中国文明", ruby: "<ruby>中国文明<rt>ちゅうごくぶんめい</rt></ruby>" },
+      { id: 16, c: "原始・古代文明", q: "確認されている中国最古の王朝は？", a: "殷", ruby: "<ruby>殷<rt>いん</rt></ruby>（<ruby>商<rt>しょう</rt></ruby>）" },
+      { id: 17, c: "原始・古代文明", q: "銅とスズの合金で作られた祭器や武器は？", a: "青銅器", ruby: "<ruby>青銅器<rt>せいどうき</rt></ruby>" },
+      { id: 18, c: "原始・古代文明", q: "亀の甲羅や骨に刻まれた漢字の原形文字は？", a: "甲骨文字", ruby: "<ruby>甲骨文字<rt>こうこつもじ</rt></ruby>" },
+      { id: 19, c: "原始・古代文明", q: "儒学を開いた中国の思想家は？", a: "孔子", ruby: "<ruby>孔子<rt>こうし</rt></ruby>" },
+      { id: 20, c: "原始・古代文明", q: "孔子によって説かれた徳治政治の思想は？", a: "儒学", ruby: "<ruby>儒学<rt>じゅがく</rt></ruby>（<ruby>儒教<rt>じゅきょう</rt></ruby>）" },
+      { id: 21, c: "原始・古代文明", q: "紀元前3世紀に中国を初めて統一した王朝は？", a: "秦", ruby: "<ruby>秦<rt>しん</rt></ruby>" },
+      { id: 22, c: "原始・古代文明", q: "秦の初代皇帝は？", a: "始皇帝", ruby: "<ruby>始皇帝<rt>しこうてい</rt></ruby>" },
+      { id: 23, c: "原始・古代文明", q: "秦の崩壊後に成立し、長期間続いた中国の王朝は？", a: "漢", ruby: "<ruby>漢<rt>かん</rt></ruby>" },
+      { id: 24, c: "原始・古代文明", q: "東西を結んだユーラシアの交易路は？", a: "シルクロード", ruby: "シルクロード（<ruby>絹<rt>きぬ</rt></ruby>の<ruby>道<rt>みち</rt></ruby>）" },
+      { id: 25, c: "原始・古代文明", q: "地中海沿岸で発展した古代ヨーロッパ文明は？", a: "ギリシャ・ローマ文明", ruby: "ギリシャ・ローマ<ruby>文明<rt>ぶんめい</rt></ruby>" },
+      { id: 26, c: "原始・古代文明", q: "民主政が発達した代表的なポリスは？", a: "アテネ", ruby: "アテネ" },
+      { id: 27, c: "原始・古代文明", q: "古代ギリシャの都市国家は？", a: "ポリス", ruby: "ポリス" },
+      { id: 28, c: "原始・古代文明", q: "市民全員が参加して政治を決める体制は？", a: "民主政", ruby: "<ruby>民主政<rt>みんしゅせい</rt></ruby>" },
+      { id: 29, c: "原始・古代文明", q: "パルテノン神殿などに代表される古代地中海文化は？", a: "ギリシャ文明", ruby: "ギリシャ<ruby>文明<rt>ぶんめい</rt></ruby>" },
+      { id: 30, c: "原始・古代文明", q: "東方遠征を行いヘレニズム時代を開いたマケドニアの王は？", a: "アレクサンドロス大王", ruby: "アレクサンドロス<ruby>大王<rt>だいおう</rt></ruby>" },
+      { id: 31, c: "原始・古代文明", q: "ギリシャ文化とオリエント文化が融合した風潮は？", a: "ヘレニズム", ruby: "ヘレニズム" },
+      { id: 32, c: "原始・古代文明", q: "地中海全域を支配した巨大国家は？", a: "ローマ帝国", ruby: "ローマ<ruby>帝国<rt>ていこく</rt></ruby>" },
+      { id: 33, c: "原始・古代文明", q: "王を持たない古代ローマ初期の政治体制は？", a: "共和政", ruby: "<ruby>共和政<rt>きょうわせい</rt></ruby>" },
 
-                return `
-                    <div class="cat-card" onclick="toggleCatCheckbox('${cat.id}')">
-                        <div class="cat-header">
-                            <label class="cat-checkbox-wrap" onclick="event.stopPropagation()">
-                                <input type="checkbox" id="chk-${cat.id}" value="${cat.id}" checked>
-                                <span class="checkmark-sq"><svg class="icon"><use href="#icon-check"/></svg></span>
-                                <span>${cat.name}</span>
-                            </label>
-                            <span class="cat-rate">理解度: ${masteredPercent}%</span>
-                        </div>
-                        <div class="cat-progress-bg">
-                            <div class="cat-progress-fill-mastered" style="width: ${masteredPercent}%"></div>
-                            <div class="cat-progress-fill-learning" style="width: ${learningPercent}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+      // --- 2. 宗教・縄文・弥生 ---
+      { id: 34, c: "宗教・縄文・弥生", q: "釈迦によってインドで開かれた宗教は？", a: "仏教", ruby: "<ruby>仏教<rt>ぶっきょう</rt></ruby>" },
+      { id: 35, c: "宗教・縄文・弥生", q: "仏教を開いた人物は？", a: "釈迦", ruby: "<ruby>釈迦<rt>しゃか</rt></ruby>" },
+      { id: 36, c: "宗教・縄文・弥生", q: "インドの伝統宗教が融合して成立した多神教は？", a: "ヒンドゥー教", ruby: "ヒンドゥー<ruby>教<rt>きょう</rt></ruby>" },
+      { id: 37, c: "宗教・縄文・弥生", q: "イエスを救世主とする宗教は？", a: "キリスト教", ruby: "キリスト<ruby>教<rt>きょう</rt></ruby>" },
+      { id: 38, c: "宗教・縄文・弥生", q: "キリスト教を開いた人物は？", a: "イエス", ruby: "イエス" },
+      { id: 39, c: "宗教・縄文・弥生", q: "キリスト教の聖典は？", a: "聖書", ruby: "<ruby>聖書<rt>せいしょ</rt></ruby>" },
+      { id: 40, c: "宗教・縄文・弥生", q: "ムハンマドが開いた宗教は？", a: "イスラム教", ruby: "イスラム<ruby>教<rt>きょう</rt></ruby>" },
+      { id: 41, c: "宗教・縄文・弥生", q: "イスラム教を開いた預言者は？", a: "ムハンマド", ruby: "ムハンマド" },
+      { id: 42, c: "宗教・縄文・弥生", q: "イスラム教の聖典は？", a: "コーラン", ruby: "コーラン" },
+      { id: 43, c: "宗教・縄文・弥生", q: "縄文土器が使われた約1万年前からの時代は？", a: "縄文時代", ruby: "<ruby>縄文時代<rt>じょうもんじだい</rt></ruby>" },
+      { id: 44, c: "宗教・縄文・弥生", q: "表面に縄目模様のある深鉢形などの土器は？", a: "縄文土器", ruby: "<ruby>縄文土器<rt>じょうんどき</rt></ruby>" },
+      { id: 45, c: "宗教・縄文・弥生", q: "縄文時代を中心とする狩猟・採集文化は？", a: "縄文文化", ruby: "<ruby>縄文文化<rt>じょうもんぶんか</rt></ruby>" },
+      { id: 46, c: "宗教・縄文・弥生", q: "地面を掘り下げ床を設けた住居は？", a: "竪穴住居", ruby: "<ruby>竪穴住居<rt>たてあなじゅうきょ</rt></ruby>" },
+      { id: 47, c: "宗教・縄文・弥生", q: "食べ残しの貝殻などが積もった遺跡は？", a: "貝塚", ruby: "<ruby>貝塚<rt>かいづか</rt></ruby>" },
+      { id: 48, c: "宗教・縄文・弥生", q: "魔よけなどの魔術的儀式に使われた土の人形は？", a: "土偶", ruby: "<ruby>土偶<rt>どぐう</rt></ruby>" },
+      { id: 49, c: "宗教・縄文・弥生", q: "稲作と金属器が伝わり広まった時代は？", a: "弥生時代", ruby: "<ruby>弥生時代<rt>やよいじだい</rt></ruby>" },
+      { id: 50, c: "宗教・縄文・弥生", q: "赤褐色で薄くて硬い実用的な土器は？", a: "弥生土器", ruby: "<ruby>弥生土器<rt>やよいどき</rt></ruby>" },
+      { id: 51, c: "宗教・縄文・弥生", q: "農耕と金属器を伴う弥生時代の文化は？", a: "弥生文化", ruby: "<ruby>弥生文化<rt>やよいぶんか</rt></ruby>" },
+      { id: 52, c: "宗教・縄文・弥生", q: "大陸から九州北部に伝わった米作りは？", a: "稲作", ruby: "<ruby>稲作<rt>いなさく</rt></ruby>" },
+      { id: 53, c: "宗教・縄文・弥生", q: "青銅器や鉄器の総称は？（補正: 金属機➔金属器）", a: "金属器", ruby: "<ruby>金属器<rt>きんぞくき</rt></ruby>" },
+      { id: 54, c: "宗教・縄文・弥生", q: "収穫した穀物をねずみや湿気から守る倉庫は？", a: "高床倉庫", ruby: "<ruby>高床倉庫<rt>たかゆかそうこ</rt></ruby>" },
+      { id: 55, c: "宗教・縄文・弥生", q: "卑弥呼が治めた小国連合体は？", a: "邪馬台国", ruby: "<ruby>邪馬台国<rt>やまたいこく</rt></ruby>" },
+      { id: 56, c: "宗教・縄文・弥生", q: "邪馬台国の女王は？", a: "卑弥呼", ruby: "<ruby>卑弥呼<rt>ひみこ</rt></ruby>" },
+      { id: 57, c: "宗教・縄文・弥生", q: "外国の君主に貢物を納める外交行為は？", a: "朝貢", ruby: "<ruby>朝貢<rt>ちょうこう</rt></ruby>" },
+      { id: 58, c: "宗教・縄文・弥生", q: "魏の皇帝から卑弥呼に授けられた称号は？", a: "親魏倭王", ruby: "<ruby>親魏倭王<rt>しんぎわおう</rt></ruby>" },
 
-        function toggleCatCheckbox(catId) {
-            const chk = document.getElementById(`chk-${catId}`);
-            if (chk) chk.checked = !chk.checked;
-        }
+      // --- 3. 古墳・飛鳥・奈良 ---
+      { id: 59, c: "古墳・飛鳥・奈良", q: "ヤマトの勢力を中心に成立した連合政権は？", a: "大和政権", ruby: "<ruby>大和政権<rt>やまとせいけん</rt></ruby>" },
+      { id: 60, c: "古墳・飛鳥・奈良", q: "大和政権の頂点に立った首長の称号は？", a: "大王", ruby: "<ruby>大王<rt>おおきみ</rt></ruby>" },
+      { id: 61, c: "古墳・飛鳥・奈良", q: "鉄剣銘に刻まれた雄略天皇とされる大王は？", a: "ワカタケル大王", ruby: "ワカタケル<ruby>大王<rt>だいおう</rt></ruby>" },
+      { id: 62, c: "古墳・飛鳥・奈良", q: "朝鮮半島南西部にあった国は？", a: "百済", ruby: "<ruby>百済<rt>くだら</rt></ruby>" },
+      { id: 63, c: "古墳・飛鳥・奈良", q: "朝鮮半島南部の小国群地域は？", a: "伽耶", ruby: "<ruby>伽耶<rt>かや</rt></ruby>" },
+      { id: 64, c: "古墳・飛鳥・奈良", q: "伽耶地域の別称は？", a: "加羅地域", ruby: "<ruby>加羅地域<rt>からちいき</rt></ruby>" },
+      { id: 65, c: "古墳・飛鳥・奈良", q: "日本が深く関与したとされる伽耶の別称は？", a: "任那", ruby: "<ruby>任那<rt>みまな</rt></ruby>" },
+      { id: 66, c: "古墳・飛鳥・奈良", q: "朝鮮半島北部の強大な国家は？", a: "高句麗", ruby: "<ruby>高句麗<rt>こうくり</rt></ruby>" },
+      { id: 67, c: "古墳・飛鳥・奈良", q: "朝鮮半島南東部の国は？", a: "新羅", ruby: "<ruby>新羅<rt>しらぎ</rt></ruby>" },
+      { id: 68, c: "古墳・飛鳥・奈良", q: "巨大な墳丘墓が作られた時代は？", a: "古墳時代", ruby: "<ruby>古墳時代<rt>こふんじだい</rt></ruby>" },
+      { id: 69, c: "古墳・飛鳥・奈良", q: "鍵穴のような形をした前方部と後円部を持つ古墳は？", a: "前方後円墳", ruby: "<ruby>前方後円墳<rt>ぜんぽうこうえんふん</rt></ruby>" },
+      { id: 70, c: "古墳・飛鳥・奈良", q: "古墳の墳丘や周囲に並べられた素焼きの焼き物は？", a: "埴輪", ruby: "<ruby>埴輪<rt>はにわ</rt></ruby>" },
+      { id: 71, c: "古墳・飛鳥・奈良", q: "技術や学問を持って大陸から移住した人々は？", a: "渡来人", ruby: "<ruby>渡来人<rt>とらいじん</rt></ruby>" },
+      { id: 72, c: "古墳・飛鳥・奈良", q: "渡来人が伝えた灰色で硬い土器は？", a: "須恵器", ruby: "<ruby>須恵器<rt>すえき</rt></ruby>" },
+      { id: 73, c: "古墳・飛鳥・奈良", q: "推古天皇の摂政として天皇中心の政治を目指した人物は？", a: "聖徳太子", ruby: "<ruby>聖徳太子<rt>しょうとくたいし</rt></ruby>（<ruby>厩戸皇子<rt>うまやどのおうじ</rt></ruby>）" },
+      { id: 74, c: "古墳・飛鳥・奈良", q: "渡来人と結びつき権勢を振るった豪族は？", a: "蘇我氏", ruby: "<ruby>蘇我氏<rt>そがし</rt></ruby>" },
+      { id: 75, c: "古墳・飛鳥・奈良", q: "日本初の女性天皇は？", a: "推古天皇", ruby: "<ruby>推古天皇<rt>すいこてんのう</rt></ruby>" },
+      { id: 76, c: "古墳・飛鳥・奈良", q: "家柄にとらわれず才能で位階を与えた制度は？", a: "冠位十二階", ruby: "<ruby>冠位十二階<rt>かんいじゅうにかい</rt></ruby>" },
+      { id: 77, c: "古墳・飛鳥・奈良", q: "604年に制定された役人の心構えを示す法規は？", a: "十七条の憲法", ruby: "<ruby>十七条の憲法<rt>じゅうしちじょうのけんぽう</rt></ruby>" },
+      { id: 78, c: "古墳・飛鳥・奈良", q: "隋へ派遣された使節は？", a: "遣隋使", ruby: "<ruby>遣隋使<rt>けんずいし</rt></ruby>" },
+      { id: 79, c: "古墳・飛鳥・奈良", q: "607年に遣隋使として隋に渡った人物は？", a: "小野妹子", ruby: "<ruby>小野妹子<rt>おののいもこ</rt></ruby>" },
+      { id: 80, c: "古墳・飛鳥・奈良", q: "法隆寺などに代表される日本初の仏教文化は？", a: "あすか文化", ruby: "あすか<ruby>文化<rt>ぶんか</rt></ruby>" },
+      { id: 81, c: "古墳・飛鳥・奈良", q: "645年、中大兄皇子らが蘇我氏を倒し始まった政治改革は？", a: "大化の改新", ruby: "<ruby>大化の改新<rt>たいかのかいしん</rt></ruby>" },
+      { id: 82, c: "古墳・飛鳥・奈良", q: "大化の改新を中心となって進めた皇子は？", a: "中大兄皇子", ruby: "<ruby>中大兄皇子<rt>なかのおおえのおうじ</rt></ruby>" },
+      { id: 83, c: "古墳・飛鳥・奈良", q: "即位後、近江大津宮に遷都した中大兄皇子の天皇名は？", a: "天智天皇", ruby: "<ruby>天智天皇<rt>てんじてんのう</rt></ruby>" },
+      { id: 84, c: "古墳・飛鳥・奈良", q: "中大兄皇子を助け、死際に藤原の姓を授けられた人物は？", a: "中臣鎌足", ruby: "<ruby>中臣鎌足<rt>なかとみのかまたり</rt></ruby>" },
+      { id: 85, c: "古墳・飛鳥・奈良", q: "土地と人民を直接国家が支配する原則は？", a: "公地・公民", ruby: "<ruby>公地・公民<rt>こうち・こうみん</rt></ruby>" },
+      { id: 86, c: "古墳・飛鳥・奈良", q: "律と令に基づき政治を行う国家体制は？", a: "律令国家", ruby: "<ruby>律令国家<rt>りつりょうこっか</rt></ruby>" },
+      { id: 87, c: "古墳・飛鳥・奈良", q: "663年、日本が唐・新羅軍に敗北した海戦は？", a: "白村江の戦い", ruby: "<ruby>白村江の戦い<rt>はくすきのえのたたかい</rt></ruby>" },
+      { id: 88, c: "古墳・飛鳥・奈良", q: "672年、大海人皇子と大友皇子が争った後継者争いは？", a: "壬申の乱", ruby: "<ruby>壬申の乱<rt>じんしんのらん</rt></ruby>" },
+      { id: 89, c: "古墳・飛鳥・奈良", q: "壬申の乱に勝利し即位した天皇は？", a: "天武天皇", ruby: "<ruby>天武天皇<rt>てんむてんのう</rt></ruby>" },
+      { id: 90, c: "古墳・飛鳥・奈良", q: "日本初の本格的な中国式の都城は？", a: "藤原京", ruby: "<ruby>藤原京<rt>ふじわらきょう</rt></ruby>" },
+      { id: 91, c: "古墳・飛鳥・奈良", q: "藤原京へ遷都し飛鳥浄御原令を完成させた天皇は？", a: "持統天皇", ruby: "<ruby>持統天皇<rt>じとうてんのう</rt></ruby>" },
+      { id: 92, c: "古墳・飛鳥・奈良", q: "701年に藤原不比等らが制定した律令は？", a: "大宝律令", ruby: "<ruby>大宝律令<rt>たいほうりつりょう</rt></ruby>" },
+      { id: 93, c: "古墳・飛鳥・奈良", q: "6歳以上の男女に口分田を与え死亡時に返還させた制度は？", a: "班田収授法", ruby: "<ruby>班田収授法<rt>はんでんしゅうじゅのほう</rt></ruby>" },
+      { id: 94, c: "古墳・飛鳥・奈良", q: "人民の把握と税の徴収のために作られた台帳は？", a: "戸籍", ruby: "<ruby>戸籍<rt>こせき</rt></ruby>" },
+      { id: 95, c: "古墳・飛鳥・奈良", q: "班田収授法に基づき人民に割り当てられた農地は？", a: "口分田", ruby: "<ruby>口分田<rt>くぶんデン</rt></ruby>" },
+      { id: 96, c: "古墳・飛鳥・奈良", q: "743年、新しく開墾した土地の永久私有を認めた法令は？", a: "墾田永年私財法", ruby: "<ruby>墾田永年私財法<rt>こんでんえいねんしざいほう</rt></ruby>" },
+      { id: 97, c: "古墳・飛鳥・奈良", q: "貴族や社寺が私有した農地は？", a: "荘園", ruby: "<ruby>荘園<rt>しょうえん</rt></ruby>" },
+      { id: 98, c: "古墳・飛鳥・奈良", q: "710年に奈良に平城京が置かれてからの時代は？", a: "平城京", ruby: "<ruby>平城京<rt>へいじょうきょう</rt></ruby>" },
+      { id: 99, c: "古墳・飛鳥・奈良", q: "仏教の力で国家の安泰を図った天皇は？", a: "聖武天皇", ruby: "<ruby>聖武天皇<rt>しょうむてんのう</rt></ruby>" },
+      { id: 100, c: "古墳・飛鳥・奈良", q: "国ごとに建てられた男子の寺院は？", a: "国分寺", ruby: "<ruby>国分寺<rt>こくぶんじ</rt></ruby>" },
+      { id: 101, c: "古墳・飛鳥・奈良", q: "国ごとに建てられた女子の寺院は？", a: "国分尼寺", ruby: "<ruby>国分尼寺<rt>こくぶんにじ</rt></ruby>" },
+      { id: 102, c: "古墳・飛鳥・奈良", q: "大仏が安置されている奈良の代表的な寺院は？", a: "東大寺", ruby: "<ruby>東大寺<rt>とうだいじ</rt></ruby>" },
+      { id: 103, c: "古墳・飛鳥・奈良", q: "東大寺に造立された巨大な仏像は？", a: "大仏", ruby: "<ruby>大仏<rt>だいぶつ</rt></ruby>" },
+      { id: 104, c: "古墳・飛鳥・奈良", q: "唐の影響を強く受けた聖武天皇の時代の文化は？", a: "天平文化", ruby: "<ruby>天平文化<rt>てんぴょうぶんか</rt></ruby>" },
 
-        function updateCounts() {
-            let counts = { forgot: 0, learning: 0, mastered: 0, unlearned: 0 };
-            historyData.forEach(item => {
-                const status = getItemStatus(item.id);
-                counts[status]++;
-            });
+      // --- 4. 平安時代 ---
+      { id: 105, c: "平安時代", q: "794年に京都に作られた都は？", a: "平安京", ruby: "<ruby>平安京<rt>へいあんきょう</rt></ruby>" },
+      { id: 106, c: "平安時代", q: "平安京へ遷都し東北地方へ軍を派遣した天皇は？", a: "桓武天皇", ruby: "<ruby>桓武天皇<rt>かんむてんのう</rt></ruby>" },
+      { id: 107, c: "平安時代", q: "794年から鎌倉幕府成立までの時代は？", a: "平安時代", ruby: "<ruby>平安時代<rt>へいあんじだい</rt></ruby>" },
+      { id: 108, c: "平安時代", q: "蝦夷の征伐のために派遣された将軍は？", a: "坂上田村麻呂", ruby: "<ruby>坂上田村麻呂<rt>さかのうえのたむらまろ</rt></ruby>" },
+      { id: 109, c: "平安時代", q: "東北地方の動乱を抑えるために設けられた総司令官役職は？", a: "征夷大将軍", ruby: "<ruby>征夷大将軍<rt>せいいたいしょうぐん</rt></ruby>" },
+      { id: 110, c: "平安時代", q: "藤原氏が摂政・関白の職を独占して行なった政治は？", a: "摂関政治", ruby: "<ruby>摂関政治<rt>せっかんせいじ</rt></ruby>" },
+      { id: 111, c: "平安時代", q: "幼少の天皇に代わり政治を行う補佐役は？", a: "摂政", ruby: "<ruby>摂政<rt>せっしょう</rt></ruby>" },
+      { id: 112, c: "平安時代", q: "成人した天皇を補佐する最高役職は？", a: "関白", ruby: "<ruby>関白<rt>かんぱく</rt></ruby>" },
+      { id: 113, c: "平安時代", q: "摂関政治の全盛期を築き「この世をば…」と詠んだ人物は？", a: "藤原道長", ruby: "<ruby>藤原道長<rt>ふじわらのみちなが</rt></ruby>" },
+      { id: 114, c: "平安時代", q: "比叡山延暦寺を開き天台宗を広めた僧は？", a: "最澄", ruby: "<ruby>最澄<rt>さいちょう</rt></ruby>" },
+      { id: 115, c: "平安時代", q: "最澄が開いた仏教宗派は？", a: "天台宗", ruby: "<ruby>天台宗<rt>てんだいしゅう</rt></ruby>" },
+      { id: 116, c: "平安時代", q: "最澄が比叡山に建てた総本山は？", a: "比叡山延暦寺", ruby: "<ruby>比叡山延暦寺<rt>ひえいざんえんりゃくじ</rt></ruby>" },
+      { id: 117, c: "平安時代", q: "高野山金剛峯寺を開き真言宗を広めた僧は？", a: "空海", ruby: "<ruby>空海<rt>くうかい</rt></ruby>" },
+      { id: 118, c: "平安時代", q: "空海が開いた高野山を拠点とする密教宗派は？", a: "真言宗", ruby: "<ruby>真言宗<rt>しんごんしゅう</rt></ruby>" },
+      { id: 119, c: "平安時代", q: "国風文化の風土で生まれた日本独自の文化スタイルは？", a: "国風文化", ruby: "<ruby>国風文化<rt>こくふうぶんか</rt></ruby>" },
+      { id: 120, c: "平安時代", q: "894年に遣唐使の廃止を提言した政治家・学者は？", a: "菅原道真", ruby: "<ruby>菅原道真<rt>すがわらのみちざね</rt></ruby>" },
+      { id: 121, c: "平安時代", q: "阿弥陀如来を信じ極楽浄土への往生を願う信仰は？", a: "浄土信仰", ruby: "<ruby>浄土信仰<rt>じょうどしんこう</rt></ruby>" },
+      { id: 122, c: "平安時代", q: "東大寺にあり聖武天皇の遺品などを収めた宝物庫は？", a: "正倉院", ruby: "<ruby>正倉院<rt>しょうそういん</rt></ruby>" },
+      { id: 123, c: "平安時代", q: "712年に編纂された日本最古の歴史書は？", a: "古事記", ruby: "『<ruby>古事記<rt>こじき</rt></ruby>』" },
+      { id: 124, c: "平安時代", q: "720年に完成した漢文表記の正史は？", a: "日本書紀", ruby: "『<ruby>日本書紀<rt>にほんしょき</rt></ruby>』" },
+      { id: 125, c: "平安時代", q: "国ごとに地理や産物、伝承を記録させた報告書は？", a: "風土記", ruby: "『<ruby>風土記<rt>ふどき</rt></ruby>』" },
+      { id: 126, c: "平安時代", q: "防人や農民の歌も含まれる日本最古の和歌集は？", a: "万葉集", ruby: "『<ruby>万葉集<rt>まんようしゅう</rt></ruby>』" },
+      { id: 127, c: "平安時代", q: "『源氏物語』を執筆した女流作家は？", a: "紫式部", ruby: "<ruby>紫式部<rt>むらさきしきぶ</rt></ruby>" },
+      { id: 128, c: "平安時代", q: "光源氏を主人公とする長編物語は？", a: "源氏物語", ruby: "『<ruby>源氏物語<rt>げんじものがたり</rt></ruby>』" },
+      { id: 129, c: "平安時代", q: "『枕草子』を執筆した清少納言は？", a: "清少納言", ruby: "<ruby>清少納言<rt>せいしょうなごん</rt></ruby>" },
+      { id: 130, c: "平安時代", q: "「春はあけぼの…」で始まる随筆集は？", a: "枕草子", ruby: "『<ruby>枕草子<rt>まくらのそうし</rt></ruby>』" },
+      { id: 131, c: "平安時代", q: "醍醐天皇の命で紀貫之らが編纂した初の勅撰和歌集は？", a: "古今和歌集", ruby: "『<ruby>古今和歌集<rt>こきんわかしゅう</rt></ruby>』" },
+      { id: 132, c: "平安時代", q: "藤原頼通が宇治に建立した阿弥陀堂建築は？", a: "平等院鳳凰堂", ruby: "<ruby>平等院鳳凰堂<rt>びょうどういんほうおうどう</rt></ruby>" },
+      { id: 133, c: "平安時代", q: "地方の館や荘園を警護するために生まれた武装集団は？", a: "武士", ruby: "<ruby>武士<rt>ぶし</rt></ruby>" },
+      { id: 134, c: "平安時代", q: "清和源氏の流れを汲む代表的な武士の棟梁一族は？", a: "源氏", ruby: "<ruby>源氏<rt>げんじ</rt></ruby>" },
+      { id: 135, c: "平安時代", q: "平泉を中心に東北地方で独自の黄金文化を築いた一族は？", a: "奥州藤原氏", ruby: "<ruby>奥州藤原氏<rt>おうしゅうふじわらし</rt></ruby>" },
+      { id: 136, c: "平安時代", q: "桓武平氏の流れを汲み武家政権を初めて樹立した一族は？", a: "平氏", ruby: "<ruby>平氏<rt>へいし</rt></ruby>" },
+      { id: 137, c: "平安時代", q: "天皇が譲位して上皇となり院庁で行なった政治形態は？", a: "院政", ruby: "<ruby>院政<rt>いんせい</rt></ruby>" },
+      { id: 138, c: "平安時代", q: "譲位した皇室の長は？", a: "上皇", ruby: "<ruby>上皇<rt>じょうこう</rt></ruby>" },
+      { id: 139, c: "平安時代", q: "太政大臣に上り詰め平氏全盛期を創出した人物は？", a: "平清盛", ruby: "<ruby>平清盛<rt>たいらのきよもり</rt></ruby>" },
+      { id: 140, c: "平安時代", q: "太政官の最高官職は？", a: "太政大臣", ruby: "<ruby>太政大臣<rt>だいじょうだいじん</rt></ruby>" },
+      { id: 141, c: "平安時代", q: "平清盛が音戸の瀬戸を開削し大輪田泊を進めた対外貿易は？", a: "日宋貿易", ruby: "<ruby>日宋貿易<rt>にっそうぼうえき</rt></ruby>" },
+      { id: 142, c: "平安時代", q: "鎌倉幕府を開いた源氏の棟梁は？", a: "源頼朝", ruby: "<ruby>源頼朝<rt>みなもとのよりとも</rt></ruby>" },
+      { id: 143, c: "平安時代", q: "1185年、平氏が滅亡した山口県の合戦場は？", a: "壇ノ浦", ruby: "<ruby>壇ノ浦<rt>だんのうら</rt></ruby>" },
 
-            document.getElementById('count-forgot').innerText = counts.forgot;
-            document.getElementById('count-learning').innerText = counts.learning;
-            document.getElementById('count-mastered').innerText = counts.mastered;
-            document.getElementById('count-unlearned').innerText = counts.unlearned;
+      // --- 5. 鎌倉・室町・戦国 ---
+      { id: 144, c: "鎌倉・室町・戦国", q: "源頼朝が東国に樹立した初の武家政権は？", a: "鎌倉幕府", ruby: "<ruby>鎌倉幕府<rt>かまくらばくふ</rt></ruby>" },
+      { id: 145, c: "鎌倉・室町・戦国", q: "鎌倉幕府が成立してからの時代は？", a: "鎌倉時代", ruby: "<ruby>鎌倉時代<rt>かまくらじだい</rt></ruby>" },
+      { id: 146, c: "鎌倉・室町・戦国", q: "国ごとに置かれ軍事・警察を司った役職は？", a: "守護", ruby: "<ruby>守護<rt>しゅご</rt></ruby>" },
+      { id: 147, c: "鎌倉・室町・戦国", q: "荘園や公領ごとに置かれ年貢徴収を司った役職は？", a: "地頭", ruby: "<ruby>地頭<rt>じとう</rt></ruby>" },
+      { id: 148, c: "鎌倉・室町・戦国", q: "将軍と主従関係を結んだ武士は？", a: "御家人", ruby: "<ruby>御家人<rt>ごけにん</rt></ruby>" },
+      { id: 149, c: "鎌倉・室町・戦国", q: "将軍が御家人に領地を保障・給与する恩恵は？", a: "御恩", ruby: "<ruby>御恩<rt>ごおん</rt></ruby>" },
+      { id: 150, c: "鎌倉・室町・戦国", q: "御家人が将軍のために軍役や番役を果たす義務は？", a: "奉公", ruby: "<ruby>奉公<rt>ほうこう</rt></ruby>" },
+      { id: 151, c: "鎌倉・室町・戦国", q: "北条氏が執権の職に就き行なった政治形態は？", a: "執権政治", ruby: "<ruby>執権政治<rt>しっけんせいじ</rt></ruby>" },
+      { id: 152, c: "鎌倉・室町・戦国", q: "将軍を補佐し幕政の実権を握った役職は？", a: "執権", ruby: "<ruby>執権<rt>しっけん</rt></ruby>" },
+      { id: 153, c: "鎌倉・室町・戦国", q: "北条政子や義時を輩出し執権を独占した一族は？", a: "北条氏", ruby: "<ruby>北条氏<rt>ほうじょうし</rt></ruby>" },
+      { id: 154, c: "鎌倉・室町・戦国", q: "御成敗式目を制定した3代執権は？", a: "北条泰時", ruby: "<ruby>北条泰時<rt>ほうじょうやすとき</rt></ruby>" },
+      { id: 155, c: "鎌倉・室町・戦国", q: "1232年に泰時が制定した武家社会初の裁判基準法規は？（補正: 菅玲等誤字無し）", a: "御成敗式目", ruby: "『<ruby>御成敗式目<rt>ごせいばいしきもく</rt></ruby>』" },
+      { id: 156, c: "鎌倉・室町・戦国", q: "1221年、後鳥羽上皇が幕府を倒そうとして起こした挙兵は？", a: "承久の乱", ruby: "<ruby>承久の乱<rt>じょうきゅうのらん</rt></ruby>" },
+      { id: 157, c: "鎌倉・室町・戦国", q: "承久の乱を起こし隠岐に流された上皇は？", a: "後鳥羽上皇", ruby: "<ruby>後鳥羽上皇<rt>ごとばじょうこう</rt></ruby>" },
+      { id: 158, c: "鎌倉・室町・戦国", q: "「御恩は山より高く…」と御家人を鼓舞した源頼朝の妻は？", a: "北条政子", ruby: "<ruby>北条政子<rt>ほうじょうまさこ</rt></ruby>" },
+      { id: 159, c: "鎌倉・室町・戦国", q: "13世紀後半、フビライの元軍が2度にわたり侵攻してきた事件は？", a: "元寇", ruby: "<ruby>元寇<rt>げんこう</rt></ruby>" },
+      { id: 160, c: "鎌倉・室町・戦国", q: "困窮した御家人の所領売却地を無償で取り戻させた法令は？", a: "徳政令", ruby: "<ruby>徳政令<rt>とくせいれい</rt></ruby>" },
+      { id: 161, c: "鎌倉・室町・戦国", q: "同じ耕地で1年に2回異なる作物を育てる農法は？", a: "二毛作", ruby: "<ruby>二毛作<rt>にもうさく</rt></ruby>" },
+      { id: 162, c: "鎌倉・室町・戦国", q: "月に数回、交通の要衝で開かれた市場は？", a: "定期市", ruby: "<ruby>定期市<rt>ていきいち</rt></ruby>" },
+      { id: 163, c: "鎌倉・室町・戦国", q: "鎌倉幕府滅亡後、後醍醐天皇が始めた天皇親政は？", a: "建武の新政", ruby: "<ruby>建武の新政<rt>けんむのしんせい</rt></ruby>" },
+      { id: 164, c: "鎌倉・室町・戦国", q: "建武の新政を行い吉野へ逃れて南朝を立てた天皇は？", a: "後醍醐天皇", ruby: "<ruby>後醍醐天皇<rt>ごだいごてんのう</rt></ruby>" },
+      { id: 165, c: "鎌倉・室町・戦国", q: "後醍醐天皇が吉野に開いた朝廷は？", a: "南朝", ruby: "<ruby>南朝<rt>なんちょう</rt></ruby>" },
+      { id: 166, c: "鎌倉・室町・戦国", q: "足利尊氏が京都に擁立した朝廷は？", a: "北朝", ruby: "<ruby>北朝<rt>ほくちょう</rt></ruby>" },
+      { id: 167, c: "鎌倉・室町・戦国", q: "室町幕府を開き北朝を擁立した武将は？", a: "足利尊氏", ruby: "<ruby>足利尊氏<rt>あしかがたかうじ</rt></ruby>" },
+      { id: 168, c: "鎌倉・室町・戦国", q: "南北の2つの朝廷が並立し対立した時代は？", a: "南北朝時代", ruby: "<ruby>南北朝時代<rt>なんぼくちょうじだい</rt></ruby>" },
+      { id: 169, c: "鎌倉・室町・戦国", q: "南北朝を合一し金閣を建てた3代将軍は？", a: "足利義満", ruby: "<ruby>足利義満<rt>あしかがよしみつ</rt></ruby>" },
+      { id: 170, c: "鎌倉・室町・戦国", q: "足利尊氏が京都に開いた武家政権は？", a: "室町幕府", ruby: "<ruby>室町幕府<rt>むろまちばくふ</rt></ruby>" },
+      { id: 171, c: "鎌倉・室町・戦国", q: "室町幕府が置かれていた時代は？", a: "室町時代", ruby: "<ruby>室町時代<rt>むろまちじだい</rt></ruby>" },
+      { id: 172, c: "鎌倉・室町・戦国", q: "将軍を補佐した最高役職は？（補正: 菅玲➔管領）", a: "管領", ruby: "<ruby>管領<rt>かんれい</rt></ruby>" },
+      { id: 173, c: "鎌倉・室町・戦国", q: "関東8か国を統治するために鎌倉に置かれた機関は？", a: "鎌倉府", ruby: "<ruby>鎌倉府<rt>かまくらふ</rt></ruby>" },
+      { id: 174, c: "鎌倉・室町・戦国", q: "一国の領主としての性格を強めた室町時代の守護は？", a: "守護大名", ruby: "<ruby>守護大名<rt>しゅごだいみょう</rt></ruby>" },
+      { id: 175, c: "鎌倉・室町・戦国", q: "東シナ海などで活動した海賊・海軍集団は？", a: "倭寇", ruby: "<ruby>倭寇<rt>わこう</rt></ruby>" },
+      { id: 176, c: "鎌倉・室町・戦国", q: "日明貿易で正規の貿易船かを証明するために使われた札は？", a: "勘合", ruby: "<ruby>勘合<rt>かんごう</rt></ruby>" },
+      { id: 177, c: "鎌倉・室町・戦国", q: "勘合符を用いて明と行った貿易は？", a: "日明貿易", ruby: "<ruby>日明貿易<rt>にちみんぼうえき</rt></ruby>（<ruby>勘合貿易<rt>かんごうぼうえき</rt></ruby>）" },
+      { id: 178, c: "鎌倉・室町・戦国", q: "沖縄本島を統一し尚氏が樹立した中継貿易国家は？", a: "琉球王国", ruby: "<ruby>琉球王国<rt>りゅうきゅうおうこく</rt></ruby>" },
+      { id: 179, c: "鎌倉・室町・戦国", q: "1467年、将軍継承問題等で京都が焦土となった戦乱は？", a: "応仁の乱", ruby: "<ruby>応仁の乱<rt>おうにんのらん</rt></ruby>" },
+      { id: 180, c: "鎌倉・室町・戦国", q: "銀閣を建て東山文化を開いた8代将軍は？", a: "足利義政", ruby: "<ruby>足利義政<rt>あしかがよしまさ</rt></ruby>" },
+      { id: 181, c: "鎌倉・室町・戦国", q: "下の者が実力で上の者を倒して取って代わる風潮は？", a: "下剋上", ruby: "<ruby>下剋上<rt>げこくじょう</rt></ruby>" },
+      { id: 182, c: "鎌倉・室町・戦国", q: "領国を独自に直接支配した戦国時代の領主は？", a: "戦国大名", ruby: "<ruby>戦国大名<rt>せんごくだいみょう</rt></ruby>" },
+      { id: 183, c: "鎌倉・室町・戦国", q: "応仁の乱以降、群雄が割拠した時代は？", a: "戦国時代", ruby: "<ruby>戦国時代<rt>せんごくじだい</rt></ruby>" },
+      { id: 184, c: "鎌倉・室町・戦国", q: "戦国大名の居城を中心に作られた城郭都市は？", a: "城下町", ruby: "<ruby>城下町<rt>じょうかまち</rt></ruby>" },
+      { id: 185, c: "鎌倉・室町・戦国", q: "戦国大名が領国内を統治するために制定した独自法規は？", a: "分国法", ruby: "<ruby>分国法<rt>ぶんこくほう</rt></ruby>" },
+      { id: 186, c: "鎌倉・室町・戦国", q: "米や麦、野菜などの食用作物は？", a: "食品作物", ruby: "<ruby>食品作物<rt>しょくひんさくもつ</rt></ruby>" },
+      { id: 187, c: "鎌倉・室町・戦国", q: "農民らが結成した自治的な村落組織は？", a: "惣", ruby: "<ruby>惣<rt>そう</rt></ruby>" },
+      { id: 188, c: "鎌倉・室町・戦国", q: "惣の農民が集まり村のルールを決めた話し合いは？", a: "寄合", ruby: "<ruby>寄合<rt>よりあい</rt></ruby>" },
+      { id: 189, c: "鎌倉・室町・戦国", q: "借金の帳消し（徳政）を求めて農民が起こした暴動は？", a: "土一揆", ruby: "<ruby>土一揆<rt>つちいっき</rt></ruby>" },
+      { id: 190, c: "鎌倉・室町・戦国", q: "質屋を営み高利貸しを行った金融業者は？", a: "土倉", ruby: "<ruby>土倉<rt>どそう</rt></ruby>" },
+      { id: 191, c: "鎌倉・室町・戦国", q: "馬を使って陸上輸送を行なった運送業者は？", a: "馬借", ruby: "<ruby>馬借<rt>ばしゃく</rt></ruby>" },
+      { id: 192, c: "鎌倉・室町・戦国", q: "港湾で商品の保管や輸送を請け負った業者は？", a: "問", ruby: "<ruby>問<rt>とい</rt></ruby>" },
+      { id: 193, c: "鎌倉・室町・戦国", q: "商人や手工業者が作った同業組合は？", a: "座", ruby: "<ruby>座<rt>ざ</rt></ruby>" },
+      { id: 194, c: "鎌倉・室町・戦国", q: "京都や自治都市堺などで自治を行った裕福な町人は？", a: "町衆", ruby: "<ruby>町衆<rt>まちしゅう</rt></ruby>" },
+      { id: 195, c: "鎌倉・室町・戦国", q: "足利義満が北山に建てた金箔張りの楼閣は？", a: "金閣", ruby: "<ruby>金閣<rt>きんかく</rt></ruby>" },
+      { id: 196, c: "鎌倉・室町・戦国", q: "観阿弥・世阿弥により大成された仮面芸能は？", a: "能", ruby: "<ruby>能<rt>のう</rt></ruby>" },
+      { id: 197, c: "鎌倉・室町・戦国", q: "足利義政が東山に建てた質素で落ち着いた楼閣は？", a: "銀閣", ruby: "<ruby>銀閣<rt>ぎんかく</rt></ruby>" },
+      { id: 198, c: "鎌倉・室町・戦国", q: "畳や障子、床の間を持つ近代和室の原型様式は？", a: "書院造", ruby: "<ruby>書院造<rt>しょいんづくり</rt></ruby>" },
+      { id: 199, c: "鎌倉・室町・戦国", q: "明に渡り水墨画を大成した画僧は？", a: "雪舟", ruby: "<ruby>雪舟<rt>せっしゅう</rt></ruby>" },
+      { id: 200, c: "鎌倉・室町・戦国", q: "墨の濃淡のみで表現する絵画技法は？", a: "水墨画", ruby: "<ruby>水墨画<rt>すいぼくが</rt></ruby>" },
+      { id: 201, c: "鎌倉・室町・戦国", q: "能の合間に演じられた滑稽な対話劇は？", a: "狂言", ruby: "<ruby>狂言<rt>きょうげん</rt></ruby>" },
+      { id: 202, c: "鎌倉・室町・戦国", q: "『一寸法師』など挿絵入りの通俗的な物語絵本は？", a: "御伽草子", ruby: "<ruby>御伽草子<rt>おとぎぞうし</rt></ruby>" },
 
-            renderCategories();
-        }
+      // --- 6. ヨーロッパ世界と大航海時代 ---
+      { id: 203, c: "ヨーロッパ世界と大航海時代", q: "ローマ教皇を首長とするキリスト教西方の旧教は？", a: "カトリック教会", ruby: "カトリック<ruby>教会<rt>きょうかい</rt></ruby>" },
+      { id: 204, c: "ヨーロッパ世界と大航海時代", q: "ビザンツ帝国やロシアで信仰された東方のキリスト教は？", a: "正教会", ruby: "<ruby>正教会<rt>せいきょうかい</rt></ruby>" },
+      { id: 205, c: "ヨーロッパ世界と大航海時代", q: "カトリック教会の最高指導者は？", a: "ローマ教皇", ruby: "ローマ<ruby>教皇<rt>きょうこう</rt></ruby>" },
+      { id: 206, c: "ヨーロッパ世界と大航海時代", q: "キリスト教・ユダヤ教・イスラム教共通の聖地は？", a: "エルサレム", ruby: "エルサレム" },
+      { id: 207, c: "ヨーロッパ世界と大航海時代", q: "エルサレム奪還のためローマ教皇の呼びかけで派遣された軍は？", a: "十字軍", ruby: "<ruby>十字軍<rt>じゅうじぐん</rt></ruby>" },
+      { id: 208, c: "ヨーロッパ世界と大航海時代", q: "14〜16世紀、古代ギリシャ・ローマの文化を復興しようとした運動は？", a: "ルネサンス", ruby: "ルネサンス" },
+      { id: 209, c: "ヨーロッパ世界と大航海時代", q: "ヨーロッパ人が新航路を開拓し世界進出した時代は？", a: "大航海時代", ruby: "<ruby>大航海時代<rt>だいこうかいじだい</rt></ruby>" },
+      { id: 210, c: "ヨーロッパ世界と大航海時代", q: "アフリカ南端を回りインドへ到達した航海者は？", a: "バスコ・ダ・ガマ", ruby: "バスコ・ダ・ガマ" },
+      { id: 211, c: "ヨーロッパ世界と大航海時代", q: "1492年、大西洋を渡りアメリカ大陸へ到達した航海者は？", a: "コロンブス", ruby: "コロンブス" },
+      { id: 212, c: "ヨーロッパ世界と大航海時代", q: "列強国によって政治的・経済的に支配された地域は？", a: "植民地", ruby: "<ruby>植民地<rt>しょくみんち</rt></ruby>" },
+      { id: 213, c: "ヨーロッパ世界と大航海時代", q: "一行が史上初の世界周航を達成した航海者は？", a: "マゼラン", ruby: "マゼラン" },
+      { id: 214, c: "ヨーロッパ世界と大航海時代", q: "ルターやカルバンがカトリック教会を批判し起きた運動は？（補正: 宗教革命➔宗教改革）", a: "宗教改革", ruby: "<ruby>宗教改革<rt>しゅうきょうかいかく</rt></ruby>" },
+      { id: 215, c: "ヨーロッパ世界と大航海時代", q: "予定説を唱えプロテスタントの倫理を形成した改革者は？", a: "カルバン", ruby: "カルバン" },
+      { id: 216, c: "ヨーロッパ世界と大航海時代", q: "宗教改革によりカトリックから分離した新教徒は？", a: "プロテスタント", ruby: "プロテスタント" },
+      { id: 217, c: "ヨーロッパ世界と大航海時代", q: "カトリック側の海外布教組織でザビエルらを排出させた組織は？（補正: イエスズ会➔イエズス会）", a: "イエズス会", ruby: "イエズス<ruby>会<rt>かい</rt></ruby>" },
 
-        function buildDeck() {
-            const selectedCats = Array.from(document.querySelectorAll('#category-options input[type="checkbox"]:checked')).map(cb => cb.value);
-            const selectedStatuses = Array.from(document.querySelectorAll('.status-chip input:checked')).map(cb => cb.value);
+      // --- 7. 安土桃山・江戸時代 ---
+      { id: 218, c: "安土桃山・江戸時代", q: "1543年、ポルトガル人を乗せた船が着いた島へ伝来した兵器は？", a: "鉄砲伝来", ruby: "<ruby>鉄砲伝来<rt>てっぽうでんらい</rt></ruby>" },
+      { id: 219, c: "安土桃山・江戸時代", q: "鉄砲が初めて伝来した鹿児島県の島は？", a: "種子島", ruby: "<ruby>種子島<rt>たねがしま</rt></ruby>" },
+      { id: 220, c: "安土桃山・江戸時代", q: "キリスト教に入信し保護した戦国大名は？", a: "キリシタン大名", ruby: "キリシタン<ruby>大名<rt>だいみょう</rt></ruby>" },
+      { id: 221, c: "安土桃山・江戸時代", q: "ポルトガルやスペイン（南蛮人）との貿易は？", a: "南蛮貿易", ruby: "<ruby>南蛮貿易<rt>なんばんぼうえき</rt></ruby>" },
+      { id: 222, c: "安土桃山・江戸時代", q: "桶狭間の戦いで今川氏を倒し天下統一を進めた武将は？", a: "織田信長", ruby: "<ruby>織田信長<rt>おだのぶなが</rt></ruby>" },
+      { id: 223, c: "安土桃山・江戸時代", q: "織田信長が城下町の商工業を自由化するため行った政策は？", a: "楽市楽座", ruby: "<ruby>楽市楽座<rt>らくいちらくざ</rt></ruby>" },
+      { id: 224, c: "安土桃山・江戸時代", q: "豊臣秀吉が宣教師の国外退去を命じた法令は？", a: "バテレン追放令", ruby: "バテレン<ruby>追放令<rt>ついほうれい</rt></ruby>" },
+      { id: 225, c: "安土桃山・江戸時代", q: "全国の土地の物質量（石高）を揃えた枡で調査した事業は？", a: "太閤検地", ruby: "<ruby>太閤検地<rt>たいこうけんち</rt></ruby>" },
+      { id: 226, c: "安土桃山・江戸時代", q: "土地の生産力を米の収穫量（石）で表した単位は？", a: "石高", ruby: "<ruby>石高<rt>こくだか</rt></ruby>" },
+      { id: 227, c: "安土桃山・江戸時代", q: "農民から武器を没収し一揆を防いだ政策は？", a: "刀狩", ruby: "<ruby>刀狩<rt>かたながり</rt></ruby>" },
+      { id: 228, c: "安土桃山・江戸時代", q: "武士と農民の身分を明確に区別した体制変化は？", a: "兵農分離", ruby: "<ruby>兵農分離<rt>へいのうぶんり</rt></ruby>" },
+      { id: 229, c: "安土桃山・江戸時代", q: "豪壮で華麗な屏風絵や茶の湯が栄えた文化は？", a: "桃山文化", ruby: "<ruby>桃山文化<rt>ももやまぶんか</rt></ruby>" },
+      { id: 230, c: "安土桃山・江戸時代", q: "織田信長・豊臣秀吉が支配した時代は？", a: "安土桃山時代", ruby: "<ruby>安土桃山時代<rt>あづちももやまじだい</rt></ruby>" },
+      { id: 231, c: "安土桃山・江戸時代", q: "侘び茶を大成し秀吉に仕えた茶人は？", a: "千利休", ruby: "<ruby>千利休<rt>せんのりきゅう</rt></ruby>" },
+      { id: 232, c: "安土桃山・江戸時代", q: "1600年、徳川家康が石田三成らを破った合戦は？（補正: 関ヶ原に戦い➔関ヶ原の戦い）", a: "関ヶ原の戦い", ruby: "<ruby>関ヶ原の戦い<rt>せきがはらのたたかい</rt></ruby>" },
+      { id: 233, c: "安土桃山・江戸時代", q: "関ヶ原の戦いに勝ち1603年に江戸幕府を開いた人物は？", a: "徳川家康", ruby: "<ruby>徳川家康<rt>とくがわいえやす</rt></ruby>" },
+      { id: 234, c: "安土桃山・江戸時代", q: "1603年、徳川家康が開いた武家政権は？", a: "江戸幕府", ruby: "<ruby>江戸幕府<rt>えどばくふ</rt></ruby>" },
+      { id: 235, c: "安土桃山・江戸時代", q: "約260年間続いた徳川氏の治世時代は？", a: "江戸時代", ruby: "<ruby>江戸時代<rt>えどじだい</rt></ruby>" },
+      { id: 236, c: "安土桃山・江戸時代", q: "幕府と全国の藩が土地と人民を支配する統治体制は？", a: "幕藩体制", ruby: "<ruby>幕藩体制<rt>ばくはんたいせい</rt></ruby>" },
+      { id: 237, c: "安土桃山・江戸時代", q: "幕府の老中・若年寄などの役職を構成する役人は？", a: "幕僚", ruby: "<ruby>幕僚<rt>ばくりょう</rt></ruby>" },
+      { id: 238, c: "安土桃山・江戸時代", q: "徳川一族（親族）の大名は？", a: "親藩", ruby: "<ruby>親藩<rt>しんぱん</rt></ruby>" },
+      { id: 239, c: "安土桃山・江戸時代", q: "関ヶ原の戦い以前から徳川氏に仕えていた大名は？", a: "譜代大名", ruby: "<ruby>譜代大名<rt>ふだいだいみょう</rt></ruby>" },
+      { id: 240, c: "安土桃山・江戸時代", q: "関ヶ原の戦い以降に徳川氏に服従した大名は？", a: "外様大名", ruby: "<ruby>外様大名<rt>とざまだいみょう</rt></ruby>" },
+      { id: 241, c: "安土桃山・江戸時代", q: "1615年に制定された大名を統制するための法令は？", a: "武家諸法度", ruby: "『<ruby>武家諸法度<rt>ぶけしょはっと</rt></ruby>』" },
+      { id: 242, c: "安土桃山・江戸時代", q: "参勤交代を制度化し鎖国を完成させた3代将軍は？", a: "徳川家光", ruby: "<ruby>徳川家光<rt>とくがわいえみつ</rt></ruby>" },
+      { id: 243, c: "安土桃山・江戸時代", q: "大名に1年おきに領地と江戸を往復させた制度は？", a: "参勤交代", ruby: "<ruby>参勤交代<rt>さんきんこうたい</rt></ruby>" },
+      { id: 244, c: "安土桃山・江戸時代", q: "苗字帯刀などの特権を持った支配身分は？", a: "武士", ruby: "<ruby>武士<rt>ぶし</rt></ruby>" },
+      { id: 245, c: "安土桃山・江戸時代", q: "城下町に住む商人と手工業者の総称は？", a: "町人", ruby: "<ruby>町人<rt>ちょうにん</rt></ruby>" },
+      { id: 246, c: "安土桃山・江戸時代", q: "全人口の約8割を占めた農民を中心とする身分は？", a: "百姓", ruby: "<ruby>百姓<rt>ひゃくしょう</rt></ruby>" },
+      { id: 247, c: "安土桃山・江戸時代", q: "百姓が収穫した米などを領主に納める税は？", a: "年貢", ruby: "<ruby>年貢<rt>ねんぐ</rt></ruby>" },
+      { id: 248, c: "安土桃山・江戸時代", q: "渡航許可状を持った船が行なった海外貿易は？", a: "朱印船貿易", ruby: "<ruby>朱印船貿易<rt>しゅいんせんぼうえき</rt></ruby>" },
+      { id: 249, c: "安土桃山・江戸時代", q: "幕府が発行した海外渡航許可状は？", a: "朱印状", ruby: "<ruby>朱印状<rt>しゅいんじょう</rt></ruby>" },
+      { id: 250, c: "安土桃山・江戸時代", q: "東南アジア各地に作られた日本人の居住地域は？", a: "日本町", ruby: "<ruby>日本町<rt>にほんまち</rt></ruby>" },
+      { id: 251, c: "安土桃山・江戸時代", q: "海外との交通や貿易を幕府が制限・独占した状態は？", a: "鎖国", ruby: "<ruby>鎖国<rt>さこく</rt></ruby>" },
+      { id: 252, c: "安土桃山・江戸時代", q: "キリスト教の信仰を禁止した命令は？", a: "禁教令", ruby: "<ruby>禁教令<rt>きんきょうれい</rt></ruby>" },
+      { id: 253, c: "安土桃山・江戸時代", q: "キリシタンを見分けるために聖画像を踏ませた儀式は？", a: "絵踏", ruby: "<ruby>絵踏<rt>えぶみ</rt></ruby>" },
+      { id: 254, c: "安土桃山・江戸時代", q: "人々を寺院に所属させ宗門改帳に記載させた制度は？", a: "宗門改", ruby: "<ruby>宗門改<rt>しゅうもんあらため</rt></ruby>" },
+      { id: 255, c: "安土桃山・江戸時代", q: "1637年、天草四郎を大将にキリシタン農民らが起こした一揆は？", a: "島原・天草一揆", ruby: "<ruby>島原・天草一揆<rt>しまばら・あまくさいっき</rt></ruby>" },
+      { id: 256, c: "安土桃山・江戸時代", q: "島原・天草一揆で総大将に担ぎ出された少年は？", a: "天草四郎", ruby: "<ruby>天草四郎<rt>あまくさしろう</rt></ruby>" },
+      { id: 257, c: "安土桃山・江戸時代", q: "長崎港内に作られオランダ商館が置かれた扇形の人工島は？", a: "長崎の出島", ruby: "<ruby>長崎の出島<rt>ながさきのでじま</rt></ruby>" },
+      { id: 258, c: "安土桃山・江戸時代", q: "鎖国下で長崎で貿易を許された2つの国・地域は？", a: "オランダ・清", ruby: "オランダ・<ruby>清<rt>しん</rt></ruby>" },
+      { id: 259, c: "安土桃山・江戸時代", q: "朝鮮王朝から将軍の就任ごとに祝賀で派遣された使節は？", a: "朝鮮通信使", ruby: "<ruby>朝鮮通信使<rt>ちょうせんつうしんし</rt></ruby>" },
+      { id: 260, c: "安土桃山・江戸時代", q: "薩摩藩の支配を受けつつ中国とも朝貢した南方の王国は？", a: "琉球王国", ruby: "<ruby>琉球王国<rt>りゅうきゅうおうこく</rt></ruby>" },
+      { id: 261, c: "安土桃山・江戸時代", q: "蝦夷地（北海道など）に先住していた固有の民族は？", a: "アイヌ民族", ruby: "アイヌ<ruby>民族<rt>みんぞく</rt></ruby>" },
+      { id: 262, c: "安土桃山・江戸時代", q: "松前藩の不当な取引に対して起ち上がったアイヌの首長は？", a: "シャクシャイン", ruby: "シャクシャイン" },
+      { id: 263, c: "安土桃山・江戸時代", q: "新田を開墾して耕地面積を増やした事業は？", a: "新田開発", ruby: "<ruby>新田開発<rt>しんでんかいはつ</rt></ruby>" },
+      { id: 264, c: "安土桃山・江戸時代", q: "深耕を可能にしたV字型の鉄製農具は？", a: "備中ぐわ", ruby: "<ruby>備中<rt>びっちゅう</rt></ruby>ぐわ" },
+      { id: 265, c: "安土桃山・江戸時代", q: "脱穀の効率を劇的に高めた鉄の歯を持つ農具は？", a: "千歯こき", ruby: "<ruby>千歯<rt>せんば</rt></ruby>こき" },
+      { id: 266, c: "安土桃山・江戸時代", q: "全国で統一して流通した寛永年間発行の銅銭は？", a: "寛永通宝", ruby: "『<ruby>寛永通宝<rt>かんえいつうほう</rt></ruby>』" },
+      { id: 267, c: "安土桃山・江戸時代", q: "金・銀・銭の交換や手形の決済を行なった金融業者は？", a: "両替商", ruby: "<ruby>両替商<rt>りょうがえしょう</rt></ruby>" },
+      { id: 268, c: "安土桃山・江戸時代", q: "東海道・中山道などの江戸を中心とする幹線道路は？", a: "五街道", ruby: "<ruby>五街道<rt>ごかいどう</rt></ruby>" },
+      { id: 269, c: "安土桃山・江戸時代", q: "東北地方太平洋側から江戸へ至る海上ルートは？（補正: 左回り航路➔東回り航路）", a: "東回り航路", ruby: "<ruby>東回り航路<rt>ひがしまいこうろ</rt></ruby>" },
+      { id: 270, c: "安土桃山・江戸時代", q: "日本海側から下関を経て大坂・江戸へ至る海上航路は？", a: "西廻り航路", ruby: "<ruby>西廻り航路<rt>にしまわりこうろ</rt></ruby>" },
+      { id: 271, c: "安土桃山・江戸時代", q: "政治の中心地であった江戸の別称・俗称は？", a: "将軍のおひざもと", ruby: "<ruby>将軍<rt>しょうぐん</rt></ruby>のおひざもと" },
+      { id: 272, c: "安土桃山・江戸時代", q: "全国の物資が集まり経済の中心であった大坂の別称は？", a: "天下の台所", ruby: "<ruby>天下<rt>てんか</rt></ruby>の<ruby>台所<rt>だいどころ</rt></ruby>" },
+      { id: 273, c: "安土桃山・江戸時代", q: "諸藩が大坂などに置き年貢米や特産物を売却した施設は？", a: "蔵屋敷", ruby: "<ruby>蔵屋敷<rt>くらやしき</rt></ruby>" },
+      { id: 274, c: "安土桃山・江戸時代", q: "幕府から株仲間として承認を得た同業者組合は？", a: "株仲間", ruby: "<ruby>株仲間<rt>かぶなかま</rt></ruby>" },
+      { id: 275, c: "安土桃山・江戸時代", q: "生類憐みの令を出した5代将軍は？", a: "徳川綱吉", ruby: "<ruby>徳川綱吉<rt>とくがわつなよし</rt></ruby>" },
+      { id: 276, c: "安土桃山・江戸時代", q: "大義名分や礼儀を重んじる朱子学の体系は？", a: "朱子学", ruby: "<ruby>朱子学<rt>しゅしがく</rt></ruby>" },
+      { id: 277, c: "安土桃山・江戸時代", q: "極端な極悪令として犬などを保護させた法令は？", a: "生類憐みの令", ruby: "『<ruby>生類憐みの令<rt>しょうるいあわれみのれい</rt></ruby>』" },
+      { id: 278, c: "安土桃山・江戸時代", q: "徳川家宣・家継に仕え「正徳の治」を行なった儒学者は？", a: "新井白石", ruby: "<ruby>新井白石<rt>あらいはくせき</rt></ruby>" },
+      { id: 279, c: "安土桃山・江戸時代", q: "新井白石が行なった貨幣改鋳や貿易制限などの政治は？", a: "正徳の治", ruby: "<ruby>正徳の治<rt>しょうとくのち</rt></ruby>" },
+      { id: 280, c: "安土桃山・江戸時代", q: "8代将軍吉宗が行なった財政再建改革は？", a: "享保の改革", ruby: "<ruby>享保の改革<rt>きょうほうのかいせい</rt></ruby>" },
+      { id: 281, c: "安土桃山・江戸時代", q: "米将軍と呼ばれ享保の改革を主導した8代将軍は？", a: "徳川吉宗", ruby: "<ruby>徳川吉宗<rt>とくがわよしむね</rt></ruby>" },
+      { id: 282, c: "安土桃山・江戸時代", q: "株仲間を奨励し賄賂政治とも批判された老中は？", a: "田沼意次", ruby: "<ruby>田沼意次<rt>たぬまおきつぐ</rt></ruby>" },
+      { id: 283, c: "安土桃山・江戸時代", q: "松平定信が質素倹約や旧里帰農令を出した改革は？", a: "寛政の改革", ruby: "<ruby>寛政の改革<rt>かんせいのかいかく</rt></ruby>" },
+      { id: 284, c: "安土桃山・江戸時代", q: "株仲間解散や人返しの法を出した老中は？", a: "水野忠邦", ruby: "<ruby>水野忠邦<rt>みずのただくに</rt></ruby>" },
+      { id: 285, c: "安土桃山・江戸時代", q: "各藩が独自に発行した紙幣は？", a: "藩札", ruby: "<ruby>藩札<rt>はんさつ</rt></ruby>" },
+      { id: 286, c: "安土桃山・江戸時代", q: "年貢軽減や不正役人の罷免を求め農民が集団行動した事件は？", a: "百姓一揆", ruby: "<ruby>百姓一揆<rt>ひゃくしょういっき</rt></ruby>" },
+      { id: 287, c: "安土桃山・江戸時代", q: "都市の貧民が米買い占め業者らを襲撃した暴動は？", a: "打ち壊し", ruby: "<ruby>打ち壊し<rt>うちこわし</rt></ruby>" },
+      { id: 288, c: "安土桃山・江戸時代", q: "1837年、大坂で元与力・陽明学者が救民のため起こした乱は？（補正: 大潮の乱➔大塩の乱）", a: "大塩の乱", ruby: "<ruby>大塩の乱<rt>おおしおのらん</rt></ruby>" },
+      { id: 289, c: "安土桃山・江戸時代", q: "1825年、接近する外国船を撃退するよう命じた法令は？", a: "異国船打払令", ruby: "『<ruby>異国船打払令<rt>いこくせんうちはらいれい</rt></ruby>』" },
+      { id: 290, c: "安土桃山・江戸時代", q: "幕府の外国船打払令を批判した尚歯会の学者は？", a: "高野長英・渡辺崋山", ruby: "<ruby>高野長英<rt>たかのちょうえい</rt></ruby>・<ruby>渡辺崋山<rt>わたなべかざん</rt></ruby>" },
+      { id: 291, c: "安土桃山・江戸時代", q: "高野長英・渡辺崋山らが処罰された言論弾圧事件は？", a: "蛮社の獄", ruby: "<ruby>蛮社の獄<rt>ばんしゃのごく</rt></ruby>" },
+      { id: 292, c: "安土桃山・江戸時代", q: "上方（京都・大坂）を中心に元禄期に栄えた町人文化は？", a: "元禄文化", ruby: "<ruby>元禄文化<rt>げんろくぶんか</rt></ruby>" },
+      { id: 293, c: "安土桃山・江戸時代", q: "化政期に江戸を中心に栄えた庶民的な町人文化は？", a: "化政文化", ruby: "<ruby>化政文化<rt>かせいぶんか</rt></ruby>" },
+      { id: 294, c: "安土桃山・江戸時代", q: "『古事記伝』を著し国学を大成した人物は？", a: "本居宣長", ruby: "<ruby>本居宣長<rt>もとおりのりなが</rt></ruby>" },
+      { id: 295, c: "安土桃山・江戸時代", q: "前野良沢らと『解体新書』を翻訳刊行した蘭学者は？", a: "杉田玄白", ruby: "<ruby>杉田玄白<rt>すぎたげんぱく</rt></ruby>" },
+      { id: 296, c: "安土桃山・江戸時代", q: "『富嶽三十六景』を描いた浮世絵師は？", a: "葛飾北斎", ruby: "<ruby>葛飾北斎<rt>かつしかほくさい</rt></ruby>" },
 
-            if (selectedCats.length === 0) {
-                alert("カテゴリーを1つ以上選択してください。");
-                return false;
-            }
-            if (selectedStatuses.length === 0) {
-                alert("出題状態の絞り込みを1つ以上選択してください。");
-                return false;
-            }
+      // --- 8. 欧米の近代化と幕末・明治 ---
+      { id: 297, c: "欧米の近代化と幕末・明治", q: "理性や科学によって社会の不合理を正そうとする思想は？", a: "啓蒙思想", ruby: "<ruby>啓蒙思想<rt>けいもうしそう</rt></ruby>" },
+      { id: 298, c: "欧米の近代化と幕末・明治", q: "1642年にイギリスで起きた清教徒中心の革命は？", a: "ピューリタン革命", ruby: "ピューリタン<ruby>革命<rt>かくめい</rt></ruby>" },
+      { id: 299, c: "欧米の近代化と幕末・明治", q: "1688年、流血なしに王を追放し立憲君主制を立てた革命は？", a: "名誉革命", ruby: "<ruby>名誉革命<rt>めいよかくめい</rt></ruby>" },
+      { id: 300, c: "欧米の近代化と幕末・明治", q: "1689年、イギリスで制定された立憲政治の基礎法規は？", a: "権利章典", ruby: "『<ruby>権利章典<rt>けんりしょうてん</rt></ruby>』" },
+      { id: 301, c: "欧米の近代化と幕末・明治", q: "1776年、アメリカ13州がイギリスからの独立を宣言した文書は？", a: "独立宣言", ruby: "『<ruby>独立宣言<rt>どくりつせんげん</rt></ruby>』" },
+      { id: 302, c: "欧米の近代化と幕末・明治", q: "アメリカ独立戦争の軍司令官で初代大統領は？", a: "ワシントン", ruby: "ワシントン" },
+      { id: 303, c: "欧米の近代化と幕末・明治", q: "国王が絶対的な権力を握る強大な統治形態は？", a: "絶対王政", ruby: "<ruby>絶対王政<rt>ぜったいおうせい</rt></ruby>" },
+      { id: 304, c: "欧米の近代化と幕末・明治", q: "1789年、人権宣言を採択し封建的特権を廃止した革命は？", a: "フランス革命", ruby: "フランス<ruby>革命<rt>かくめい</rt></ruby>" },
+      { id: 305, c: "欧米の近代化と幕末・明治", q: "18世紀後半、イギリスで始まった機械化・工場制手工業の変革は？", a: "産業革命", ruby: "<ruby>産業革命<rt>さんぎょうかくめい</rt></ruby>" },
+      { id: 306, c: "欧米の近代化と幕末・明治", q: "資本家が生産手段を所有し利潤を追求する経済体制は？", a: "資本主義", ruby: "<ruby>資本主義<rt>しほんしゅぎ</rt></ruby>" },
+      { id: 307, c: "欧米の近代化と幕末・明治", q: "生産手段を社会で共有し平等を目指す思想・経済体制は？", a: "社会主義", ruby: "<ruby>社会主義<rt>しゃかいしゅぎ</rt></ruby>" },
+      { id: 308, c: "欧米の近代化と幕末・明治", q: "鉄血宰相と呼ばれドイツ統一を成し遂げた首相は？", a: "ビスマルク", ruby: "ビスマルク" },
+      { id: 309, c: "欧米の近代化と幕末・明治", q: "ロシアが凍らない港を求めて南へ進出しようとした政策は？", a: "南下政策", ruby: "<ruby>南下政策<rt>なんかせいさく</rt></ruby>" },
+      { id: 310, c: "欧米の近代化と幕末・明治", q: "1861〜65年、アメリカの南北州間で起きた内戦は？", a: "南北戦争", ruby: "<ruby>南北戦争<rt>なんぼくせんそう</rt></ruby>" },
+      { id: 311, c: "欧米の近代化と幕末・明治", q: "「人民の、人民による…」演説で知られる第16代大統領は？", a: "リンカン", ruby: "リンカン" },
+      { id: 312, c: "欧米の近代化と幕末・明治", q: "1840年、アヘンの密輸を巡り清とイギリスの間で起きた戦争は？", a: "アヘン戦争", ruby: "アヘン<ruby>戦争<rt>せんそう</rt></ruby>" },
+      { id: 313, c: "欧米の近代化と幕末・明治", q: "1842年、アヘン戦争後に清とイギリスが結んだ不平等条約は？", a: "南京条約", ruby: "『<ruby>南京条約<rt>なんきんじょうやく</rt></ruby>』" },
+      { id: 314, c: "欧米の近代化と幕末・明治", q: "リンカンが出した黒人奴隷を解放する布告は？", a: "奴隷解放宣言", ruby: "『<ruby>奴隷解放宣言<rt>どれいかいほうせんげん</rt></ruby>』" },
+      { id: 315, c: "欧米の近代化と幕末・明治", q: "洪秀全がキリスト教の影響を受け清で起こした反乱は？", a: "太平天国の乱", ruby: "<ruby>太平天国の乱<rt>たいへいてんごくのらん</rt></ruby>" },
+      { id: 316, c: "欧米の近代化と幕末・明治", q: "1857年、東インド会社のシパーヒーらが起こした反抗は？", a: "インド大反乱", ruby: "インド<ruby>大反乱<rt>だいはんらん</rt></ruby>" },
+      { id: 317, c: "欧米の近代化と幕末・明治", q: "1854年、ペリー再航時に日本が開国を余儀なくされた条約は？", a: "日米和親条約", ruby: "『<ruby>日米和親条約<rt>にちべいわしんじょうやく</rt></ruby>』" },
+      { id: 318, c: "欧米の近代化と幕末・明治", q: "1858年、領事裁判権や関税自主権の欠如を含む不平等条約は？", a: "日米修好通商条約", ruby: "『<ruby>日米修好通商条約<rt>にちべいしゅうこうつうしょうじょうやく</rt></ruby>』" },
+      { id: 319, c: "欧米の近代化と幕末・明治", q: "領事裁判権の容認や関税自主権の放棄などを指す条約上の不利は？", a: "領事裁判権(関税自主権)", ruby: "<ruby>領事裁判権<rt>りょうじさいばんけん</rt></ruby>（<ruby>関税自主権<rt>かんぜいじしゅけん</rt></ruby>）" },
+      { id: 320, c: "欧米の近代化と幕末・明治", q: "天皇を尊び外国人を排除しようとした幕末の思想・運動は？", a: "尊王攘夷運動", ruby: "<ruby>尊王攘夷運動<rt>そんのうじょういうんどう</rt></ruby>" },
+      { id: 321, c: "欧米の近代化と幕末・明治", q: "安政の大獄を断行し桜田門外の変で暗殺された大老は？", a: "井伊直弼", ruby: "<ruby>井伊直弼<rt>いいなおすけ</rt></ruby>" },
+      { id: 322, c: "欧米の近代化と幕末・明治", q: "1860年、水戸藩浪士らが大老井伊直弼を襲撃した事件は？", a: "桜田門外の変", ruby: "<ruby>桜田門外の変<rt>さくらだもんがいのへん</rt></ruby>" },
+      { id: 323, c: "欧米の近代化と幕末・明治", q: "1866年、坂本龍馬らの仲介で薩摩藩と長州藩が結んだ同盟は？", a: "薩長同盟", ruby: "<ruby>薩長同盟<rt>さっちょうどうめい</rt></ruby>" },
+      { id: 324, c: "欧米の近代化と幕末・明治", q: "長州藩の指導者で薩長同盟を結び維新の十傑と称された人物は？", a: "木戸孝允", ruby: "<ruby>木戸孝允<rt>きどたかよし</rt></ruby>" },
+      { id: 325, c: "欧米の近代化と幕末・明治", q: "薩摩藩の指導者で征韓論に破れ西南戦争を起こした人物は？", a: "西郷隆盛", ruby: "<ruby>西郷隆盛<rt>さいごうたかもり</rt></ruby>" },
+      { id: 326, c: "欧米の近代化と幕末・明治", q: "明治政府の中心として殖産興業を進めた薩摩出身の政治家は？", a: "大久保利通", ruby: "<ruby>大久保利通<rt>おおくぼとしみち</rt></ruby>" },
+      { id: 327, c: "欧米の近代化と幕末・明治", q: "土佐藩士で亀山社中を設立し薩長同盟を仲介した志士は？", a: "坂本龍馬", ruby: "<ruby>坂本龍馬<rt>さかもとりょうま</rt></ruby>" },
+      { id: 328, c: "欧米の近代化と幕末・明治", q: "1867年、15代将軍徳川慶喜が政権を朝廷に返上した出来事は？", a: "大政奉還", ruby: "<ruby>大政奉還<rt>たいせいほうかん</rt></ruby>" },
+      { id: 329, c: "欧米の近代化と幕末・明治", q: "大政奉還を行なった江戸幕府最後の15代将軍は？", a: "徳川慶喜", ruby: "<ruby>徳川慶喜<rt>とくがわけいき</rt></ruby>" },
+      { id: 330, c: "欧米の近代化と幕末・明治", q: "幕府を廃止し天皇中心の新政府樹立を宣した宣言は？", a: "王政復古の大号令", ruby: "『<ruby>王政復古の大号令<rt>おうせいふっこのだいごうれい</rt></ruby>』" },
+      { id: 331, c: "欧米の近代化と幕末・明治", q: "1868〜69年、新政府軍と旧幕府軍との間で戦われた内戦は？", a: "戊辰戦争", ruby: "<ruby>戊辰戦争<rt>ぼしんせんそう</rt></ruby>" },
+      { id: 332, c: "欧米の近代化と幕末・明治", q: "明治政府が行なった近代化への一連の大改革は？", a: "明治維新", ruby: "<ruby>明治維新<rt>めいじいしん</rt></ruby>" },
+      { id: 333, c: "欧米の近代化と幕末・明治", q: "1868年、明治天皇が発布した新政府の基本基本方針は？", a: "五箇条の御誓文", ruby: "『<ruby>五箇条の御誓文<rt>ごかじょうのごせいもん</rt></ruby>』" },
+      { id: 334, c: "欧米の近代化と幕末・明治", q: "1869年、藩主たちに土地と人民を天皇へ返還させた政策は？", a: "版籍奉還", ruby: "<ruby>版籍奉還<rt>はんせきほうかん</rt></ruby>" },
+      { id: 335, c: "欧米の近代化と幕末・明治", q: "1871年、藩を廃止して県を置き中央集権を完成させた政策は？", a: "廃藩置県", ruby: "<ruby>廃藩置県<rt>はいはんちけん</rt></ruby>" },
+      { id: 336, c: "欧米の近代化と幕末・明治", q: "薩摩・長州・土佐・肥前出身者が政府高官を独占した政治は？", a: "藩閥政治", ruby: "<ruby>藩閥政治<rt>はんばんせいじ</rt></ruby>" },
+      { id: 337, c: "欧米の近代化と幕末・明治", q: "四民平等に伴い一般農民や町人に与えられた身分称号は？", a: "平民", ruby: "<ruby>平民<rt>へいみん</rt></ruby>" },
+      { id: 338, c: "欧米の近代化と幕末・明治", q: "1871年、賤称を廃止し身分上同等とした布告は？", a: "解放令", ruby: "『<ruby>解放令<rt>かいほうれい</rt></ruby>』" },
+      { id: 339, c: "欧米の近代化と幕末・明治", q: "1872年、満6歳以上の男女に小学校教育を受けさせた制度は？", a: "学制", ruby: "<ruby>学制<rt>がくせい</rt></ruby>" },
+      { id: 340, c: "欧米の近代化と幕末・明治", q: "1873年、20歳以上の男子に国民皆兵として軍役を課した法令は？", a: "徴兵令", ruby: "『<ruby>徴兵令<rt>ちょうへいれい</rt></ruby>』" },
+      { id: 341, c: "欧米の近代化と幕末・明治", q: "1873年、地価の3%を地券所有者に現金で納めさせた税制改革は？", a: "地租改正", ruby: "<ruby>地租改正<rt>ちそかいせい</rt></ruby>" },
+      { id: 342, c: "欧米の近代化と幕末・明治", q: "地租改正の基準とされた土地の価格は？", a: "地価", ruby: "<ruby>地価<rt>ちか</rt></ruby>" },
+      { id: 343, c: "欧米の近代化と幕末・明治", q: "土地の所有者や地価を記載し発行された所有権利証書は？", a: "地券", ruby: "<ruby>地券<rt>ちけん</rt></ruby>" },
+      { id: 344, c: "欧米の近代化と幕末・明治", q: "地価を基準にして課された土地税は？", a: "地租", ruby: "<ruby>地租<rt>ちそ</rt></ruby>" },
+      { id: 345, c: "欧米の近代化と幕末・明治", q: "地租改正スタート時の税率は地価の何%？", a: "3%", ruby: "3%" },
+      { id: 346, c: "欧米の近代化と幕末・明治", q: "税負担の重さに怒った農民たちが全国で起こした一揆は？", a: "地租改正反対一揆", ruby: "<ruby>地租改正反対一揆<rt>ちそかいせいはんたいいっき</rt></ruby>" },
+      { id: 347, c: "欧米の近代化と幕末・明治", q: "反対一揆を受け地租の税率は地価の何%に引き下げられた？", a: "2.5%", ruby: "2.5%" },
+      { id: 348, c: "欧米の近代化と幕末・明治", q: "経済を豊かにし強大な軍隊を保有しようとした明治の標語は？", a: "富国強兵", ruby: "<ruby>富国強兵<rt>ふこくきょうへい</rt></ruby>" },
+      { id: 349, c: "欧米の近代化と幕末・明治", q: "政府主導で近代産業・インフラを育成した政策は？", a: "殖産興業", ruby: "<ruby>殖産興業<rt>しょくさんこうぎょう</rt></ruby>" },
+      { id: 350, c: "欧米の近代化と幕末・明治", q: "前島密の尽力により全国に張り巡らされた近代通信網は？", a: "郵便制度", ruby: "<ruby>郵便制度<rt>ゆうびんせいど</rt></ruby>" },
+      { id: 351, c: "欧米の近代化と幕末・明治", q: "富岡製糸場など官営で作られた洋式モデル工場は？", a: "官営模範工場", ruby: "<ruby>官営模範工場<rt>かんえいもはんこうじょう</rt></ruby>" },
+      { id: 352, c: "欧米の近代化と幕末・明治", q: "西洋の生活様式や思想が急速に流入した風潮は？", a: "文明開化", ruby: "<ruby>文明開化<rt>ぶんめいかいか</rt></ruby>" },
+      { id: 353, c: "欧米の近代化と幕末・明治", q: "『学問のすすめ』を著し慶應義塾を創設した思想家は？", a: "福沢諭吉", ruby: "<ruby>福沢諭吉<rt>ふくざわゆきち</rt></ruby>" },
+      { id: 354, c: "欧米の近代化と幕末・明治", q: "「天は人の上に人をつくらず…」で始まる福沢諭吉の著書は？", a: "学問のすすめ", ruby: "『<ruby>学問のすすめ<rt>がくもんのすすめ</rt></ruby>』" },
+      { id: 355, c: "欧米の近代化と幕末・明治", q: "ルソーの思想を紹介し東洋のルソーと呼ばれた思想家は？", a: "中江兆民", ruby: "<ruby>中江兆民<rt>なかえちょうみん</rt></ruby>" },
+      { id: 356, c: "欧米の近代化と幕末・明治", q: "不平等条約改定交渉と欧米視察のため派遣された使節団は？", a: "岩倉使節団", ruby: "<ruby>岩倉使節団<rt>いわくらしせつだん</rt></ruby>" },
+      { id: 357, c: "欧米の近代化と幕末・明治", q: "岩倉使節団の全権大使を務めた公家出身の政治家は？", a: "岩倉具視", ruby: "<ruby>岩倉具視<rt>いわくらともみ</rt></ruby>" },
+      { id: 358, c: "欧米の近代化と幕末・明治", q: "武力で朝鮮を開国させようとした主張は？", a: "征韓論", ruby: "<ruby>征韓論<rt>せいかんろん</rt></ruby>" },
+      { id: 359, c: "欧米の近代化と幕末・明治", q: "1877年、西郷隆盛を大将に鹿児島士族が起こした最大の反乱は？", a: "西南戦争", ruby: "<ruby>西南戦争<rt>せいなんせんそう</rt></ruby>" },
+      { id: 360, c: "欧米の近代化と幕末・明治", q: "1874年、板垣退助らが国会開設を求めて政府へ提出した文書は？", a: "民撰議院設立の建白書", ruby: "『<ruby>民撰議院設立の建白書<rt>みんせんぎいんせくりつのけんぱくしょ</rt></ruby>』" },
+      { id: 361, c: "欧米の近代化と幕末・明治", q: "憲法制定や国会開設を要求した国民的政治運動は？", a: "自由民権運動", ruby: "<ruby>自由民権運動<rt>じゆうみんけんうんどう</rt></ruby>" },
+      { id: 362, c: "欧米の近代化と幕末・明治", q: "1871年、日本と清が結んだ対等な条約は？", a: "日清修好条規", ruby: "『<ruby>日清修好条規<rt>にっしんしゅうこうじょうき</rt></ruby>』" },
+      { id: 363, c: "欧米の近代化と幕末・明治", q: "1876年、江華島事件を機に日本が朝鮮と結んだ不平等条約は？", a: "日朝修好条規", ruby: "『<ruby>日朝修好条規<rt>にっちょうしゅうこうじょうき</rt></ruby>』" },
+      { id: 364, c: "欧米の近代化と幕末・明治", q: "1875年、ロシアと国境を確定させるため結んだ条約は？", a: "樺太・千島条約", ruby: "『<ruby>樺太・千島条約<rt>からふと・ちしまじょうやく</rt></ruby>』" },
+      { id: 365, c: "欧米の近代化と幕末・明治", q: "北海道の旧称は？", a: "蝦夷地", ruby: "<ruby>蝦夷地<rt>えぞち</rt></ruby>" },
+      { id: 366, c: "欧米の近代化と幕末・明治", q: "北海道の先住民族は？", a: "アイヌの人々", ruby: "アイヌの<ruby>人々<rt>ひとびと</rt></ruby>" },
+      { id: 367, c: "欧米の近代化と幕末・明治", q: "北海道の開拓と統治のため設置された政府機関は？", a: "開拓使", ruby: "<ruby>開拓使<rt>かいたくし</rt></ruby>" },
+      { id: 368, c: "欧米の近代化と幕末・明治", q: "1879年、琉球藩を廃して沖縄県を設置した強硬措置は？", a: "琉球処分", ruby: "<ruby>琉球処分<rt>りゅうきゅうしょぶん</rt></ruby>" },
+      { id: 369, c: "欧米の近代化と幕末・明治", q: "1880年、全国の民権派運動家が大阪に結集して作った組織は？", a: "国会期成同盟", ruby: "<ruby>国会期成同盟<rt>こっかいきせいどうめい</rt></ruby>" },
+      { id: 370, c: "欧米の近代化と幕末・明治", q: "初代内閣総理大臣を務め明治憲法草案を作成した政治家は？", a: "伊藤博文", ruby: "<ruby>伊藤博文<rt>いとうひろぶみ</rt></ruby>" },
+      { id: 371, c: "欧米の近代化と幕末・明治", q: "1881年、10年後の国会開設を約束した詔勅は？", a: "国会開設の勅諭", ruby: "『<ruby>国会開設の勅諭<rt>こっかいかいせつのちょくゆ</rt></ruby>』" },
+      { id: 372, c: "欧米の近代化と幕末・明治", q: "板垣退助が党首となり結成されたフランス風自由主義政党は？", a: "自由党", ruby: "<ruby>自由党<rt>じゆうとう</rt></ruby>" },
+      { id: 373, c: "欧米の近代化と幕末・明治", q: "大隈重信が党首となり結成されたイギリス風改進主義政党は？", a: "立憲改進党", ruby: "<ruby>立憲改進党<rt>りっけんかいしんとう</rt></ruby>" },
+      { id: 374, c: "欧米の近代化と幕末・明治", q: "1889年2月11日に発布されたアジア初の近代憲法は？", a: "大日本帝国憲法", ruby: "『<ruby>大日本帝国憲法<rt>だいにっぽんていこくけんぽう</rt></ruby>』" },
+      { id: 375, c: "欧米の近代化と幕末・明治", q: "貴族院と衆議院の二院制で構成された開設時の国会名称は？", a: "帝国議会", ruby: "<ruby>帝国議会<rt>ていこくぎかい</rt></ruby>" },
+      { id: 376, c: "欧米の近代化と幕末・明治", q: "皇族・華族や勅選議員で構成された非解散の議院は？", a: "貴族院", ruby: "<ruby>貴族院<rt>きぞくいん</rt></ruby>" },
+      { id: 377, c: "欧米の近代化と幕末・明治", q: "解散制度を持ち民選議員で構成された議院は？", a: "衆議院", ruby: "<ruby>衆議院<rt>しゅうぎいん</rt></ruby>" },
+      { id: 378, c: "欧米の近代化と幕末・明治", q: "第1回衆議院議員選挙の選挙権資格制限は？", a: "直接国税15円以上を納める25以上の男子", ruby: "<ruby>直接国税<rt>ちょくせつこくぜい</rt></ruby>15<ruby>円<rt>えん</rt></ruby>以上を納める25<ruby>歳<rt>さい</rt></ruby>以上の<ruby>男子<rt>だんし</rt></ruby>" },
+      { id: 379, c: "欧米の近代化と幕末・明治", q: "1890年に発布された道徳・教育の基準を示した勅語は？", a: "教育勅語", ruby: "『<ruby>教育勅語<rt>きょういくちょくご</rt></ruby>』" },
+      { id: 380, c: "欧米の近代化と幕末・明治", q: "列強が軍事・経済力で他国を侵略支配しようとする傾向は？", a: "帝国主義", ruby: "<ruby>帝国主義<rt>ていこくしゅぎ</rt></ruby>" },
+      { id: 381, c: "欧米の近代化と幕末・明治", q: "鹿鳴館などで欧米の生活様式を取り入れようとした政策は？", a: "欧化政策", ruby: "<ruby>欧化政策<rt>おうかせいさく</rt></ruby>" },
+      { id: 382, c: "欧米の近代化と幕末・明治", q: "1894年、領事裁判権の撤廃に成功した外務大臣は？", a: "陸奥宗光", ruby: "<ruby>陸奥宗光<rt>むつむねみつ</rt></ruby>" },
+      { id: 383, c: "欧米の近代化と幕末・明治", q: "1911年、関税自主権の完全回復に成功した外務大臣は？", a: "小村寿太郎", ruby: "<ruby>小村寿太郎<rt>こむらじゅたろう</rt></ruby>" },
+      { id: 384, c: "欧米の近代化と幕末・明治", q: "1894〜95年、朝鮮の主導権を巡り起きた日本と清の戦争は？", a: "日清戦争", ruby: "<ruby>日清戦争<rt>にっしんせんそう</rt></ruby>" },
+      { id: 385, c: "欧米の近代化と幕末・明治", q: "1894年、朝鮮で東学党が起こした大規模農民反乱は？", a: "甲午農民戦争", ruby: "<ruby>甲午農民戦争<rt>こうごのうみんせんそう</rt></ruby>" },
+      { id: 386, c: "欧米の近代化と幕末・明治", q: "1895年、日清戦争の講和条約として締結された条約は？", a: "下関条約", ruby: "『<ruby>下関条約<rt>しもせきじょうやく</rt></ruby>』" },
+      { id: 387, c: "欧米の近代化と幕末・明治", q: "下関条約で割譲されたが三国干渉で返還した半島は？", a: "遼東半島", ruby: "<ruby>遼東半島<rt>りょうとうはんとう</rt></ruby>" },
+      { id: 388, c: "欧米の近代化と幕末・明治", q: "ロシア・フランス・ドイツが遼東半島の清への返還を迫った干渉は？", a: "三国干渉", ruby: "<ruby>三国干渉<rt>さんごくかんしょう</rt></ruby>" },
+      { id: 389, c: "欧米の近代化と幕末・明治", q: "1904〜05年、満洲・朝鮮の権益を巡り日露間で行われた戦争は？", a: "日露戦争", ruby: "<ruby>日露戦争<rt>にちろせんそう</rt></ruby>" },
+      { id: 390, c: "欧米の近代化と幕末・明治", q: "1900年、「扶清滅洋」を掲げ北京の公使館街を包囲した事件は？", a: "義和団事件", ruby: "<ruby>義和団事件<rt>ぎわだんじけん</rt></ruby>" },
+      { id: 391, c: "欧米の近代化と幕末・明治", q: "1902年、ロシアの南下に対抗するため日英間で結ばれた同盟は？", a: "日英同盟", ruby: "<ruby>日英同盟<rt>にちえいどうめい</rt></ruby>" },
+      { id: 392, c: "欧米の近代化と幕末・明治", q: "1905年、アメリカの斡旋で日露戦争の講和が成立した条約は？", a: "ポーツマス条約", ruby: "『<ruby>ポーツマス条約<rt>ぽーつますじょうやく</rt></ruby>』" },
+      { id: 393, c: "欧米の近代化と幕末・明治", q: "ポーツマス条約で賠償金が得られず暴徒化した民衆騒擾事件は？", a: "日比谷焼き打ち事件", ruby: "<ruby>日比谷焼き打ち事件<rt>ひびややきうちじけん</rt></ruby>" },
+      { id: 394, c: "欧米の近代化と幕末・明治", q: "1905年、韓国の外交権を奪い統治するため設置した機関は？", a: "韓国統監府", ruby: "<ruby>韓国統監府<rt>かんこくとうかんふ</rt></ruby>" },
+      { id: 395, c: "欧米の近代化と幕末・明治", q: "1910年、大韓帝国を植民地化して併合した出来事は？", a: "韓国併合", ruby: "<ruby>韓国併合<rt>かんこくへいごう</rt></ruby>" },
+      { id: 396, c: "欧米の近代化と幕末・明治", q: "韓国併合後に朝鮮を統治するため設置された現地統治機関は？", a: "朝鮮総督府", ruby: "<ruby>朝鮮総督府<rt>ちょうせんそうとくふ</rt></ruby>" },
+      { id: 397, c: "欧米の近代化と幕末・明治", q: "主権を奪われ他国の直接支配下に置かれた地域は？", a: "植民地", ruby: "<ruby>植民地<rt>しょくみんち</rt></ruby>" },
+      { id: 398, c: "欧米の近代化と幕末・明治", q: "日露戦争後、長春以南の鉄道・炭鉱を経営した半官半民会社は？", a: "南満州鉄道株式会社(満鉄)", ruby: "<ruby>南満州鉄道株式会社<rt>みなみまんしゅうてつどうかぶしきがいしゃ</rt></ruby>" },
 
-            let filtered = historyData.filter(item => {
-                return selectedCats.includes(item.cat) && selectedStatuses.includes(getItemStatus(item.id));
-            });
+      // --- 9. 世界大戦と現代 ---
+      { id: 399, c: "世界大戦と現代", q: "1912年、辛亥革命により清が倒れてアジア初の共和制国家として成立した国は？", a: "中華民国", ruby: "<ruby>中華民国<rt>ちゅうかみんこく</rt></ruby>" },
+      { id: 400, c: "世界大戦と現代", q: "1911年、孫文らを指導者として清を倒した革命は？", a: "辛亥革命", ruby: "<ruby>辛亥革命<rt>しんがいかくめい</rt></ruby>" },
+      { id: 401, c: "世界大戦と現代", q: "孫文が提唱した「民族・民権・民生」の政治原理は？", a: "三民主義", ruby: "<ruby>三民主義<rt>さんみんしゅぎ</rt></ruby>" },
+      { id: 402, c: "世界大戦と現代", q: "辛亥革命を指導し中華民国の臨時大総統に就任した人物は？", a: "孫文", ruby: "<ruby>孫文<rt>そんぶん</rt></ruby>" },
+      { id: 403, c: "世界大戦と現代", q: "孫文から大総統を譲られたが独裁を進めた清軍出身の軍閥は？", a: "袁世凱", ruby: "<ruby>袁世凱<rt>えんせいがい</rt></ruby>" },
+      { id: 404, c: "世界大戦と現代", q: "各地に割拠し私兵を率いて対立した軍人グループは？", a: "軍閥", ruby: "<ruby>軍閥<rt>ぐんばつ</rt></ruby>" },
+      { id: 405, c: "世界大戦と現代", q: "1901年に稼働開始した官営の製鉄所は？（補正: 八幡製鉄城➔八幡製鉄所）", a: "八幡製鉄所", ruby: "<ruby>八幡製鉄所<rt>やはたせいてつじょ</rt></ruby>" },
+      { id: 406, c: "世界大戦と現代", q: "三井・三菱・住友・安田などの巨大金融・産業資本閥は？", a: "財閥", ruby: "<ruby>財閥<rt>ざいばつ</rt></ruby>" },
+      { id: 407, c: "世界大戦と現代", q: "田中正造が命をかけて明治天皇へ直訴した鉱害公害事件は？", a: "足尾銅山鉱毒事件", ruby: "<ruby>足尾銅山鉱毒事件<rt>あしおどうざんこうどくじけん</rt></ruby>" },
+      { id: 408, c: "世界大戦と現代", q: "労働条件の維持改善を目指し労働者が結成した団体は？", a: "労働組合", ruby: "<ruby>労働組合<rt>ろうどうくみあい</rt></ruby>" },
+      { id: 409, c: "世界大戦と現代", q: "1914年、サラエボ事件を機に勃発した世界的対立戦争は？", a: "第一次世界大戦", ruby: "<ruby>第一次世界大戦<rt>だいいちじせかいたいせん</rt></ruby>" },
+      { id: 410, c: "世界大戦と現代", q: "1989年、ブッシュ・ゴルバチョフ両首脳が冷戦終結を宣言した会談は？（補正: マルタ階段➔マルタ会談）", a: "マルタ会談", ruby: "マルタ<ruby>会談<rt>かいだん</rt></ruby>" },
+      { id: 411, c: "世界大戦と現代", q: "1991年12月に不快感と経済破綻の中で崩壊解体した超大国は？", a: "ソ連解体", ruby: "ソ<ruby>連解体<rt>れんかいたい</rt></ruby>" }
+    ];
 
-            if (filtered.length === 0) {
-                alert("条件に一致する問題がありません。選択条件を変更してください。");
-                return false;
-            }
+    const categoryList = [
+      "原始・古代文明", "宗教・縄文・弥生", "古墳・飛鳥・奈良", 
+      "平安時代", "鎌倉・室町・戦国", "ヨーロッパ世界と大航海時代", 
+      "安土桃山・江戸時代", "欧米の近代化と幕末・明治", "世界大戦と現代"
+    ];
 
-            if (document.getElementById('setting-shuffle').checked) {
-                filtered = filtered.sort(() => Math.random() - 0.5);
-            }
+    let selectedCategories = [...categoryList];
 
-            const limitVal = document.getElementById('setting-count').value;
-            if (limitVal !== 'all') {
-                filtered = filtered.slice(0, parseInt(limitVal, 10));
-            }
+    let userData = {
+      name: localStorage.getItem('histori_name') || 'ゲスト',
+      level: parseInt(localStorage.getItem('histori_lvl') || '1', 10),
+      xp: parseInt(localStorage.getItem('histori_xp') || '0', 10),
+      coins: parseInt(localStorage.getItem('histori_coins') || '20', 10),
+      masteredIds: JSON.parse(localStorage.getItem('histori_mstr_ids') || '[]'),
+      icon: localStorage.getItem('histori_icon') || '🎓',
+      questionCountSetting: localStorage.getItem('histori_qcount') || '10',
+      studyMode: localStorage.getItem('histori_studymode') || 'typing',
+      currentTheme: localStorage.getItem('histori_theme') || 'academic',
+      isVipPlus: localStorage.getItem('histori_vip') === 'true'
+    };
 
-            currentDeck = filtered;
-            currentIndex = 0;
-            sessionStats = { forgot: 0, learning: 0, mastered: 0 };
-            return true;
-        }
+    let peer = null, peerConnMap = {}, myPeerId = "", roomCode = "", isHost = false;
+    let roomMembers = [];
+    let activeQuizList = [], currentQuizIndex = 0;
+    let battleMode = "speed";
+    let speedScores = {};
+    let answerStartTime = 0;
 
-        function renderQuestion() {
-            const item = currentDeck[currentIndex];
-            const currentStatus = getItemStatus(item.id);
+    let canvas, ctx, animationFrameId, particles = [];
 
-            document.getElementById('study-category-label').innerText = item.catName;
-            document.getElementById('study-progress-text').innerText = `${currentIndex + 1} / ${currentDeck.length}`;
-            const fillPercent = ((currentIndex) / currentDeck.length) * 100;
-            document.getElementById('progress-bar-fill').style.width = `${fillPercent}%`;
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('themeCanvas');
+      if (canvas) ctx = canvas.getContext('2d');
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
 
-            const tag = document.getElementById('card-status-tag');
-            const statusMap = {
-                forgot: { text: "🔴 忘れた", bg: "var(--status-forgot-bg)", color: "var(--status-forgot)" },
-                learning: { text: "🟡 学習中", bg: "var(--status-learning-bg)", color: "var(--status-learning)" },
-                mastered: { text: "🟢 覚えた", bg: "var(--status-mastered-bg)", color: "var(--status-mastered)" },
-                unlearned: { text: "⚪ 未学習", bg: "var(--bg-paper)", color: "var(--text-sub)" }
-            };
-            const sInfo = statusMap[currentStatus];
-            tag.innerText = sInfo.text;
-            tag.style.background = sInfo.bg;
-            tag.style.color = sInfo.color;
+      initCategorySpreadGrid();
+      initUserDataUI();
+      initPeerJS();
+      initKeyShortcut();
+      changeTheme(userData.currentTheme);
 
-            document.getElementById('card-question').innerText = item.q;
-            document.getElementById('card-answer-word').innerText = item.word;
-            document.getElementById('card-answer-desc').innerText = item.desc;
+      document.getElementById('bgFileInput').addEventListener('change', handleBgFileUpload);
+      document.getElementById('typingInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitTypingAnswer();
+      });
+    });
 
-            const isAutoReveal = document.getElementById('setting-auto-reveal').checked;
-            if (isAutoReveal) {
-                revealAnswer();
-            } else {
-                document.getElementById('reveal-container').style.display = 'block';
-                document.getElementById('answer-container').style.display = 'none';
-                document.getElementById('action-buttons').classList.remove('active');
-            }
-        }
+    function resizeCanvas() {
+      if (!canvas) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
 
-        function revealAnswer() {
-            document.getElementById('reveal-container').style.display = 'none';
-            document.getElementById('answer-container').style.display = 'block';
-            document.getElementById('action-buttons').classList.add('active');
-        }
+    // モーダル開閉
+    function openModal(id) {
+      if (id === 'skillModal') openSkillTreeModal();
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+    }
 
-        function recordAndNext(actionStatus) {
-            const item = currentDeck[currentIndex];
-            userStatus[item.id] = actionStatus;
-            saveUserStatus();
+    function closeModal(id) {
+      const target = document.getElementById(id);
+      if (target) target.classList.remove('active');
+    }
 
-            sessionStats[actionStatus]++;
+    // テーマ設定
+    function changeTheme(t) {
+      userData.currentTheme = t;
+      localStorage.setItem('histori_theme', t);
+      document.documentElement.setAttribute('data-theme', t);
+      const sel = document.getElementById('themeSelect');
+      if (sel) sel.value = t;
 
-            currentIndex++;
-            if (currentIndex < currentDeck.length) {
-                renderQuestion();
-            } else {
-                showCompleteScreen();
-            }
-        }
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      particles = [];
 
-        function showCompleteScreen() {
-            document.getElementById('progress-bar-fill').style.width = `100%`;
-            document.getElementById('stat-total').innerText = currentDeck.length;
-            document.getElementById('stat-mastered').innerText = sessionStats.mastered;
-            document.getElementById('stat-learning').innerText = sessionStats.learning;
-            document.getElementById('stat-forgot').innerText = sessionStats.forgot;
-            updateCounts();
-            switchScreen('complete');
-        }
+      if (!ctx) return;
+      if (t === 'sunlight') initSunlightParticles();
+      else if (t === 'sakura') initSakuraParticles();
+      else if (t === 'lavender') initLavenderParticles();
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 2000);
-        }
-
-        // ---------------------------------------------------------
-        // 4. INITIALIZATION & EVENTS
-        // ---------------------------------------------------------
-        document.addEventListener('DOMContentLoaded', () => {
-            loadUserStatus();
-            loadTheme();
-            updateCounts();
-
-            // Theme Switcher Event
-            document.getElementById('setting-theme').addEventListener('change', (e) => {
-                applyTheme(e.target.value);
-            });
-
-            // Start Event
-            document.getElementById('btn-start').addEventListener('click', () => {
-                if (buildDeck()) {
-                    switchScreen('study');
-                    renderQuestion();
-                }
-            });
-
-            // Reveal Event
-            document.getElementById('btn-reveal').addEventListener('click', revealAnswer);
-
-            // 【即時強制移動】メニューに戻るボタン
-            const btnAbort = document.getElementById('btn-abort-study');
-            if (btnAbort) {
-                btnAbort.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    updateCounts();
-                    switchScreen('menu');
-                });
-            }
-
-            // Action Buttons Event
-            document.querySelectorAll('#action-buttons button').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const action = e.currentTarget.getAttribute('data-action');
-                    recordAndNext(action);
-                });
-            });
-
-            // Back to Menu Event
-            document.getElementById('btn-back-menu').addEventListener('click', () => {
-                updateCounts();
-                switchScreen('menu');
-            });
-
-            // Reset Event
-            document.getElementById('btn-reset-data').addEventListener('click', () => {
-                if (confirm("これまでの「覚えた」「忘れた」などの学習記録をすべて初期化しますか？")) {
-                    userStatus = {};
-                    saveUserStatus();
-                    updateCounts();
-                    showToast("学習記録をリセットしました");
-                }
-            });
+    function initSunlightParticles() {
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          r: Math.random() * 3 + 1, alpha: Math.random() * 0.5 + 0.2, speed: Math.random() * 0.5 + 0.2
         });
-    </script>
+      }
+      animateSunlight();
+    }
+
+    function animateSunlight() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, 'rgba(254, 240, 138, 0.25)');
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'rgba(253, 224, 71, 0.6)';
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.y -= p.speed;
+        if (p.y < 0) p.y = canvas.height;
+      });
+      animationFrameId = requestAnimationFrame(animateSunlight);
+    }
+
+    function initSakuraParticles() {
+      for (let i = 0; i < 35; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          size: Math.random() * 8 + 6, speedY: Math.random() * 1.5 + 0.8, speedX: Math.random() * 0.8 - 0.4,
+          rot: Math.random() * 360
+        });
+      }
+      animateSakura();
+    }
+
+    function animateSakura() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(244, 114, 182, 0.5)';
+      particles.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        p.y += p.speedY; p.x += p.speedX; p.rot += 1;
+        if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+      });
+      animationFrameId = requestAnimationFrame(animateSakura);
+    }
+
+    function initLavenderParticles() {
+      for (let i = 0; i < 4; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          vx: Math.random() * 1.2 - 0.6, vy: Math.random() * 1.2 - 0.6
+        });
+      }
+      animateLavender();
+    }
+
+    function animateLavender() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '24px sans-serif';
+      particles.forEach(p => {
+        ctx.fillText('🦋', p.x, p.y);
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+      });
+      animationFrameId = requestAnimationFrame(animateLavender);
+    }
+
+    // モード・出題数設定
+    function changeStudyMode(m) {
+      userData.studyMode = m;
+      localStorage.setItem('histori_studymode', m);
+      showToast(`回答モードを「${m === 'typing' ? 'タイピングモード' : '一問一答モード'}」に変更しました`);
+    }
+
+    function changeQuestionCount(cnt) {
+      userData.questionCountSetting = cnt;
+      localStorage.setItem('histori_qcount', cnt);
+      showToast(`出題数を ${cnt === 'all' ? '全問題' : cnt + '問'} に設定しました`);
+    }
+
+    function initUserDataUI() {
+      document.getElementById('userNameDisplay').innerText = userData.name;
+      document.getElementById('p1Name').innerText = userData.name;
+      document.getElementById('userLevel').innerText = userData.level;
+      document.getElementById('userXp').innerText = userData.xp;
+      document.getElementById('userCoins').innerText = userData.coins;
+      document.getElementById('userMastered').innerText = userData.masteredIds.length;
+      document.getElementById('userAvatarBtn').innerText = userData.icon;
+      document.getElementById('p1Avatar').innerText = userData.icon;
+      document.getElementById('treeCenterAvatar').innerText = userData.icon;
+      document.getElementById('questionCountSelect').value = userData.questionCountSetting;
+      document.getElementById('studyModeSelect').value = userData.studyMode;
+
+      localStorage.setItem('histori_name', userData.name);
+      localStorage.setItem('histori_lvl', userData.level);
+      localStorage.setItem('histori_xp', userData.xp);
+      localStorage.setItem('histori_coins', userData.coins);
+      localStorage.setItem('histori_mstr_ids', JSON.stringify(userData.masteredIds));
+    }
+
+    function handleLoginSubmit() {
+      const id = document.getElementById('loginIdInput').value.trim();
+      if (id) {
+        userData.name = id;
+        document.getElementById('loginBtnText').innerText = id;
+        initUserDataUI();
+        closeModal('loginModal');
+        showToast(`ようこそ、${id} さん！`);
+      }
+    }
+
+    function quickSocialLogin(p) {
+      userData.name = `${p}ユーザー`;
+      document.getElementById('loginBtnText').innerText = userData.name;
+      initUserDataUI();
+      closeModal('loginModal');
+      showToast(`${p}でログインしました`);
+    }
+
+    function initCategorySpreadGrid() {
+      const grid = document.getElementById('categorySpreadGrid');
+      grid.innerHTML = "";
+
+      categoryList.forEach(cat => {
+        const count = rawWordList.filter(q => q.c === cat).length;
+        const isSelected = selectedCategories.includes(cat);
+        const card = document.createElement('div');
+        card.className = `category-check-card ${isSelected ? 'selected' : ''}`;
+        card.innerHTML = `
+          <div><div style="font-weight:800;">${cat}</div><div style="font-size:0.75rem; color:#64748b;">${count}語句</div></div>
+          <div class="custom-checkbox"><i class="fa-solid fa-check"></i></div>
+        `;
+        card.addEventListener('click', () => {
+          if (selectedCategories.includes(cat)) {
+            selectedCategories = selectedCategories.filter(c => c !== cat);
+            card.classList.remove('selected');
+          } else {
+            selectedCategories.push(cat);
+            card.classList.add('selected');
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function toggleCategorySpread() {
+      document.getElementById('categorySpreadContainer').classList.toggle('active');
+    }
+
+    function selectAllCategories(select) {
+      selectedCategories = select ? [...categoryList] : [];
+      initCategorySpreadGrid();
+    }
+
+    // PeerJS 通信
+    function initPeerJS() {
+      try {
+        peer = new Peer();
+        peer.on('open', (id) => { myPeerId = id; });
+        peer.on('connection', (conn) => { handleIncomingConn(conn); });
+      } catch (e) {
+        console.warn("PeerJS Warning:", e);
+      }
+    }
+
+    function createRoomHost() {
+      isHost = true;
+      roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      document.getElementById('createdRoomCode').innerText = roomCode;
+
+      if (peer) peer.destroy();
+      peer = new Peer(`histori-room-${roomCode}`);
+
+      peer.on('open', () => {
+        roomMembers = [{ id: myPeerId, name: userData.name, avatar: userData.icon }];
+        updateRoomMemberListUI();
+        document.getElementById('btnHostStartSelect').style.display = 'inline-flex';
+        showToast(`部屋コード ${roomCode} を作成しました`);
+      });
+
+      peer.on('connection', (conn) => { handleIncomingConn(conn); });
+    }
+
+    function joinRoomGuest() {
+      const code = document.getElementById('joinRoomCodeInput').value.trim();
+      if (code.length !== 4) return showToast('4桁の数字を入力してください');
+
+      isHost = false;
+      const hostPeerId = `histori-room-${code}`;
+      const conn = peer.connect(hostPeerId);
+
+      conn.on('open', () => {
+        peerConnMap[hostPeerId] = conn;
+        conn.send({ type: 'JOIN', name: userData.name, avatar: userData.icon });
+        showToast(`部屋 ${code} に参加しました`);
+      });
+
+      conn.on('data', (data) => handlePeerData(data));
+    }
+
+    function handleIncomingConn(conn) {
+      conn.on('open', () => { peerConnMap[conn.peer] = conn; });
+      conn.on('data', (data) => handlePeerData(data, conn));
+    }
+
+    function handlePeerData(data, conn) {
+      if (data.type === 'JOIN') {
+        roomMembers.push({ id: conn.peer, name: data.name, avatar: data.avatar });
+        updateRoomMemberListUI();
+        broadcastData({ type: 'ROOM_MEMBERS', members: roomMembers });
+      } else if (data.type === 'ROOM_MEMBERS') {
+        roomMembers = data.members;
+        updateRoomMemberListUI();
+      } else if (data.type === 'START_BATTLE') {
+        battleMode = data.mode;
+        activeQuizList = data.questions;
+        currentQuizIndex = 0;
+        closeModal('onlineModal');
+        startBattleQuizUI();
+      } else if (data.type === 'TYPING_ANSWER') {
+        speedScores[data.name] = { time: data.time, correct: data.correct };
+        if (Object.keys(speedScores).length >= roomMembers.length) {
+          showRoundSpeedRanking();
+        }
+      }
+    }
+
+    function broadcastData(data) {
+      Object.values(peerConnMap).forEach(c => { if (c && c.open) c.send(data); });
+    }
+
+    function updateRoomMemberListUI() {
+      document.getElementById('roomMemberList').innerText = roomMembers.map(m => `${m.avatar} ${m.name}`).join(' , ');
+    }
+
+    function selectMode(m) {
+      battleMode = m;
+      document.querySelectorAll('.mode-select-card').forEach(c => c.style.background = '#fff');
+      const target = document.getElementById(m === 'speed' ? 'modeSpeed' : 'modeSurvival');
+      if (target) target.style.background = '#fef08a';
+    }
+
+    function confirmAndStartBattle() {
+      closeModal('gameModeModal');
+      closeModal('onlineModal');
+
+      let questions = rawWordList.filter(q => selectedCategories.includes(q.c));
+      if (questions.length === 0) questions = [...rawWordList];
+      questions.sort(() => Math.random() - 0.5);
+
+      const limit = userData.questionCountSetting === 'all' ? questions.length : parseInt(userData.questionCountSetting, 10);
+      activeQuizList = questions.slice(0, limit);
+      currentQuizIndex = 0;
+
+      broadcastData({ type: 'START_BATTLE', mode: battleMode, questions: activeQuizList });
+      startBattleQuizUI();
+    }
+
+    // 学習・クイズ開始
+    function startSoloStudy() {
+      let questions = rawWordList.filter(q => selectedCategories.includes(q.c));
+      if (questions.length === 0) return showToast('カテゴリーを選択してください');
+      questions.sort(() => Math.random() - 0.5);
+
+      const limit = userData.questionCountSetting === 'all' ? questions.length : parseInt(userData.questionCountSetting, 10);
+      activeQuizList = questions.slice(0, limit);
+
+      currentQuizIndex = 0;
+      document.getElementById('heroSection').classList.add('fade-out-up');
+      document.getElementById('categoryCenterSection').style.display = 'none';
+
+      document.getElementById('battleStatusBar').classList.remove('active');
+      document.getElementById('quizContainer').classList.add('active');
+
+      renderCurrentQuestion();
+    }
+
+    function startBattleQuizUI() {
+      document.getElementById('heroSection').classList.add('fade-out-up');
+      document.getElementById('categoryCenterSection').style.display = 'none';
+
+      document.getElementById('battleStatusBar').classList.add('active');
+      document.getElementById('quizContainer').classList.add('active');
+
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      const q = activeQuizList[currentQuizIndex];
+      document.getElementById('currentCategoryBadge').innerText = q.c;
+      document.getElementById('questionNumText').innerText = `Q.${currentQuizIndex + 1} / ${activeQuizList.length}`;
+      document.getElementById('questionDisplay').innerText = q.q;
+      
+      const isOnlineBattle = document.getElementById('battleStatusBar').classList.contains('active');
+      const isTypingMode = isOnlineBattle || (userData.studyMode === 'typing');
+
+      document.getElementById('nextQuestionArea').style.display = 'none';
+      document.getElementById('evalControlButtons').style.display = 'none';
+
+      if (isTypingMode) {
+        // タイピングモード
+        document.getElementById('typingArea').style.display = 'flex';
+        document.getElementById('studyControlButtons').style.display = 'none';
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#94a3b8; font-size:0.95rem;">タイピングで回答を入力してください</span>`;
+        
+        const inputEl = document.getElementById('typingInput');
+        inputEl.value = "";
+        inputEl.disabled = false;
+        document.getElementById('btnSubmitTyping').style.display = 'inline-flex';
+        inputEl.focus();
+      } else {
+        // 一問一答モード
+        document.getElementById('typingArea').style.display = 'none';
+        document.getElementById('studyControlButtons').style.display = 'flex';
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#94a3b8; font-size:0.95rem;">【答えを見る】ボタンを押すと答えが表示されます</span>`;
+      }
+
+      if (isOnlineBattle) {
+        runCountdown(() => { answerStartTime = Date.now(); });
+      } else {
+        answerStartTime = Date.now();
+      }
+    }
+
+    function runCountdown(cb) {
+      const overlay = document.getElementById('countdownOverlay');
+      const numEl = document.getElementById('countdownNumber');
+      overlay.classList.add('active');
+
+      let count = 3; numEl.innerText = count;
+      const timer = setInterval(() => {
+        count--;
+        if (count > 0) numEl.innerText = count;
+        else if (count === 0) numEl.innerText = "START!";
+        else {
+          clearInterval(timer);
+          overlay.classList.remove('active');
+          cb();
+        }
+      }, 800);
+    }
+
+    // 一問一答モード：「答えを見る」ボタン
+    function toggleAnswer() {
+      const q = activeQuizList[currentQuizIndex];
+      document.getElementById('answerDisplay').innerHTML = `<span>${q.ruby}</span>`;
+      document.getElementById('studyControlButtons').style.display = 'none';
+      document.getElementById('evalControlButtons').style.display = 'flex'; // 右から順に「わかった」「微妙」「わからない」
+    }
+
+    // タイピングモード：「送信」ボタン
+    function submitTypingAnswer() {
+      const inputEl = document.getElementById('typingInput');
+      const input = inputEl.value.trim();
+      const q = activeQuizList[currentQuizIndex];
+      const isCorrect = (input === q.a);
+      const timeTaken = ((Date.now() - answerStartTime) / 1000).toFixed(2);
+
+      inputEl.disabled = true;
+      document.getElementById('btnSubmitTyping').style.display = 'none';
+
+      if (isCorrect) {
+        showToast(`正解！ (${timeTaken}秒)`);
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#10b981;">⭕ 正解！ ${q.ruby}</span>`;
+        if (!userData.masteredIds.includes(q.id)) {
+          userData.masteredIds.push(q.id);
+        }
+        userData.xp += 10; userData.coins += 2;
+        if (userData.xp >= userData.level * 50) {
+          userData.level += 1;
+          showToast(`🎉 Lv.${userData.level} にレベルアップ！`);
+        }
+        initUserDataUI();
+      } else {
+        showToast(`不正解... 答え: ${q.a}`);
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#ef4444;">❌ 不正解！ 答え: ${q.ruby}</span>`;
+      }
+
+      if (document.getElementById('battleStatusBar').classList.contains('active')) {
+        speedScores[userData.name] = { time: timeTaken, correct: isCorrect };
+        broadcastData({ type: 'TYPING_ANSWER', name: userData.name, time: timeTaken, correct: isCorrect });
+        
+        if (Object.keys(speedScores).length >= roomMembers.length || !isHost) {
+          showRoundSpeedRanking();
+        }
+      } else {
+        // ソロタイピング時：「次の問題へ ➔」ボタンを表示
+        document.getElementById('nextQuestionArea').style.display = 'block';
+      }
+    }
+
+    // 「次の問題へ ➔」進行
+    function goToNextQuestion() {
+      currentQuizIndex++;
+      if (currentQuizIndex < activeQuizList.length) {
+        renderCurrentQuestion();
+      } else {
+        showToast('学習完了！');
+        exitQuizToLobby();
+      }
+    }
+
+    function showRoundSpeedRanking() {
+      const content = document.getElementById('speedRankContent');
+      const sorted = Object.entries(speedScores).sort((a,b) => a[1].time - b[1].time);
+
+      content.innerHTML = sorted.map(([name, res], idx) => `
+        <div style="margin-bottom:6px;">
+          ${idx === 0 ? '🥇' : '🥈'} <strong>${name}</strong>: ${res.correct ? res.time + '秒' : '不正解'}
+        </div>
+      `).join('');
+
+      openModal('speedRankModal');
+      speedScores = {};
+
+      setTimeout(() => {
+        closeModal('speedRankModal');
+        currentQuizIndex++;
+        if (currentQuizIndex < activeQuizList.length) renderCurrentQuestion();
+        else showFinalRanking();
+      }, 2000);
+    }
+
+    function showFinalRanking() {
+      document.getElementById('rankModalTitle').innerText = "🏆 最終総合結果";
+      document.getElementById('rankSubNotice').innerText = "対戦お疲れ様でした！";
+      document.getElementById('btnFinishRank').style.display = 'block';
+      openModal('speedRankModal');
+    }
+
+    // 一問一答評価ボタン処理
+    function handleAnswerEval(score) {
+      const q = activeQuizList[currentQuizIndex];
+      if (score === 2) { // わかった（覚えた！）
+        if (!userData.masteredIds.includes(q.id)) {
+          userData.masteredIds.push(q.id);
+        }
+        userData.xp += 10; userData.coins += 2;
+        if (userData.xp >= userData.level * 50) {
+          userData.level += 1;
+          showToast(`🎉 Lv.${userData.level} にレベルアップ！`);
+        }
+      }
+      initUserDataUI();
+
+      currentQuizIndex++;
+      if (currentQuizIndex < activeQuizList.length) renderCurrentQuestion();
+      else { showToast('学習完了！'); exitQuizToLobby(); }
+    }
+
+    // スキルツリー描画
+    function openSkillTreeModal() {
+      openModal('skillModal');
+      const wrapper = document.getElementById('skillTreeCanvasWrapper');
+      const svg = document.getElementById('skillTreeSvg');
+      svg.innerHTML = "";
+      document.querySelectorAll('.word-node').forEach(el => el.remove());
+
+      const centerX = wrapper.clientWidth / 2, centerY = wrapper.clientHeight / 2, radius = 135;
+      const displayWords = rawWordList.slice(0, 14);
+
+      displayWords.forEach((item, idx) => {
+        const angle = (idx / displayWords.length) * 2 * Math.PI;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", centerX); line.setAttribute("y1", centerY);
+        line.setAttribute("x2", x); line.setAttribute("y2", y);
+        line.setAttribute("stroke", "#334155"); line.setAttribute("stroke-width", "2");
+        svg.appendChild(line);
+
+        const isMastered = userData.masteredIds.includes(item.id);
+        const node = document.createElement('div');
+        node.className = `word-node ${isMastered ? 'unlocked' : ''}`;
+        node.style.left = `${x}px`; node.style.top = `${y}px`;
+        node.innerHTML = `<span>${item.a}</span><div class="fog-layer">🌫️ 未修得</div>`;
+        wrapper.appendChild(node);
+      });
+    }
+
+    function exitQuizToLobby() {
+      document.getElementById('heroSection').classList.remove('fade-out-up');
+      document.getElementById('categoryCenterSection').style.display = 'block';
+      document.getElementById('quizContainer').classList.remove('active');
+      document.getElementById('battleStatusBar').classList.remove('active');
+    }
+
+    function changeFontSize(s) {
+      document.body.classList.remove('font-large', 'font-xlarge');
+      if (s === 'large') document.body.classList.add('font-large');
+      if (s === 'xlarge') document.body.classList.add('font-xlarge');
+    }
+
+    function chooseAvatar(icon) { userData.icon = icon; initUserDataUI(); closeModal('avatarModal'); }
+
+    // Shift + G ショートカットで VIP+ 確実に解放
+    function initKeyShortcut() {
+      document.addEventListener('keydown', (e) => {
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (activeTag === 'input' || activeTag === 'textarea') return;
+
+        if (e.shiftKey && (e.key === 'G' || e.key === 'g' || e.code === 'KeyG')) {
+          if (!userData.isVipPlus) {
+            userData.isVipPlus = true;
+            localStorage.setItem('histori_vip', 'true');
+            showToast("🌟 VIP+ 特典が解放されました！");
+            updateVipUI();
+          } else {
+            openModal('vipSettingsModal');
+          }
+        }
+      });
+      updateVipUI();
+    }
+
+    function updateVipUI() {
+      if (userData.isVipPlus) {
+        const vipBtn = document.getElementById('btnVipSettings');
+        if (vipBtn) vipBtn.style.display = 'inline-flex';
+        
+        const savedBg = localStorage.getItem('histori_bg_img');
+        if (savedBg) {
+          const bgEl = document.getElementById('vipBgOverlay');
+          if (bgEl) bgEl.style.backgroundImage = `url('${savedBg}')`;
+          document.body.classList.add('vip-active');
+        }
+      }
+    }
+
+    function saveBgImage() {
+      const url = document.getElementById('bgUrlInput').value.trim();
+      if (url) {
+        localStorage.setItem('histori_bg_img', url);
+        updateVipUI(); closeModal('vipSettingsModal'); showToast('背景を適用しました');
+      }
+    }
+
+    function handleBgFileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          localStorage.setItem('histori_bg_img', evt.target.result);
+          updateVipUI(); closeModal('vipSettingsModal'); showToast('背景を適用しました');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function resetBgImage() {
+      localStorage.removeItem('histori_bg_img');
+      document.body.classList.remove('vip-active');
+      closeModal('vipSettingsModal');
+      showToast('背景をリセットしました');
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${msg}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
 </body>
 </html>
