@@ -406,6 +406,10 @@
   <div id="onlineModal" class="modal-overlay">
     <div class="modal-card">
       <h2 class="modal-title"><i class="fa-solid fa-users"></i> 数字4桁 対戦ロビー</h2>
+      <p style="font-size:.85rem;line-height:1.6;color:#475569;margin:-6px 0 16px;">
+        別々のWi-Fiでも対戦できます。両方の端末でこのHTMLを開き、インターネットに接続してください。
+        初回接続には数秒かかる場合があります。
+      </p>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
         <div style="background: #f1f5f9; padding: 16px; border-radius: 16px; border: 2.5px solid #1e293b; text-align: center;">
           <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px;">部屋を作る (ホスト)</div>
@@ -1264,83 +1268,165 @@
 
     // PeerJS 通信
     function initPeerJS() {
+      // PeerJSのシグナリングサーバーへ接続。別々のWi-Fi間でもWebRTC接続を試みる。
       try {
         peer = new Peer();
         peer.on('open', (id) => { myPeerId = id; });
         peer.on('connection', (conn) => { handleIncomingConn(conn); });
+        peer.on('error', (err) => {
+          console.warn('PeerJS:', err);
+          showToast(peerErrorMessage(err));
+        });
+        peer.on('disconnected', () => {
+          if (peer && !peer.destroyed) peer.reconnect();
+        });
       } catch (e) {
         console.warn("PeerJS Warning:", e);
       }
     }
 
+    function peerErrorMessage(err) {
+      if (err && err.type === 'peer-unavailable') return '部屋が見つかりません。コードを確認し、ホストが待機中か確認してください。';
+      if (err && err.type === 'unavailable-id') return '部屋コードが使用中です。もう一度部屋を作成してください。';
+      if (err && err.type === 'network') return '接続サーバーに接続できません。インターネット接続を確認してください。';
+      return 'オンライン接続に失敗しました。ページを再読み込みして再試行してください。';
+    }
+
+    function ensurePeerReady(callback) {
+      if (peer && peer.open && !peer.destroyed) { callback(); return; }
+      if (peer && !peer.destroyed) peer.destroy();
+      peer = new Peer();
+      peer.on('open', (id) => { myPeerId = id; callback(); });
+      peer.on('connection', (conn) => handleIncomingConn(conn));
+      peer.on('error', (err) => { console.warn('PeerJS:', err); showToast(peerErrorMessage(err)); });
+    }
+
     function createRoomHost() {
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      const hostPeerId = `histori-room-${code}`;
       isHost = true;
-      roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-      document.getElementById('createdRoomCode').innerText = roomCode;
+      roomCode = code;
+      document.getElementById('createdRoomCode').innerText = '接続中…';
+      document.getElementById('btnHostStartSelect').style.display = 'none';
+      roomMembers = [];
+      peerConnMap = {};
+      if (peer && !peer.destroyed) peer.destroy();
 
-      if (peer) peer.destroy();
-      peer = new Peer(`histori-room-${roomCode}`);
-
-      peer.on('open', () => {
+      // 4桁コードをPeer IDに使い、他の端末から同じコードで接続できるようにする。
+      peer = new Peer(hostPeerId);
+      peer.on('open', (id) => {
+        myPeerId = id;
+        document.getElementById('createdRoomCode').innerText = roomCode;
         roomMembers = [{ id: myPeerId, name: userData.name, avatar: userData.icon }];
         updateRoomMemberListUI();
         document.getElementById('btnHostStartSelect').style.display = 'inline-flex';
-        showToast(`部屋コード ${roomCode} を作成しました`);
+        showToast(`部屋コード ${roomCode} を作成しました。相手に4桁コードを伝えてください`);
       });
-
-      peer.on('connection', (conn) => { handleIncomingConn(conn); });
+      peer.on('connection', (conn) => handleIncomingConn(conn));
+      peer.on('error', (err) => {
+        console.warn('PeerJS host:', err);
+        document.getElementById('createdRoomCode').innerText = '失敗';
+        showToast(peerErrorMessage(err));
+      });
+      peer.on('disconnected', () => {
+        if (peer && !peer.destroyed) peer.reconnect();
+      });
     }
 
     function joinRoomGuest() {
       const code = document.getElementById('joinRoomCodeInput').value.trim();
-      if (code.length !== 4) return showToast('4桁の数字を入力してください');
+      if (!/^\d{4}$/.test(code)) return showToast('4桁の数字を入力してください');
 
       isHost = false;
+      roomCode = code;
+      peerConnMap = {};
       const hostPeerId = `histori-room-${code}`;
-      const conn = peer.connect(hostPeerId);
+      showToast('部屋に接続しています…');
 
-      conn.on('open', () => {
-        peerConnMap[hostPeerId] = conn;
-        conn.send({ type: 'JOIN', name: userData.name, avatar: userData.icon });
-        showToast(`部屋 ${code} に参加しました`);
-      });
+      const connect = () => {
+        if (!peer || peer.destroyed || !peer.open) {
+          return showToast('通信の準備ができていません。数秒後にもう一度お試しください');
+        }
+        const conn = peer.connect(hostPeerId, { reliable: true });
+        let settled = false;
+        conn.on('open', () => {
+          settled = true;
+          peerConnMap[hostPeerId] = conn;
+          conn.send({ type: 'JOIN', name: userData.name, avatar: userData.icon });
+          showToast(`部屋 ${code} に接続しました`);
+        });
+        conn.on('data', (data) => handlePeerData(data));
+        conn.on('error', (err) => {
+          console.warn('PeerJS guest connection:', err);
+          if (!settled) showToast(peerErrorMessage(err));
+        });
+        conn.on('close', () => {
+          delete peerConnMap[hostPeerId];
+          showToast('ホストとの接続が切れました');
+        });
+      };
 
-      conn.on('data', (data) => handlePeerData(data));
+      // 初期PeerがまだIDを取得していない場合も、準備完了後に接続する。
+      ensurePeerReady(connect);
     }
 
     function handleIncomingConn(conn) {
-      conn.on('open', () => { peerConnMap[conn.peer] = conn; });
+      conn.on('open', () => {
+        peerConnMap[conn.peer] = conn;
+      });
       conn.on('data', (data) => handlePeerData(data, conn));
+      conn.on('close', () => {
+        delete peerConnMap[conn.peer];
+        if (isHost) {
+          roomMembers = roomMembers.filter(m => m.id !== conn.peer);
+          updateRoomMemberListUI();
+          broadcastData({ type: 'ROOM_MEMBERS', members: roomMembers });
+        }
+      });
+      conn.on('error', (err) => console.warn('PeerJS connection:', err));
     }
 
     function handlePeerData(data, conn) {
-      if (data.type === 'JOIN') {
-        roomMembers.push({ id: conn.peer, name: data.name, avatar: data.avatar });
+      if (!data || typeof data.type !== 'string') return;
+      if (data.type === 'JOIN' && isHost) {
+        if (!roomMembers.some(m => m.id === conn.peer)) {
+          roomMembers.push({ id: conn.peer, name: String(data.name || 'ゲスト').slice(0, 24), avatar: String(data.avatar || '🎓') });
+        }
         updateRoomMemberListUI();
         broadcastData({ type: 'ROOM_MEMBERS', members: roomMembers });
       } else if (data.type === 'ROOM_MEMBERS') {
-        roomMembers = data.members;
+        roomMembers = Array.isArray(data.members) ? data.members : roomMembers;
         updateRoomMemberListUI();
       } else if (data.type === 'START_BATTLE') {
-        battleMode = data.mode;
+        if (!Array.isArray(data.questions) || !data.questions.length) return;
+        battleMode = data.mode || 'speed';
         activeQuizList = data.questions;
         currentQuizIndex = 0;
+        speedScores = {};
         closeModal('onlineModal');
+        closeModal('gameModeModal');
         startBattleQuizUI();
       } else if (data.type === 'TYPING_ANSWER') {
-        speedScores[data.name] = { time: data.time, correct: data.correct };
-        if (Object.keys(speedScores).length >= roomMembers.length) {
+        speedScores[data.name] = { time: Number(data.time), correct: !!data.correct };
+        if (isHost && Object.keys(speedScores).length >= roomMembers.length) {
           showRoundSpeedRanking();
         }
       }
     }
 
     function broadcastData(data) {
-      Object.values(peerConnMap).forEach(c => { if (c && c.open) c.send(data); });
+      Object.values(peerConnMap).forEach(c => {
+        if (c && c.open) {
+          try { c.send(data); } catch (e) { console.warn('送信失敗:', e); }
+        }
+      });
     }
 
     function updateRoomMemberListUI() {
-      document.getElementById('roomMemberList').innerText = roomMembers.map(m => `${m.avatar} ${m.name}`).join(' , ');
+      const el = document.getElementById('roomMemberList');
+      if (el) el.innerText = roomMembers.length
+        ? roomMembers.map(m => `${m.avatar || '🎓'} ${m.name || 'プレイヤー'}`).join(' , ')
+        : '(接続待ち...)';
     }
 
     function selectMode(m) {
@@ -1362,6 +1448,11 @@
       activeQuizList = questions.slice(0, limit);
       currentQuizIndex = 0;
 
+      if (!isHost) {
+        showToast('対戦の開始はホストが行います');
+        return;
+      }
+      speedScores = {};
       broadcastData({ type: 'START_BATTLE', mode: battleMode, questions: activeQuizList });
       startBattleQuizUI();
     }
@@ -1490,7 +1581,7 @@
         speedScores[userData.name] = { time: timeTaken, correct: isCorrect };
         broadcastData({ type: 'TYPING_ANSWER', name: userData.name, time: timeTaken, correct: isCorrect });
         
-        if (Object.keys(speedScores).length >= roomMembers.length || !isHost) {
+        if (isHost && Object.keys(speedScores).length >= roomMembers.length) {
           showRoundSpeedRanking();
         }
       } else {
