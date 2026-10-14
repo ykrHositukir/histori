@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="academic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ひすとり - 満点突破一問一答 (全411問)</title>
+  <!-- PeerJS WebRTC Library -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       テーマ別 カラー & エフェクト定義
+       ========================================== */
+    :root[data-theme="academic"] {
+      --bg-main: #f0f4f8; --card-bg: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border-color: #1e293b; --primary-yellow: #ffd54f;
+    }
+    :root[data-theme="green"] {
+      --bg-main: #f0fdf4; --card-bg: #ffffff; --text-main: #064e3b; --text-muted: #047857; --border-color: #064e3b; --primary-yellow: #fef08a;
+    }
+    :root[data-theme="mocha"] {
+      --bg-main: #fdf8f6; --card-bg: #ffffff; --text-main: #431407; --text-muted: #78350f; --border-color: #431407; --primary-yellow: #fde68a;
+    }
+    :root[data-theme="dark"] {
+      --bg-main: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: #38bdf8; --primary-yellow: #fde047;
+    }
+    :root[data-theme="sunlight"] {
+      --bg-main: #fffbeb; --card-bg: #ffffff; --text-main: #451a03; --text-muted: #78350f; --border-color: #78350f; --primary-yellow: #fde047;
+    }
+    :root[data-theme="sakura"] {
+      --bg-main: #fff1f2; --card-bg: #ffffff; --text-main: #881337; --text-muted: #9f1239; --border-color: #881337; --primary-yellow: #fecdd3;
+    }
+    :root[data-theme="lavender"] {
+      --bg-main: #faf5ff; --card-bg: #ffffff; --text-main: #581c87; --text-muted: #6b21a8; --border-color: #581c87; --primary-yellow: #e9d5ff;
+    }
+    :root[data-theme="ocean"] { --bg-main:#eaf8ff; --card-bg:#f8fdff; --text-main:#083344; --text-muted:#0e7490; --border-color:#0369a1; --primary-yellow:#a5f3fc; }
+    :root[data-theme="sunset"] { --bg-main:#fff1e9; --card-bg:#fffaf7; --text-main:#7c2d12; --text-muted:#c2410c; --border-color:#9a3412; --primary-yellow:#fdba74; }
+    :root[data-theme="mint"] { --bg-main:#eafff5; --card-bg:#fbfffd; --text-main:#064e3b; --text-muted:#0f766e; --border-color:#047857; --primary-yellow:#a7f3d0; }
+    :root[data-theme="midnight"] { --bg-main:#111827; --card-bg:#1f2937; --text-main:#f9fafb; --text-muted:#cbd5e1; --border-color:#a78bfa; --primary-yellow:#c4b5fd; }
+    :root[data-theme="peach"] { --bg-main:#fff5f1; --card-bg:#fffdfc; --text-main:#7f1d1d; --text-muted:#b45353; --border-color:#be6678; --primary-yellow:#fed7aa; }
+    :root[data-theme="starlight"] { --bg-main:#eef2ff; --card-bg:#fafaff; --text-main:#1e1b4b; --text-muted:#4338ca; --border-color:#4338ca; --primary-yellow:#fde68a; }
+    :root[data-theme="forest"] { --bg-main:#edf4e8; --card-bg:#fbfff8; --text-main:#20351f; --text-muted:#4d6b45; --border-color:#365314; --primary-yellow:#d9f99d; }
+
+    /* ぼかし付きデフォルト背景 */
+    body::before { content:""; position:fixed; inset:-18px; z-index:-1; pointer-events:none; background-image:linear-gradient(rgba(238,246,255,.60),rgba(245,249,255,.70)),url('https://gamingpc2.com/wp-content/uploads/2017/08/minecraft-shader.jpg'); background-position:center; background-size:cover; filter:blur(7px); transform:scale(1.04); }
+    body.vip-active::before { opacity:0; }
+    body.mobile-mode { padding:10px; }
+    body.mobile-mode .app-container { gap:12px; }
+    body.mobile-mode .top-nav { flex-direction:column; align-items:stretch; gap:10px; padding:12px; }
+    body.mobile-mode .nav-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    body.mobile-mode .nav-tools .btn-neo { padding:9px 7px; font-size:.78rem; }
+    body.mobile-mode .hero-grid { grid-template-columns:1fr; }
+    body.mobile-mode .hero-main-card { grid-column:auto; min-height:unset; gap:18px; }
+    body.mobile-mode .neo-card { padding:16px; border-width:2.5px; border-radius:18px; box-shadow:4px 4px 0 var(--border-color); }
+    body.mobile-mode .stat-card { min-height:unset; }
+    body.mobile-mode .category-spread-container { padding:12px; }
+    body.mobile-mode .category-spread-grid { grid-template-columns:1fr; }
+    body.mobile-mode .question-text { font-size:1.25rem; }
+    body.mobile-mode .typing-container { flex-direction:column; }
+    body.mobile-mode .typing-input, body.mobile-mode .typing-container .btn-neo { width:100%; }
+    body.mobile-mode .eval-buttons-grid { grid-template-columns:1fr; }
+    body.mobile-mode .battle-status-bar { flex-direction:column; gap:8px; text-align:center; }
+    body.mobile-mode .modal-card { width:min(96vw,560px); padding:16px; max-height:90vh; overflow-y:auto; }
+    @media (max-width: 640px) { body:not(.mobile-mode) { padding:10px; } .top-nav { flex-wrap:wrap; gap:10px; } .nav-tools { flex-wrap:wrap; } .hero-grid { grid-template-columns:1fr; } .hero-main-card { grid-column:auto; } }
+
+    /* VIP+ ぼかし背景 */
+    .vip-bg-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background-size: cover; background-position: center; filter: blur(12px) brightness(0.8);
+      transform: scale(1.05); z-index: -3; display: none; transition: opacity 0.5s ease;
+    }
+    body.vip-active .vip-bg-overlay { display: block; }
+
+    /* アニメーション背景キャンバス */
+    #themeCanvas {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: -2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Zen Maru Gothic', 'Plus Jakarta Sans', sans-serif; }
+
+    body {
+      background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding: 20px;
+      position: relative; overflow-x: hidden; transition: background-color 0.3s ease;
+    }
+
+    body.font-large { font-size: 115%; }
+    body.font-xlarge { font-size: 130%; }
+
+    .app-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    /* トップナビ */
+    .top-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card-bg); border: 3.5px solid var(--border-color);
+      border-radius: 16px; padding: 12px 20px; box-shadow: 4px 4px 0px var(--border-color);
+    }
+
+    .nav-brand { font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+    .nav-tools { display: flex; align-items: center; gap: 10px; }
+
+    .btn-neo {
+      border: 3px solid var(--border-color); padding: 10px 18px; border-radius: 14px;
+      font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 4px 4px 0px var(--border-color);
+      transition: all 0.15s ease; background: #ffffff; color: #0f172a;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; user-select: none;
+    }
+    .btn-neo:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--border-color); }
+    .btn-neo:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--border-color); }
+    .btn-primary-yellow { background: var(--primary-yellow); }
+    .btn-primary-blue { background: #3b82f6; color: white; }
+
+    /* ヒーローロビー */
+    .hero-container {
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, max-height 0.5s ease;
+      opacity: 1; max-height: 1000px; overflow: hidden;
+    }
+    .hero-container.fade-out-up {
+      opacity: 0; transform: translateY(-100%); max-height: 0; margin-bottom: 0; padding: 0; pointer-events: none;
+    }
+
+    .hero-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 868px) { .hero-grid { grid-template-columns: 1fr 1fr; } .hero-main-card { grid-column: span 2; } }
+
+    .neo-card {
+      background: var(--card-bg); border: 3.5px solid var(--border-color);
+      border-radius: 24px; box-shadow: 6px 6px 0px var(--border-color); padding: 24px; position: relative;
+    }
+    .hero-main-card {
+      display: flex; flex-direction: column; justify-content: space-between; min-height: 240px;
+      background: linear-gradient(135deg, var(--card-bg) 0%, #fffde7 100%);
+    }
+
+    .badge-sub {
+      display: inline-block; background: var(--border-color); color: #fff;
+      font-size: 0.8rem; font-weight: 800; padding: 4px 12px; border-radius: 8px; margin-bottom: 8px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 900; line-height: 1.2; color: var(--text-main); }
+    .hero-title span.highlight {
+      background: var(--primary-yellow); padding: 2px 10px; border-radius: 8px; border: 2.5px solid var(--border-color); color: #0f172a; display: inline-block;
+    }
+
+    .stat-card { display: flex; flex-direction: column; justify-content: space-between; }
+    .stat-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); }
+    .stat-value { font-size: 2.2rem; font-weight: 900; color: var(--text-main); margin: 6px 0; }
+
+    .user-avatar-btn {
+      width: 44px; height: 44px; border-radius: 50%; border: 2.5px solid var(--border-color);
+      background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; cursor: pointer; box-shadow: 2px 2px 0px var(--border-color);
+    }
+
+
+    /* カテゴリー拡散展開 */
+    .category-center-section { text-align: center; margin: 10px 0; }
+    .btn-open-category { font-size: 1.1rem; padding: 14px 32px; background: var(--primary-yellow); }
+
+    .category-spread-container {
+      display: none; background: var(--card-bg); border: 3.5px solid var(--border-color);
+      border-radius: 24px; box-shadow: 6px 6px 0px var(--border-color); padding: 24px; margin-top: 16px;
+      animation: spreadAnimation 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .category-spread-container.active { display: block; }
+    @keyframes spreadAnimation { 0% { opacity: 0; transform: scale(0.8) translateY(-20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+    .category-spread-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+    .category-check-card {
+      background: var(--bg-main); border: 2.5px solid var(--border-color); border-radius: 16px;
+      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; transition: all 0.2s ease;
+    }
+    .category-check-card.selected { background: #eff6ff; border-color: #2563eb; }
+
+    .custom-checkbox {
+      width: 22px; height: 22px; border: 2.5px solid var(--border-color); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; background: #fff;
+    }
+    .category-check-card.selected .custom-checkbox { background: #2563eb; border-color: #2563eb; color: white; }
+
+    /* クイズ＆対戦 メイン */
+    .quiz-container { display: none; flex-direction: column; gap: 20px; }
+    .quiz-container.active { display: flex; }
+
+    .battle-status-bar {
+      display: none; background: var(--border-color); color: white; padding: 14px 24px;
+      border-radius: 16px; justify-content: space-between; align-items: center; font-weight: 800; box-shadow: 4px 4px 0px var(--border-color);
+    }
+    .battle-status-bar.active { display: flex; }
+
+    .question-card {
+      background: var(--card-bg); border: 4px solid var(--border-color); border-radius: 24px;
+      box-shadow: 6px 6px 0px var(--border-color); padding: 32px 24px; text-align: center;
+      min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;
+    }
+
+    .question-card p.question-text {
+      color: #0f172a !important; font-size: 1.45rem; font-weight: 800; line-height: 1.6; margin-bottom: 20px;
+    }
+
+    .answer-box {
+      font-size: 1.6rem; font-weight: 900; color: #2563eb; background: #f1f5f9;
+      padding: 14px 28px; border-radius: 16px; border: 2.5px dashed #94a3b8;
+      min-width: 280px; min-height: 64px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    }
+
+    ruby { ruby-position: over; }
+    rt { font-size: 0.55em; color: #d97706; font-weight: 800; }
+
+    /* 一問一答評価ボタン群（右から：わかった、微妙、わからない） */
+    .eval-buttons-grid {
+      display: flex; gap: 12px; width: 100%; max-width: 540px;
+      flex-direction: row-reverse; /* 右から順に配置 */
+      margin-top: 10px;
+    }
+    .eval-buttons-grid .btn-neo { flex: 1; font-size: 0.95rem; }
+
+    /* カウントダウン */
+    .countdown-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background: rgba(255,255,255,0.95); border-radius: 20px;
+      display: none; justify-content: center; align-items: center; z-index: 10;
+    }
+    .countdown-overlay.active { display: flex; }
+    .countdown-number { font-size: 6rem; font-weight: 900; color: #2563eb; animation: popIn 0.5s ease; }
+    @keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+    .typing-container { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-top: 10px; }
+    .typing-input {
+      flex: 1; padding: 12px 18px; font-size: 1.1rem; font-weight: 800;
+      border: 3px solid var(--border-color); border-radius: 14px; outline: none;
+    }
+
+    /* モーダル */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: var(--card-bg); border: 4px solid var(--border-color);
+      border-radius: 24px; box-shadow: 8px 8px 0px var(--border-color);
+      padding: 28px; width: 90%; max-width: 560px; position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title { font-size: 1.35rem; font-weight: 900; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+    /* 360度 スキルツリー */
+    .skill-tree-canvas-wrapper {
+      position: relative; width: 100%; height: 380px; background: #0f172a;
+      border-radius: 16px; border: 3px solid var(--border-color); overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .skill-tree-svg { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
+    .center-player-node {
+      position: absolute; width: 54px; height: 54px; border-radius: 50%; background: #ffd54f;
+      border: 3px solid #1e293b; display: flex; justify-content: center; align-items: center;
+      font-size: 1.8rem; z-index: 5; box-shadow: 0 0 15px rgba(255,213,79,0.8);
+    }
+    .word-node {
+      position: absolute; padding: 6px 12px; border-radius: 12px; background: #ffffff;
+      border: 2.5px solid #1e293b; font-size: 0.75rem; font-weight: 900; color: #0f172a;
+      z-index: 4; transform: translate(-50%, -50%); white-space: nowrap; transition: all 0.3s ease;
+    }
+    .word-node .fog-layer {
+      position: absolute; top:-4px; left:-4px; right:-4px; bottom:-4px;
+      background: linear-gradient(135deg, rgba(148,163,184,0.95), rgba(203,213,225,0.95));
+      backdrop-filter: blur(4px); border-radius: 12px; display: flex; justify-content: center; align-items: center;
+      color: #475569; font-size: 0.7rem; font-weight: 800; transition: opacity 1.2s ease, filter 1.2s ease;
+      z-index: 6; pointer-events: none;
+    }
+    .word-node.unlocked .fog-layer { opacity: 0; filter: blur(10px); }
+
+
+    /* 角ばったスラッシュ型HPバー */
+    .hp-track{position:relative;overflow:hidden;border-radius:2px!important;clip-path:polygon(2% 0,100% 0,98% 100%,0 100%);height:28px!important;background:#172033!important;border:2px solid #d1fae5!important;box-shadow:0 0 0 1px #0f172a,0 0 14px rgba(34,197,94,.22)}
+    .hp-fill{border-radius:0!important;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);transition:width .35s cubic-bezier(.2,.8,.2,1)!important;box-shadow:0 0 12px rgba(34,197,94,.65)}
+    .hp-label{font-weight:1000!important;letter-spacing:.06em;text-shadow:0 1px 3px #064e3b!important}
+    .bot-arena-hud{display:none;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:12px;padding:12px;background:rgba(9,18,36,.94);border:2px solid #60a5fa;clip-path:polygon(1.5% 0,100% 0,98.5% 100%,0 100%);color:#fff}
+    .bot-arena-hud.active{display:grid}
+    .bot-side{min-width:0}.bot-side.right{text-align:right}.bot-name{font-weight:1000;font-size:.85rem;letter-spacing:.08em}.bot-hp-track{height:22px;background:#273449;border:1px solid #94a3b8;margin-top:5px;position:relative;overflow:hidden;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%)}
+    .bot-hp-fill{height:100%;width:100%;background:linear-gradient(90deg,#16a34a,#86efac);transition:width .4s ease}.bot-side.right .bot-hp-fill{margin-left:auto;background:linear-gradient(90deg,#60a5fa,#c4b5fd)}
+    .bot-hp-label{position:absolute;inset:0;display:grid;place-items:center;font-size:.75rem;font-weight:1000;text-shadow:0 1px 3px #111827}.bot-vs{font-weight:1000;color:#fbbf24;font-size:1.2rem}.bot-streak{color:#fbbf24;font-weight:1000;font-size:.85rem;margin-left:5px}
+    .bot-timer{font-size:1.5rem;font-weight:1000;color:#fbbf24;text-align:center}.bot-question-text{min-height:3em}
+    .bot-battle-modal .modal-card{max-width:560px}
+    .bot-level-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+    .bot-level-option{padding:12px;border:2px solid #334155;border-radius:12px;background:#f8fafc;font-weight:900;cursor:pointer;text-align:left}.bot-level-option.selected{border-color:#2563eb;background:#dbeafe;box-shadow:0 0 0 2px #93c5fd}
+    @media(max-width:700px){.bot-arena-hud{gap:6px;padding:8px}.bot-name{font-size:.7rem}.bot-hp-track{height:19px}.bot-timer{font-size:1.1rem}.bot-level-grid{grid-template-columns:1fr 1fr}}
+    @media(orientation:portrait) and (max-width:900px){body.bot-battle-active::after{content:'端末を横向きにすると遊びやすくなります';position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:9999;background:#0f172a;color:white;padding:8px 12px;border-radius:8px;font-size:12px;white-space:nowrap;pointer-events:none}}
+
+
+    /* BOT ARENA: cinematic battle presentation */
+    body.bot-battle-active{background:radial-gradient(ellipse at 50% 0%,#203b68 0%,#10182d 45%,#080d19 100%);}
+    body.bot-battle-active #quizContainer{max-width:980px;margin:12px auto 24px;position:relative;isolation:isolate}
+    body.bot-battle-active #quizContainer::before{content:"";position:absolute;inset:-10px;z-index:-1;border:1px solid rgba(96,165,250,.55);background:linear-gradient(135deg,rgba(30,58,138,.24),rgba(15,23,42,.88));box-shadow:0 0 38px rgba(59,130,246,.18),inset 0 0 30px rgba(96,165,250,.08);clip-path:polygon(2% 0,98% 0,100% 8%,100% 92%,98% 100%,2% 100%,0 92%,0 8%)}
+    body.bot-battle-active .question-card{background:linear-gradient(145deg,rgba(15,23,42,.98),rgba(30,41,59,.97));color:#f8fafc;border:1px solid rgba(125,211,252,.55);border-radius:8px;box-shadow:0 18px 50px rgba(0,0,0,.4),0 0 24px rgba(56,189,248,.12);overflow:hidden;position:relative}
+    body.bot-battle-active .question-card::after{content:"BATTLE FEED  /  LIVE";display:block;margin-top:18px;padding-top:10px;border-top:1px solid rgba(148,163,184,.22);font:800 10px/1.2 ui-monospace,monospace;letter-spacing:.22em;color:#7dd3fc;text-align:right}
+    body.bot-battle-active .question-text,body.bot-battle-active #questionDisplay{color:#f8fafc!important;text-shadow:0 0 20px rgba(125,211,252,.18);font-size:clamp(1.25rem,3vw,2rem);font-weight:900}
+    body.bot-battle-active .badge-sub{background:#0e7490;color:#cffafe;border:1px solid #67e8f9}
+    .bot-arena-hud{position:relative;max-width:980px;margin:14px auto 0!important;padding:16px 18px!important;gap:16px!important;background:linear-gradient(110deg,rgba(127,29,29,.72),rgba(15,23,42,.98) 32%,rgba(15,23,42,.98) 68%,rgba(30,64,175,.72))!important;border:1px solid rgba(125,211,252,.75)!important;box-shadow:0 0 26px rgba(37,99,235,.2),inset 0 0 22px rgba(255,255,255,.03)}
+    .bot-name{font-size:.9rem!important;letter-spacing:.16em!important;text-transform:uppercase;text-shadow:0 0 12px currentColor}
+    .bot-side:first-child .bot-name{color:#fca5a5}.bot-side.right .bot-name{color:#93c5fd}
+    .bot-hp-track{height:28px!important;background:#111827!important;border:1px solid rgba(226,232,240,.65)!important;box-shadow:inset 0 2px 5px #020617}
+    .bot-hp-fill{transition:width .55s cubic-bezier(.2,.8,.2,1)!important;box-shadow:0 0 15px rgba(74,222,128,.4);position:relative}
+    .bot-hp-fill::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 14px,rgba(255,255,255,.14) 14px 17px)}
+    .bot-side.right .bot-hp-fill{box-shadow:0 0 15px rgba(96,165,250,.5)}
+    .bot-vs{font-size:1.45rem!important;font-style:italic;text-shadow:0 0 18px rgba(251,191,36,.8);animation:vsPulse 1.6s ease-in-out infinite}
+    .bot-timer{font-size:1.7rem!important;font-variant-numeric:tabular-nums;text-shadow:0 0 18px currentColor;min-width:58px}
+    .bot-timer.urgent{color:#fb7185!important;animation:timerUrgent .45s infinite alternate}
+    body.bot-battle-active .bot-arena-hud.active{animation:arenaEnter .5s cubic-bezier(.2,.8,.2,1) both}
+    body.bot-battle-active.hit-player{animation:screenHit .32s ease-out}
+    body.bot-battle-active.hit-enemy #botEnemyHpFill{filter:brightness(1.9);}
+    body.bot-battle-active.hit-player #botPlayerHpFill{filter:brightness(1.9);background:linear-gradient(90deg,#ef4444,#fda4af)!important}
+    .bot-impact-flash{position:fixed;inset:0;z-index:9990;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(248,250,252,.22),rgba(239,68,68,.2) 45%,transparent 75%)}
+    .bot-impact-flash.active{animation:impactFlash .38s ease-out}
+    .bot-combat-banner{font:900 11px/1.2 ui-monospace,monospace;letter-spacing:.2em;text-align:center;color:#bae6fd;margin:0 auto 8px;text-shadow:0 0 12px #0284c7}
+    @keyframes vsPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.13);opacity:1}}
+    @keyframes timerUrgent{to{transform:scale(1.12);text-shadow:0 0 24px #fb7185}}
+    @keyframes arenaEnter{from{opacity:0;transform:translateY(-14px) scale(.98)}to{opacity:1;transform:none}}
+    @keyframes screenHit{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+    @keyframes impactFlash{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
+
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; }
+    .toast {
+      background: var(--border-color); color: white; padding: 12px 20px; border-radius: 12px;
+      font-weight: 800; box-shadow: 4px 4px 0px rgba(0,0,0,0.2); margin-top: 8px;
+      display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  
+    .category-review-picks{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+    .category-review-picks label{font-size:.72rem;font-weight:800;border:1px solid #cbd5e1;border-radius:8px;padding:5px 7px;background:#fff;cursor:pointer}
+    .category-mode-select{margin-top:8px;width:100%;padding:6px;border-radius:8px;border:1px solid #94a3b8;font-weight:700}
+    .quiz-hud{display:none;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:2px solid #cbd5e1;border-radius:14px;padding:10px 14px;font-weight:900}
+    .quiz-hud.active{display:flex}.hp-track{height:20px;background:#dcfce7;border:1px solid #16a34a;border-radius:999px;overflow:hidden;min-width:180px;flex:1;position:relative}.hp-fill{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#86efac);transition:width .55s ease,background .4s}.hp-label{position:absolute;inset:0;display:grid;place-items:center;font-size:.78rem;color:#14532d;text-shadow:0 1px #fff}
+    .category-result-row{display:grid;grid-template-columns:minmax(120px,1fr) 3fr 52px;gap:10px;align-items:center;margin:10px 0;font-weight:800}.category-result-track{height:14px;background:#e2e8f0;border-radius:999px;overflow:hidden}.category-result-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#6366f1);transition:width .8s ease}
+  
+    /* もちふわミニキャラ・着せ替え */
+
+
+    /* 漢字ワークショップ */
+    .kanji-panel{display:none;max-width:1050px;margin:20px auto;padding:20px;border:2px solid #bae6fd;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(239,246,255,.96));box-shadow:0 18px 50px rgba(14,116,144,.14)}
+    .kanji-panel.active{display:block}.kanji-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.kanji-field{display:flex;flex-direction:column;gap:6px;font-weight:800;color:#334155}.kanji-field input,.kanji-field textarea{width:100%;border:2px solid #cbd5e1;border-radius:12px;padding:11px;font:inherit;background:#fff;box-sizing:border-box}.kanji-problem-list{display:grid;gap:8px;margin:14px 0}.kanji-problem{display:flex;gap:10px;align-items:flex-start;padding:12px;background:#fff;border:1px solid #cbd5e1;border-radius:12px}.kanji-problem small{display:block;color:#64748b;margin-top:4px}.kanji-study{display:none;max-width:900px;margin:18px auto;padding:clamp(16px,3vw,30px);background:#fff;border:2px solid #bae6fd;border-radius:24px;box-shadow:0 18px 50px #0f172a18}.kanji-study.active{display:block}.kanji-prompt{font-size:clamp(1.35rem,3vw,2rem);font-weight:900;text-align:center;line-height:1.8;margin:20px 0}.kanji-answer-input{display:block;width:min(100%,560px);margin:12px auto;padding:14px;border:2px solid #94a3b8;border-radius:12px;font-size:1.2rem}.kanji-canvas-wrap{max-width:620px;margin:12px auto}.kanji-canvas{width:100%;height:230px;display:block;border:2px dashed #94a3b8;border-radius:16px;background:repeating-linear-gradient(0deg,#fff,#fff 56px,#e2e8f0 57px,#fff 58px);touch-action:none;cursor:crosshair}.kanji-reveal{padding:14px;margin:12px auto;text-align:center;background:#eff6ff;border-radius:14px;font-size:1.15rem;font-weight:800}.kanji-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}.kanji-progress{height:9px;border-radius:99px;background:#e2e8f0;overflow:hidden}.kanji-progress>div{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#818cf8);transition:width .25s}
+    @media(max-width:640px){.kanji-panel{padding:12px}.kanji-grid{grid-template-columns:1fr}.kanji-study{padding:14px}.kanji-canvas{height:200px}}
+
+  </style>
+</head>
+<body>
+  <div id="botImpactFlash" class="bot-impact-flash" aria-hidden="true"></div>
+
+  <!-- アニメーション背景＆VIP+ overlay -->
+  <div id="vipBgOverlay" class="vip-bg-overlay"></div>
+  <canvas id="themeCanvas"></canvas>
+
+  <div class="app-container">
+
+    <!-- ナビゲーション -->
+    <div class="top-nav">
+      <div class="nav-brand">
+        <i class="fa-solid fa-graduation-cap" style="color: #2563eb;"></i> ひすとり - 満点突破一問一答
+      </div>
+      <div class="nav-tools">
+        <button class="btn-neo" onclick="openModal('skillModal')"><i class="fa-solid fa-tree"></i> スキルツリー</button>
+        <button class="btn-neo" onclick="openModal('settingsModal')"><i class="fa-solid fa-gear"></i> 設定</button>
+        <button id="btnVipSettings" class="btn-neo" style="display: none; background: #e0e7ff;" onclick="openModal('vipSettingsModal')"><i class="fa-solid fa-crown"></i> VIP+ 背景</button>
+        <button id="btnLogin" class="btn-neo btn-primary-yellow" onclick="openModal('loginModal')">
+          <i class="fa-solid fa-user"></i> <span id="loginBtnText">ログイン</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ヒーローロビー -->
+    <div id="heroSection" class="hero-container">
+      <div class="hero-grid">
+        <div class="neo-card hero-main-card">
+          <div>
+            <div class="badge-sub">HISTORY // BATTLE ACADEMY</div>
+            <h1 class="hero-title">ひすとり <span class="highlight">ー 満点突破</span></h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px; font-weight: 700;">
+              社会・歴史と理科を切り替えて学べる！<br>「タイピングモード」と「一問一答モード」で歴史を極めよう！
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+            <button id="btnStartStudy" class="btn-neo btn-primary-yellow" onclick="startSoloStudy()"><i class="fa-solid fa-play"></i> 学習を開始</button>
+            <button id="btnOpenOnlineModal" class="btn-neo" onclick="openModal('onlineModal')"><i class="fa-solid fa-network-wired"></i> ONLINE 対戦（数字4桁）</button>
+          </div>
+        </div>
+
+        <div class="neo-card stat-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="stat-label">PLAYER</span>
+            <div id="userAvatarBtn" class="user-avatar-btn" onclick="openModal('avatarModal')">🎓</div>
+          </div>
+          <div id="userNameDisplay" style="font-size: 1.1rem; font-weight: 900; margin-top: 4px;">ゲスト</div>
+          <div style="border-top: 2px solid #cbd5e1; padding-top: 8px; margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800;">
+              <span>Lv.<span id="userLevel">1</span></span>
+              <span>XP: <span id="userXp">0</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="neo-card stat-card">
+          <span class="stat-label">MASTERED</span>
+          <div id="userMastered" class="stat-value">0</div>
+          <div style="border-top: 2px solid #cbd5e1; padding-top: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800;">
+              <span>🪙 <span id="userCoins">20</span></span>
+              <span id="lobbyStatusText" style="color: #10b981;">READY</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 教科切り替え -->
+    <div class="subject-switch" role="group" aria-label="学習する教科" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px auto 10px;">
+      <button id="subjectSocialBtn" class="btn-neo btn-primary-yellow" onclick="switchSubject('social')">🌏 社会・歴史</button>
+      <button id="subjectScienceBtn" class="btn-neo" onclick="switchSubject('science')">🔬 理科</button>
+      <button id="subjectKanjiBtn" class="btn-neo" onclick="switchSubject('kanji')">漢字</button>
+    </div>
+
+    <section id="kanjiPanel" class="kanji-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:1.6rem">漢字ワークショップ</h2><p style="margin:6px 0;color:#64748b">自分だけの漢字問題を作って、読み→書きの順で練習しよう。</p></div><span class="badge-sub">MY KANJI</span></div>
+      <div class="kanji-grid" style="margin-top:16px">
+        <label class="kanji-field">答えの漢字<input id="kanjiAnswerInput" placeholder="例：風量" maxlength="40"></label>
+        <label class="kanji-field">読み（ひらがな）<input id="kanjiReadingInput" placeholder="例：ふうりょう" maxlength="80"></label>
+        <label class="kanji-field" style="grid-column:1/-1">例文・問題文<input id="kanjiExampleInput" placeholder="例：風量を図る" maxlength="160"></label>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn-neo btn-primary-blue" onclick="saveKanjiProblem()">＋ 問題を作成</button><button class="btn-neo" onclick="clearKanjiForm()">入力をクリア</button><button class="btn-neo" onclick="selectAllKanji(true)">全選択</button><button class="btn-neo" onclick="selectAllKanji(false)">全解除</button></div>
+      <div id="kanjiProblemList" class="kanji-problem-list"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><strong id="kanjiSelectedCount">0問選択中</strong><button class="btn-neo btn-primary-yellow" onclick="startKanjiStudy()"><i class="fa-solid fa-play"></i> 選択した漢字でスタート</button></div>
+    </section>
+    <section id="kanjiStudy" class="kanji-study">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><strong id="kanjiPhaseLabel">STEP 1 / 読み</strong><span id="kanjiQuestionCount" style="color:#64748b;font-weight:800">1 / 1</span></div>
+      <div class="kanji-progress"><div id="kanjiProgressFill"></div></div>
+      <div id="kanjiStudyPrompt" class="kanji-prompt"></div>
+      <div id="kanjiReadingArea"><input id="kanjiReadingAnswer" class="kanji-answer-input" placeholder="読みをひらがなで入力" autocomplete="off"><div class="kanji-actions"><button class="btn-neo btn-primary-blue" onclick="checkKanjiReading()">読みを答える</button></div><div id="kanjiReadingFeedback" class="kanji-reveal" style="display:none"></div></div>
+      <div id="kanjiWritingArea" style="display:none"><div class="kanji-canvas-wrap"><canvas id="kanjiWritingCanvas" class="kanji-canvas" width="900" height="360" aria-label="漢字を書く欄"></canvas></div><div class="kanji-actions"><button class="btn-neo" onclick="clearKanjiCanvas()">書き直す</button><button class="btn-neo btn-primary-blue" onclick="revealKanjiAnswer()">答え合わせ</button></div><div id="kanjiWritingReveal" class="kanji-reveal" style="display:none"></div><div id="kanjiWritingEval" class="kanji-actions" style="display:none"><button class="btn-neo" style="background:#fee2e2" onclick="rateKanjiAnswer('unknown')">できなかった</button><button class="btn-neo" style="background:#fef3c7" onclick="rateKanjiAnswer('maybe')">微妙</button><button class="btn-neo" style="background:#dcfce7" onclick="rateKanjiAnswer('know')">できた</button></div></div>
+      <div class="kanji-actions"><button class="btn-neo" onclick="exitKanjiStudy()">中断して戻る</button></div>
+    </section>
+
+    <!-- カテゴリー拡散展開 -->
+    <div id="categoryCenterSection" class="category-center-section">
+      <button class="btn-neo btn-open-category" onclick="toggleCategorySpread()">
+        <i class="fa-solid fa-folder-open"></i> 出題カテゴリーを選択・開く
+      </button>
+
+      <button class="btn-neo btn-primary-blue" style="margin-top:12px;background:#bfdbfe" onclick="openModal('botBattleModal')"><i class="fa-solid fa-robot"></i> Bot対戦</button>
+      <div id="categorySpreadContainer" class="category-spread-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 1.1rem; font-weight: 900;"><i class="fa-solid fa-list-check"></i> カテゴリー複数選択</h3>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-neo" style="padding: 4px 12px; font-size: 0.8rem;" onclick="selectAllCategories(true)">全選択</button>
+            <button class="btn-neo" style="padding: 4px 12px; font-size: 0.8rem;" onclick="selectAllCategories(false)">全解除</button>
+          </div>
+        </div>
+        <div id="categorySpreadGrid" class="category-spread-grid"></div>
+      </div>
+    </div>
+
+    <!-- 対戦ステータスバー -->
+    <div id="battleStatusBar" class="battle-status-bar">
+      <div><span id="p1Avatar">🎓</span> <span id="p1Name">You</span>: <span id="p1Score">0</span> pt</div>
+      <div id="matchTimerText" style="color: #fde047; font-size: 1.15rem;">対戦準備完了</div>
+      <div id="multiPlayerList" style="font-size: 0.85rem; display: flex; gap: 12px;"></div>
+    </div>
+
+    <!-- クイズメインエリア -->
+    <div id="quizHud" class="quiz-hud"><span id="quizModeLabel">学習中</span><span id="quizElapsed">0.0 秒</span><div id="hpWrap" style="display:none;align-items:center;gap:8px;flex:1"><span>HP</span><div class="hp-track"><div id="hpFill" class="hp-fill"></div><span id="hpLabel" class="hp-label">5000 / 5000</span></div></div></div>
+  <div id="botArenaHud" class="bot-arena-hud"><div class="bot-side"><div class="bot-name" id="botEnemyName">BOT</div><div class="bot-hp-track"><div id="botEnemyHpFill" class="bot-hp-fill"></div><span id="botEnemyHpLabel" class="bot-hp-label">5000 / 5000</span></div></div><div><div class="bot-vs">VS</div><div id="botQuestionTimer" class="bot-timer">10.0</div></div><div class="bot-side right"><div class="bot-name">YOU <span id="botStreakLabel" class="bot-streak"></span></div><div class="bot-hp-track"><div id="botPlayerHpFill" class="bot-hp-fill"></div><span id="botPlayerHpLabel" class="bot-hp-label">5000 / 5000</span></div></div></div>
+  <div id="quizContainer" class="quiz-container">
+      <div class="question-card">
+        <div id="countdownOverlay" class="countdown-overlay">
+          <div id="countdownNumber" class="countdown-number">3</div>
+        </div>
+
+        <div style="font-size: 0.85rem; font-weight: 800; color: #64748b; margin-bottom: 12px;">
+          <span id="currentCategoryBadge" class="badge-sub">歴史</span>
+          <span id="questionNumText" style="margin-left: 8px;">Q.1 / 10</span>
+        </div>
+        
+        <p id="questionDisplay" class="question-text">ここに問題文が表示されます。</p>
+
+        <div id="answerDisplay" class="answer-box">
+          <span style="color: #94a3b8; font-size: 0.95rem;">【答えを見る】またはタイピングで回答</span>
+        </div>
+
+        <!-- タイピングモード用 入力エリア -->
+        <div id="typingArea" class="typing-container">
+          <input type="text" id="typingInput" class="typing-input" placeholder="ここに回答を入力してEnter..." autocomplete="off">
+          <button id="btnSubmitTyping" class="btn-neo btn-primary-yellow" onclick="submitTypingAnswer()">送信</button>
+        </div>
+
+        <!-- 一問一答モード用 「答えを見る」ボタン -->
+        <div id="studyControlButtons" style="display: flex; gap: 12px; margin-top: 14px;">
+          <button id="btnShowAnswer" class="btn-neo btn-primary-blue" onclick="toggleAnswer()"><i class="fa-solid fa-eye"></i> 答えを見る</button>
+        </div>
+
+        <!-- タイピング後の「次の問題へ」ボタン -->
+        <div id="nextQuestionArea" style="display: none; margin-top: 16px;">
+          <button id="btnNextQuestion" class="btn-neo btn-primary-yellow" style="font-size: 1.1rem; padding: 12px 28px;" onclick="goToNextQuestion()">次の問題へ ➔</button>
+        </div>
+      </div>
+
+      <!-- 一問一答モード用 評価ボタン群（右から：わかった、微妙、わからない） -->
+      <div id="evalControlButtons" class="eval-buttons-grid" style="display: none;">
+        <!-- 右端 -->
+        <button class="btn-neo" onclick="handleAnswerEval(2)" style="background: #f0fdf4; border-color: #10b981;">
+          <i class="fa-solid fa-check" style="color:#10b981;"></i> わかった
+        </button>
+        <!-- 中央 -->
+        <button class="btn-neo" onclick="handleAnswerEval(1)" style="background: #fffbeb; border-color: #f59e0b;">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i> 微妙
+        </button>
+        <!-- 左端 -->
+        <button class="btn-neo" onclick="handleAnswerEval(0)" style="background: #fef2f2; border-color: #ef4444;">
+          <i class="fa-solid fa-xmark" style="color:#ef4444;"></i> わからない
+        </button>
+      </div>
+
+      <div style="text-align: center; margin-top: 8px;">
+        <button class="btn-neo" style="font-size: 0.85rem; padding: 6px 16px;" onclick="exitQuizToLobby()"><i class="fa-solid fa-arrow-left"></i> ロビーへ戻る</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- モーダル群 -->
+  <div id="onlineModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-users"></i> 数字4桁 対戦ロビー</h2>
+      <p style="font-size:.85rem;line-height:1.6;color:#475569;margin:-6px 0 16px;">
+        別々のWi-Fiでも対戦できます。両方の端末でこのHTMLを開き、インターネットに接続してください。
+        初回接続には数秒かかる場合があります。
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div style="background: #f1f5f9; padding: 16px; border-radius: 16px; border: 2.5px solid #1e293b; text-align: center;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px;">部屋を作る (ホスト)</div>
+          <button class="btn-neo btn-primary-yellow" style="width: 100%;" onclick="createRoomHost()">4桁コード発行</button>
+          <div id="createdRoomCode" style="font-size: 1.8rem; font-weight: 900; color: #2563eb; margin-top: 8px;">----</div>
+        </div>
+
+        <div style="background: #f1f5f9; padding: 16px; border-radius: 16px; border: 2.5px solid #1e293b;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px;">コードを入力して参加</div>
+          <input type="text" id="joinRoomCodeInput" maxlength="4" placeholder="例: 1234" style="width: 100%; padding: 8px; border: 2px solid #1e293b; border-radius: 8px; font-weight: 900; text-align: center; font-size: 1.2rem; margin-bottom: 8px;">
+          <button class="btn-neo btn-primary-blue" style="width: 100%;" onclick="joinRoomGuest()">参加する</button>
+        </div>
+      </div>
+
+      <div style="background: #fffbeb; padding: 12px; border-radius: 12px; border: 2px solid #f59e0b; margin-bottom: 16px;">
+        <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 6px;">現在の参加者:</div>
+        <div id="roomMemberList" style="font-weight: 800; font-size: 0.95rem; color: #0f172a;">(待機中...)</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between;">
+        <button id="btnHostStartSelect" class="btn-neo btn-primary-yellow" style="display: none;" onclick="openModal('gameModeModal')">モードを選択して開始</button>
+        <button class="btn-neo" onclick="closeModal('onlineModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameModeModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-gamepad"></i> 対戦モードの選択</h2>
+      <div id="modeSpeed" class="mode-select-card selected" onclick="selectMode('speed')" style="border:3px solid #1e293b; padding:12px; border-radius:12px; margin-bottom:10px; cursor:pointer;">
+        <div style="font-weight: 900; font-size: 1.1rem;">⚡ スピードアンサー</div>
+        <div style="font-size: 0.85rem; color: #475569; margin-top: 4px;">同時出題！タイピング速度を競い、各問の順位ボードを表示します。</div>
+      </div>
+      <div id="modeSurvival" class="mode-select-card" onclick="selectMode('survival')" style="border:3px solid #1e293b; padding:12px; border-radius:12px; margin-bottom:10px; cursor:pointer;">
+        <div style="font-weight: 900; font-size: 1.1rem;">🔥 サバイバル</div>
+        <div style="font-size: 0.85rem; color: #475569; margin-top: 4px;">制限時間内に何問解けるかを競います。</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-neo btn-primary-yellow" onclick="confirmAndStartBattle()">対戦をスタート！</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="botBattleModal" class="modal-overlay bot-battle-modal"><div class="modal-card">
+    <h2 class="modal-title"><i class="fa-solid fa-robot"></i> BOT ARENA</h2>
+    <p style="color:#64748b;font-weight:700">難易度を選択。問題は10秒で表示され、先に与えたダメージで勝負！スマホは横向き推奨。</p>
+    <div class="bot-level-grid" id="botLevelGrid">
+      <button class="bot-level-option" data-level="堀大輔" onclick="selectBotLevel('堀大輔')">堀大輔<small style="display:block;color:#64748b">入門・ゆっくり</small></button>
+      <button class="bot-level-option" data-level="イージー" onclick="selectBotLevel('イージー')">イージー<small style="display:block;color:#64748b">やさしめ</small></button>
+      <button class="bot-level-option" data-level="ノーマル" onclick="selectBotLevel('ノーマル')">ノーマル<small style="display:block;color:#64748b">標準</small></button>
+      <button class="bot-level-option" data-level="ハード" onclick="selectBotLevel('ハード')">ハード<small style="display:block;color:#64748b">手強い</small></button>
+      <button class="bot-level-option" data-level="アルティメット" onclick="selectBotLevel('アルティメット')">アルティメット<small style="display:block;color:#64748b">ほぼ全問正解</small></button>
+      <button class="bot-level-option" data-level="ナイトメア" onclick="selectBotLevel('ナイトメア')">ナイトメア<small style="display:block;color:#64748b">高速回答</small></button>
+      <button class="bot-level-option" data-level="河野玄斗" onclick="selectBotLevel('河野玄斗')" style="grid-column:1/-1;border-color:#b45309;background:#fef3c7">河野玄斗<small style="display:block;color:#92400e">1秒以内・ほぼ絶対正解</small></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0"><button id="botTypeTyping" class="btn-neo btn-primary-blue" onclick="selectBotAnswerMode('typing')">タイピング</button><button id="botTypeFlash" class="btn-neo" onclick="selectBotAnswerMode('flashcard')">一問一答</button></div>
+    <button class="btn-neo btn-primary-yellow" style="width:100%;padding:14px" onclick="startBotBattle()">対戦開始</button>
+    <button class="btn-neo" style="width:100%;margin-top:8px" onclick="closeModal('botBattleModal')">キャンセル</button>
+  </div></div>
+
+  <div id="speedRankModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center;">
+      <h2 id="rankModalTitle" class="modal-title" style="justify-content: center;"><i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> スピード結果</h2>
+      <div id="speedRankContent" style="margin: 20px 0; font-weight: 800; font-size: 1.1rem;"></div><div id="categoryResultContent" style="text-align:left;margin-top:16px"></div>
+      <p id="rankSubNotice" style="color: #64748b; font-weight: 700; font-size: 0.85rem;">2秒後に次の問題へ進みます...</p>
+      <button id="btnFinishRank" class="btn-neo btn-primary-yellow" style="display: none; margin: 0 auto;" onclick="closeModal('speedRankModal'); exitQuizToLobby();">ロビーへ戻る</button>
+    </div>
+  </div>
+
+  <div id="skillModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-tree"></i> 360度 習得スキルツリー</h2>
+      <p style="font-weight: 700; color: #64748b; font-size: 0.85rem; margin-bottom: 12px;">学習で覚えた単語の「霧」がフェードアウトして解禁されます！</p>
+      <div class="skill-tree-canvas-wrapper" id="skillTreeCanvasWrapper">
+        <svg class="skill-tree-svg" id="skillTreeSvg"></svg>
+        <div class="center-player-node" id="treeCenterAvatar">🎓</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-neo" onclick="closeModal('skillModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-gear"></i> アプリ各種設定</h2>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight:800;font-size:.9rem;display:block;margin-bottom:4px;">画面レイアウト:</label>
+        <select id="layoutModeSelect" onchange="changeLayoutMode(this.value)" style="width:100%;padding:10px;border:2.5px solid #1e293b;border-radius:8px;font-weight:800;">
+          <option value="auto">自動（画面幅に合わせる）</option>
+          <option value="mobile">スマホモード（縦並び・大きめボタン）</option>
+          <option value="desktop">PCモード</option>
+        </select>
+        <p style="font-size:.75rem;color:var(--text-muted);font-weight:700;margin-top:5px;">スマホモードはカードやボタンを縦に並べ、入力欄を大きくします。</p>
+      </div>
+
+      <!-- 回答モード選択 -->
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">回答モード:</label>
+        <select id="studyModeSelect" onchange="changeStudyMode(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="typing">⌨️ タイピングモード (入力＆送信で正誤判定)</option>
+          <option value="flashcard">🎴 一問一答モード (答えを見る➔わかった/微妙/わからない)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">1回あたりの出題数:</label>
+        <select id="questionCountSelect" onchange="changeQuestionCount(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="10">10 問</option>
+          <option value="20">20 問</option>
+          <option value="30">30 問</option>
+          <option value="50">50 問</option>
+          <option value="all">全問題 (カテゴリー内の全問題)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">デザインテーマ (アニメーション背景):</label>
+        <select id="themeSelect" onchange="changeTheme(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="academic">アカデミックネイビー</option>
+          <option value="green">クラシックグリーン</option>
+          <option value="mocha">モカブラウン</option>
+          <option value="dark">サイバーダーク</option>
+          <option value="sunlight">☀️ 太陽の光 (降り注ぐ木漏れ日)</option>
+          <option value="sakura">🌸 桜吹雪 (舞い散る花びら)</option>
+          <option value="lavender">🪻 ラベンダー & 蝶</option>
+          <option value="ocean" selected>🌊 クリスタルオーシャン</option>
+          <option value="sunset">🌇 サンセットオレンジ</option>
+          <option value="mint">🍃 ミントガーデン</option>
+          <option value="midnight">🌌 ミッドナイトパープル</option>
+          <option value="peach">🍑 ピーチクリーム</option>
+          <option value="starlight">✨ スターライト</option>
+          <option value="forest">🌲 フォレストノート</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 4px;">文字サイズ:</label>
+        <select onchange="changeFontSize(this.value)" style="width: 100%; padding: 8px; border: 2.5px solid #1e293b; border-radius: 8px; font-weight: 800;">
+          <option value="normal">標準</option>
+          <option value="large">大</option>
+          <option value="xlarge">特大</option>
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn-neo" onclick="closeModal('settingsModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-right-to-bracket"></i> アカウントログイン</h2>
+      <div style="margin-bottom: 12px;">
+        <label style="font-weight: 800; font-size: 0.85rem;">ユーザーID / プレイヤー名:</label>
+        <input type="text" id="loginIdInput" placeholder="例: ひすとりマスター" style="width: 100%; padding: 10px; border: 2.5px solid #1e293b; border-radius: 10px; font-weight: 800; margin-top: 4px;">
+      </div>
+      <button class="btn-neo btn-primary-yellow" style="width: 100%; margin-bottom: 12px;" onclick="handleLoginSubmit()">ログイン</button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-neo" style="flex:1; font-size:0.8rem;" onclick="quickSocialLogin('Google')"><i class="fa-brands fa-google"></i> Google</button>
+        <button class="btn-neo" style="flex:1; font-size:0.8rem;" onclick="quickSocialLogin('Apple')"><i class="fa-brands fa-apple"></i> Apple</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-neo" onclick="closeModal('loginModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="avatarModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-face-smile"></i> アイコンの変更</h2>
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0;">
+        <div class="btn-neo" onclick="chooseAvatar('🎓')">🎓</div>
+        <div class="btn-neo" onclick="chooseAvatar('⚔️')">⚔️</div>
+        <div class="btn-neo" onclick="chooseAvatar('🌟')">🌟</div>
+        <div class="btn-neo" onclick="chooseAvatar('👑')">👑</div>
+        <div class="btn-neo" onclick="chooseAvatar('🦊')">🦊</div>
+        <div class="btn-neo" onclick="chooseAvatar('🐉')">🐉</div>
+        <div class="btn-neo" onclick="chooseAvatar('🚀')">🚀</div>
+        <div class="btn-neo" onclick="chooseAvatar('💎')">💎</div>
+        <div class="btn-neo" onclick="chooseAvatar('⚡')">⚡</div>
+        <div class="btn-neo" onclick="chooseAvatar('🎯')">🎯</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn-neo" onclick="closeModal('avatarModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vipSettingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title"><i class="fa-solid fa-crown" style="color: #f59e0b;"></i> VIP+ 専用背景設定</h2>
+      <input type="text" id="bgUrlInput" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 10px; border: 2.5px solid #1e293b; border-radius: 10px; font-weight: 700; margin-bottom: 12px;">
+      <input type="file" id="bgFileInput" accept="image/*" style="margin-bottom: 20px;">
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="btn-neo" onclick="resetBgImage()">リセット</button>
+        <button class="btn-neo btn-primary-yellow" onclick="saveBgImage()">背景を適用</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    // ==========================================
+    // 全411単語 完全データベース (誤字補正＆ルビ付与)
+    // ==========================================
+    const rawWordList = [
+      // --- 1. 原始・古代文明 ---
+      { id: 1, c: "原始・古代文明", q: "人類の初期段階にあたる、最も古い化石人類は？", a: "猿人", ruby: "<ruby>猿人<rt>えんじん</rt></ruby>" },
+      { id: 2, c: "原始・古代文明", q: "火や言葉を使い始めたとされる人類は？", a: "原人", ruby: "<ruby>原人<rt>げんじん</rt></ruby>" },
+      { id: 3, c: "原始・古代文明", q: "現代の人類の直接の祖先にあたる分類は？", a: "新人", ruby: "<ruby>新人<rt>しんじん</rt></ruby>" },
+      { id: 4, c: "原始・古代文明", q: "打製石器を使い、狩猟や採集を行っていた時代は？", a: "旧石器時代", ruby: "<ruby>旧石器時代<rt>きゅうせっきじだい</rt></ruby>" },
+      { id: 5, c: "原始・古代文明", q: "石を打ち欠いて作った石器は？", a: "打製石器", ruby: "<ruby>打製石器<rt>だせいせっき</rt></ruby>" },
+      { id: 6, c: "原始・古代文明", q: "磨製石器や土器を使い農耕が始まった時代は？", a: "新石器時代", ruby: "<ruby>新石器時代<rt>しんせっきじだい</rt></ruby>" },
+      { id: 7, c: "原始・古代文明", q: "石を磨いて表面を整えた石器は？", a: "磨製石器", ruby: "<ruby>磨製石器<rt>ませいせっき</rt></ruby>" },
+      { id: 8, c: "原始・古代文明", q: "粘土を焼いて作られた調理や保存の道具は？", a: "土器", ruby: "<ruby>土器<rt>どき</rt></ruby>" },
+      { id: 9, c: "原始・古代文明", q: "ナイル川流域で栄えた文明は？", a: "エジプト文化", ruby: "<ruby>エジプト文化<rt>えじぷとぶんか</rt></ruby>" },
+      { id: 10, c: "原始・古代文明", q: "エジプトで用いられた太陽に基づく暦は？", a: "太陽暦", ruby: "<ruby>太陽暦<rt>たいようれき</rt></ruby>" },
+      { id: 11, c: "原始・古代文明", q: "エジプトで使われた文字は？", a: "象形文字", ruby: "<ruby>象形文字<rt>しょうけいもじ</rt></ruby>" },
+      { id: 12, c: "原始・古代文明", q: "チグリス・ユーフラテス川流域の文明は？", a: "メソポタミア文化", ruby: "<ruby>メソポタミア文化<rt>めそぽたみあぶんか</rt></ruby>" },
+      { id: 13, c: "原始・古代文明", q: "メソポタミアで粘土板に刻まれた文字は？", a: "くさび形文字", ruby: "<ruby>くさび形文字<rt>くさびがたもじ</rt></ruby>" },
+      { id: 14, c: "原始・古代文明", q: "インダス川流域で栄えた古代文明は？", a: "インダス文明", ruby: "<ruby>インダス文明<rt>いんだすぶんめい</rt></ruby>" },
+      { id: 15, c: "原始・古代文明", q: "黄河や長江の流域で栄えた文明は？", a: "中国文明", ruby: "<ruby>中国文明<rt>ちゅうごくぶんめい</rt></ruby>" },
+      { id: 16, c: "原始・古代文明", q: "確認されている中国最古の王朝は？", a: "殷", ruby: "<ruby>殷<rt>いん</rt></ruby>（<ruby>商<rt>しょう</rt></ruby>）" },
+      { id: 17, c: "原始・古代文明", q: "銅とスズの合金で作られた祭器や武器は？", a: "青銅器", ruby: "<ruby>青銅器<rt>せいどうき</rt></ruby>" },
+      { id: 18, c: "原始・古代文明", q: "亀の甲羅や骨に刻まれた漢字の原形文字は？", a: "甲骨文字", ruby: "<ruby>甲骨文字<rt>こうこつもじ</rt></ruby>" },
+      { id: 19, c: "原始・古代文明", q: "儒学を開いた中国の思想家は？", a: "孔子", ruby: "<ruby>孔子<rt>こうし</rt></ruby>" },
+      { id: 20, c: "原始・古代文明", q: "孔子によって説かれた徳治政治の思想は？", a: "儒学", ruby: "<ruby>儒学<rt>じゅがく</rt></ruby>（<ruby>儒教<rt>じゅきょう</rt></ruby>）" },
+      { id: 21, c: "原始・古代文明", q: "紀元前3世紀に中国を初めて統一した王朝は？", a: "秦", ruby: "<ruby>秦<rt>しん</rt></ruby>" },
+      { id: 22, c: "原始・古代文明", q: "秦の初代皇帝は？", a: "始皇帝", ruby: "<ruby>始皇帝<rt>しこうてい</rt></ruby>" },
+      { id: 23, c: "原始・古代文明", q: "秦の崩壊後に成立し、長期間続いた中国の王朝は？", a: "漢", ruby: "<ruby>漢<rt>かん</rt></ruby>" },
+      { id: 24, c: "原始・古代文明", q: "東西を結んだユーラシアの交易路は？", a: "シルクロード", ruby: "シルクロード（<ruby>絹<rt>きぬ</rt></ruby>の<ruby>道<rt>みち</rt></ruby>）" },
+      { id: 25, c: "原始・古代文明", q: "地中海沿岸で発展した古代ヨーロッパ文明は？", a: "ギリシャ・ローマ文明", ruby: "ギリシャ・ローマ<ruby>文明<rt>ぶんめい</rt></ruby>" },
+      { id: 26, c: "原始・古代文明", q: "民主政が発達した代表的なポリスは？", a: "アテネ", ruby: "アテネ" },
+      { id: 27, c: "原始・古代文明", q: "古代ギリシャの都市国家は？", a: "ポリス", ruby: "ポリス" },
+      { id: 28, c: "原始・古代文明", q: "市民全員が参加して政治を決める体制は？", a: "民主政", ruby: "<ruby>民主政<rt>みんしゅせい</rt></ruby>" },
+      { id: 29, c: "原始・古代文明", q: "パルテノン神殿などに代表される古代地中海文化は？", a: "ギリシャ文明", ruby: "ギリシャ<ruby>文明<rt>ぶんめい</rt></ruby>" },
+      { id: 30, c: "原始・古代文明", q: "東方遠征を行いヘレニズム時代を開いたマケドニアの王は？", a: "アレクサンドロス大王", ruby: "アレクサンドロス<ruby>大王<rt>だいおう</rt></ruby>" },
+      { id: 31, c: "原始・古代文明", q: "ギリシャ文化とオリエント文化が融合した風潮は？", a: "ヘレニズム", ruby: "ヘレニズム" },
+      { id: 32, c: "原始・古代文明", q: "地中海全域を支配した巨大国家は？", a: "ローマ帝国", ruby: "ローマ<ruby>帝国<rt>ていこく</rt></ruby>" },
+      { id: 33, c: "原始・古代文明", q: "王を持たない古代ローマ初期の政治体制は？", a: "共和政", ruby: "<ruby>共和政<rt>きょうわせい</rt></ruby>" },
+
+      // --- 2. 宗教・縄文・弥生 ---
+      { id: 34, c: "宗教・縄文・弥生", q: "釈迦によってインドで開かれた宗教は？", a: "仏教", ruby: "<ruby>仏教<rt>ぶっきょう</rt></ruby>" },
+      { id: 35, c: "宗教・縄文・弥生", q: "仏教を開いた人物は？", a: "釈迦", ruby: "<ruby>釈迦<rt>しゃか</rt></ruby>" },
+      { id: 36, c: "宗教・縄文・弥生", q: "インドの伝統宗教が融合して成立した多神教は？", a: "ヒンドゥー教", ruby: "ヒンドゥー<ruby>教<rt>きょう</rt></ruby>" },
+      { id: 37, c: "宗教・縄文・弥生", q: "イエスを救世主とする宗教は？", a: "キリスト教", ruby: "キリスト<ruby>教<rt>きょう</rt></ruby>" },
+      { id: 38, c: "宗教・縄文・弥生", q: "キリスト教を開いた人物は？", a: "イエス", ruby: "イエス" },
+      { id: 39, c: "宗教・縄文・弥生", q: "キリスト教の聖典は？", a: "聖書", ruby: "<ruby>聖書<rt>せいしょ</rt></ruby>" },
+      { id: 40, c: "宗教・縄文・弥生", q: "ムハンマドが開いた宗教は？", a: "イスラム教", ruby: "イスラム<ruby>教<rt>きょう</rt></ruby>" },
+      { id: 41, c: "宗教・縄文・弥生", q: "イスラム教を開いた預言者は？", a: "ムハンマド", ruby: "ムハンマド" },
+      { id: 42, c: "宗教・縄文・弥生", q: "イスラム教の聖典は？", a: "コーラン", ruby: "コーラン" },
+      { id: 43, c: "宗教・縄文・弥生", q: "縄文土器が使われた約1万年前からの時代は？", a: "縄文時代", ruby: "<ruby>縄文時代<rt>じょうもんじだい</rt></ruby>" },
+      { id: 44, c: "宗教・縄文・弥生", q: "表面に縄目模様のある深鉢形などの土器は？", a: "縄文土器", ruby: "<ruby>縄文土器<rt>じょうんどき</rt></ruby>" },
+      { id: 45, c: "宗教・縄文・弥生", q: "縄文時代を中心とする狩猟・採集文化は？", a: "縄文文化", ruby: "<ruby>縄文文化<rt>じょうもんぶんか</rt></ruby>" },
+      { id: 46, c: "宗教・縄文・弥生", q: "地面を掘り下げ床を設けた住居は？", a: "竪穴住居", ruby: "<ruby>竪穴住居<rt>たてあなじゅうきょ</rt></ruby>" },
+      { id: 47, c: "宗教・縄文・弥生", q: "食べ残しの貝殻などが積もった遺跡は？", a: "貝塚", ruby: "<ruby>貝塚<rt>かいづか</rt></ruby>" },
+      { id: 48, c: "宗教・縄文・弥生", q: "魔よけなどの魔術的儀式に使われた土の人形は？", a: "土偶", ruby: "<ruby>土偶<rt>どぐう</rt></ruby>" },
+      { id: 49, c: "宗教・縄文・弥生", q: "稲作と金属器が伝わり広まった時代は？", a: "弥生時代", ruby: "<ruby>弥生時代<rt>やよいじだい</rt></ruby>" },
+      { id: 50, c: "宗教・縄文・弥生", q: "赤褐色で薄くて硬い実用的な土器は？", a: "弥生土器", ruby: "<ruby>弥生土器<rt>やよいどき</rt></ruby>" },
+      { id: 51, c: "宗教・縄文・弥生", q: "農耕と金属器を伴う弥生時代の文化は？", a: "弥生文化", ruby: "<ruby>弥生文化<rt>やよいぶんか</rt></ruby>" },
+      { id: 52, c: "宗教・縄文・弥生", q: "大陸から九州北部に伝わった米作りは？", a: "稲作", ruby: "<ruby>稲作<rt>いなさく</rt></ruby>" },
+      { id: 53, c: "宗教・縄文・弥生", q: "青銅器や鉄器の総称は？（補正: 金属機➔金属器）", a: "金属器", ruby: "<ruby>金属器<rt>きんぞくき</rt></ruby>" },
+      { id: 54, c: "宗教・縄文・弥生", q: "収穫した穀物をねずみや湿気から守る倉庫は？", a: "高床倉庫", ruby: "<ruby>高床倉庫<rt>たかゆかそうこ</rt></ruby>" },
+      { id: 55, c: "宗教・縄文・弥生", q: "卑弥呼が治めた小国連合体は？", a: "邪馬台国", ruby: "<ruby>邪馬台国<rt>やまたいこく</rt></ruby>" },
+      { id: 56, c: "宗教・縄文・弥生", q: "邪馬台国の女王は？", a: "卑弥呼", ruby: "<ruby>卑弥呼<rt>ひみこ</rt></ruby>" },
+      { id: 57, c: "宗教・縄文・弥生", q: "外国の君主に貢物を納める外交行為は？", a: "朝貢", ruby: "<ruby>朝貢<rt>ちょうこう</rt></ruby>" },
+      { id: 58, c: "宗教・縄文・弥生", q: "魏の皇帝から卑弥呼に授けられた称号は？", a: "親魏倭王", ruby: "<ruby>親魏倭王<rt>しんぎわおう</rt></ruby>" },
+
+      // --- 3. 古墳・飛鳥・奈良 ---
+      { id: 59, c: "古墳・飛鳥・奈良", q: "ヤマトの勢力を中心に成立した連合政権は？", a: "大和政権", ruby: "<ruby>大和政権<rt>やまとせいけん</rt></ruby>" },
+      { id: 60, c: "古墳・飛鳥・奈良", q: "大和政権の頂点に立った首長の称号は？", a: "大王", ruby: "<ruby>大王<rt>おおきみ</rt></ruby>" },
+      { id: 61, c: "古墳・飛鳥・奈良", q: "鉄剣銘に刻まれた雄略天皇とされる大王は？", a: "ワカタケル大王", ruby: "ワカタケル<ruby>大王<rt>だいおう</rt></ruby>" },
+      { id: 62, c: "古墳・飛鳥・奈良", q: "朝鮮半島南西部にあった国は？", a: "百済", ruby: "<ruby>百済<rt>くだら</rt></ruby>" },
+      { id: 63, c: "古墳・飛鳥・奈良", q: "朝鮮半島南部の小国群地域は？", a: "伽耶", ruby: "<ruby>伽耶<rt>かや</rt></ruby>" },
+      { id: 64, c: "古墳・飛鳥・奈良", q: "伽耶地域の別称は？", a: "加羅地域", ruby: "<ruby>加羅地域<rt>からちいき</rt></ruby>" },
+      { id: 65, c: "古墳・飛鳥・奈良", q: "日本が深く関与したとされる伽耶の別称は？", a: "任那", ruby: "<ruby>任那<rt>みまな</rt></ruby>" },
+      { id: 66, c: "古墳・飛鳥・奈良", q: "朝鮮半島北部の強大な国家は？", a: "高句麗", ruby: "<ruby>高句麗<rt>こうくり</rt></ruby>" },
+      { id: 67, c: "古墳・飛鳥・奈良", q: "朝鮮半島南東部の国は？", a: "新羅", ruby: "<ruby>新羅<rt>しらぎ</rt></ruby>" },
+      { id: 68, c: "古墳・飛鳥・奈良", q: "巨大な墳丘墓が作られた時代は？", a: "古墳時代", ruby: "<ruby>古墳時代<rt>こふんじだい</rt></ruby>" },
+      { id: 69, c: "古墳・飛鳥・奈良", q: "鍵穴のような形をした前方部と後円部を持つ古墳は？", a: "前方後円墳", ruby: "<ruby>前方後円墳<rt>ぜんぽうこうえんふん</rt></ruby>" },
+      { id: 70, c: "古墳・飛鳥・奈良", q: "古墳の墳丘や周囲に並べられた素焼きの焼き物は？", a: "埴輪", ruby: "<ruby>埴輪<rt>はにわ</rt></ruby>" },
+      { id: 71, c: "古墳・飛鳥・奈良", q: "技術や学問を持って大陸から移住した人々は？", a: "渡来人", ruby: "<ruby>渡来人<rt>とらいじん</rt></ruby>" },
+      { id: 72, c: "古墳・飛鳥・奈良", q: "渡来人が伝えた灰色で硬い土器は？", a: "須恵器", ruby: "<ruby>須恵器<rt>すえき</rt></ruby>" },
+      { id: 73, c: "古墳・飛鳥・奈良", q: "推古天皇の摂政として天皇中心の政治を目指した人物は？", a: "聖徳太子", ruby: "<ruby>聖徳太子<rt>しょうとくたいし</rt></ruby>（<ruby>厩戸皇子<rt>うまやどのおうじ</rt></ruby>）" },
+      { id: 74, c: "古墳・飛鳥・奈良", q: "渡来人と結びつき権勢を振るった豪族は？", a: "蘇我氏", ruby: "<ruby>蘇我氏<rt>そがし</rt></ruby>" },
+      { id: 75, c: "古墳・飛鳥・奈良", q: "日本初の女性天皇は？", a: "推古天皇", ruby: "<ruby>推古天皇<rt>すいこてんのう</rt></ruby>" },
+      { id: 76, c: "古墳・飛鳥・奈良", q: "家柄にとらわれず才能で位階を与えた制度は？", a: "冠位十二階", ruby: "<ruby>冠位十二階<rt>かんいじゅうにかい</rt></ruby>" },
+      { id: 77, c: "古墳・飛鳥・奈良", q: "604年に制定された役人の心構えを示す法規は？", a: "十七条の憲法", ruby: "<ruby>十七条の憲法<rt>じゅうしちじょうのけんぽう</rt></ruby>" },
+      { id: 78, c: "古墳・飛鳥・奈良", q: "隋へ派遣された使節は？", a: "遣隋使", ruby: "<ruby>遣隋使<rt>けんずいし</rt></ruby>" },
+      { id: 79, c: "古墳・飛鳥・奈良", q: "607年に遣隋使として隋に渡った人物は？", a: "小野妹子", ruby: "<ruby>小野妹子<rt>おののいもこ</rt></ruby>" },
+      { id: 80, c: "古墳・飛鳥・奈良", q: "法隆寺などに代表される日本初の仏教文化は？", a: "あすか文化", ruby: "あすか<ruby>文化<rt>ぶんか</rt></ruby>" },
+      { id: 81, c: "古墳・飛鳥・奈良", q: "645年、中大兄皇子らが蘇我氏を倒し始まった政治改革は？", a: "大化の改新", ruby: "<ruby>大化の改新<rt>たいかのかいしん</rt></ruby>" },
+      { id: 82, c: "古墳・飛鳥・奈良", q: "大化の改新を中心となって進めた皇子は？", a: "中大兄皇子", ruby: "<ruby>中大兄皇子<rt>なかのおおえのおうじ</rt></ruby>" },
+      { id: 83, c: "古墳・飛鳥・奈良", q: "即位後、近江大津宮に遷都した中大兄皇子の天皇名は？", a: "天智天皇", ruby: "<ruby>天智天皇<rt>てんじてんのう</rt></ruby>" },
+      { id: 84, c: "古墳・飛鳥・奈良", q: "中大兄皇子を助け、死際に藤原の姓を授けられた人物は？", a: "中臣鎌足", ruby: "<ruby>中臣鎌足<rt>なかとみのかまたり</rt></ruby>" },
+      { id: 85, c: "古墳・飛鳥・奈良", q: "土地と人民を直接国家が支配する原則は？", a: "公地・公民", ruby: "<ruby>公地・公民<rt>こうち・こうみん</rt></ruby>" },
+      { id: 86, c: "古墳・飛鳥・奈良", q: "律と令に基づき政治を行う国家体制は？", a: "律令国家", ruby: "<ruby>律令国家<rt>りつりょうこっか</rt></ruby>" },
+      { id: 87, c: "古墳・飛鳥・奈良", q: "663年、日本が唐・新羅軍に敗北した海戦は？", a: "白村江の戦い", ruby: "<ruby>白村江の戦い<rt>はくすきのえのたたかい</rt></ruby>" },
+      { id: 88, c: "古墳・飛鳥・奈良", q: "672年、大海人皇子と大友皇子が争った後継者争いは？", a: "壬申の乱", ruby: "<ruby>壬申の乱<rt>じんしんのらん</rt></ruby>" },
+      { id: 89, c: "古墳・飛鳥・奈良", q: "壬申の乱に勝利し即位した天皇は？", a: "天武天皇", ruby: "<ruby>天武天皇<rt>てんむてんのう</rt></ruby>" },
+      { id: 90, c: "古墳・飛鳥・奈良", q: "日本初の本格的な中国式の都城は？", a: "藤原京", ruby: "<ruby>藤原京<rt>ふじわらきょう</rt></ruby>" },
+      { id: 91, c: "古墳・飛鳥・奈良", q: "藤原京へ遷都し飛鳥浄御原令を完成させた天皇は？", a: "持統天皇", ruby: "<ruby>持統天皇<rt>じとうてんのう</rt></ruby>" },
+      { id: 92, c: "古墳・飛鳥・奈良", q: "701年に藤原不比等らが制定した律令は？", a: "大宝律令", ruby: "<ruby>大宝律令<rt>たいほうりつりょう</rt></ruby>" },
+      { id: 93, c: "古墳・飛鳥・奈良", q: "6歳以上の男女に口分田を与え死亡時に返還させた制度は？", a: "班田収授法", ruby: "<ruby>班田収授法<rt>はんでんしゅうじゅのほう</rt></ruby>" },
+      { id: 94, c: "古墳・飛鳥・奈良", q: "人民の把握と税の徴収のために作られた台帳は？", a: "戸籍", ruby: "<ruby>戸籍<rt>こせき</rt></ruby>" },
+      { id: 95, c: "古墳・飛鳥・奈良", q: "班田収授法に基づき人民に割り当てられた農地は？", a: "口分田", ruby: "<ruby>口分田<rt>くぶんデン</rt></ruby>" },
+      { id: 96, c: "古墳・飛鳥・奈良", q: "743年、新しく開墾した土地の永久私有を認めた法令は？", a: "墾田永年私財法", ruby: "<ruby>墾田永年私財法<rt>こんでんえいねんしざいほう</rt></ruby>" },
+      { id: 97, c: "古墳・飛鳥・奈良", q: "貴族や社寺が私有した農地は？", a: "荘園", ruby: "<ruby>荘園<rt>しょうえん</rt></ruby>" },
+      { id: 98, c: "古墳・飛鳥・奈良", q: "710年に奈良に平城京が置かれてからの時代は？", a: "平城京", ruby: "<ruby>平城京<rt>へいじょうきょう</rt></ruby>" },
+      { id: 99, c: "古墳・飛鳥・奈良", q: "仏教の力で国家の安泰を図った天皇は？", a: "聖武天皇", ruby: "<ruby>聖武天皇<rt>しょうむてんのう</rt></ruby>" },
+      { id: 100, c: "古墳・飛鳥・奈良", q: "国ごとに建てられた男子の寺院は？", a: "国分寺", ruby: "<ruby>国分寺<rt>こくぶんじ</rt></ruby>" },
+      { id: 101, c: "古墳・飛鳥・奈良", q: "国ごとに建てられた女子の寺院は？", a: "国分尼寺", ruby: "<ruby>国分尼寺<rt>こくぶんにじ</rt></ruby>" },
+      { id: 102, c: "古墳・飛鳥・奈良", q: "大仏が安置されている奈良の代表的な寺院は？", a: "東大寺", ruby: "<ruby>東大寺<rt>とうだいじ</rt></ruby>" },
+      { id: 103, c: "古墳・飛鳥・奈良", q: "東大寺に造立された巨大な仏像は？", a: "大仏", ruby: "<ruby>大仏<rt>だいぶつ</rt></ruby>" },
+      { id: 104, c: "古墳・飛鳥・奈良", q: "唐の影響を強く受けた聖武天皇の時代の文化は？", a: "天平文化", ruby: "<ruby>天平文化<rt>てんぴょうぶんか</rt></ruby>" },
+
+      // --- 4. 平安時代 ---
+      { id: 105, c: "平安時代", q: "794年に京都に作られた都は？", a: "平安京", ruby: "<ruby>平安京<rt>へいあんきょう</rt></ruby>" },
+      { id: 106, c: "平安時代", q: "平安京へ遷都し東北地方へ軍を派遣した天皇は？", a: "桓武天皇", ruby: "<ruby>桓武天皇<rt>かんむてんのう</rt></ruby>" },
+      { id: 107, c: "平安時代", q: "794年から鎌倉幕府成立までの時代は？", a: "平安時代", ruby: "<ruby>平安時代<rt>へいあんじだい</rt></ruby>" },
+      { id: 108, c: "平安時代", q: "蝦夷の征伐のために派遣された将軍は？", a: "坂上田村麻呂", ruby: "<ruby>坂上田村麻呂<rt>さかのうえのたむらまろ</rt></ruby>" },
+      { id: 109, c: "平安時代", q: "東北地方の動乱を抑えるために設けられた総司令官役職は？", a: "征夷大将軍", ruby: "<ruby>征夷大将軍<rt>せいいたいしょうぐん</rt></ruby>" },
+      { id: 110, c: "平安時代", q: "藤原氏が摂政・関白の職を独占して行なった政治は？", a: "摂関政治", ruby: "<ruby>摂関政治<rt>せっかんせいじ</rt></ruby>" },
+      { id: 111, c: "平安時代", q: "幼少の天皇に代わり政治を行う補佐役は？", a: "摂政", ruby: "<ruby>摂政<rt>せっしょう</rt></ruby>" },
+      { id: 112, c: "平安時代", q: "成人した天皇を補佐する最高役職は？", a: "関白", ruby: "<ruby>関白<rt>かんぱく</rt></ruby>" },
+      { id: 113, c: "平安時代", q: "摂関政治の全盛期を築き「この世をば…」と詠んだ人物は？", a: "藤原道長", ruby: "<ruby>藤原道長<rt>ふじわらのみちなが</rt></ruby>" },
+      { id: 114, c: "平安時代", q: "比叡山延暦寺を開き天台宗を広めた僧は？", a: "最澄", ruby: "<ruby>最澄<rt>さいちょう</rt></ruby>" },
+      { id: 115, c: "平安時代", q: "最澄が開いた仏教宗派は？", a: "天台宗", ruby: "<ruby>天台宗<rt>てんだいしゅう</rt></ruby>" },
+      { id: 116, c: "平安時代", q: "最澄が比叡山に建てた総本山は？", a: "比叡山延暦寺", ruby: "<ruby>比叡山延暦寺<rt>ひえいざんえんりゃくじ</rt></ruby>" },
+      { id: 117, c: "平安時代", q: "高野山金剛峯寺を開き真言宗を広めた僧は？", a: "空海", ruby: "<ruby>空海<rt>くうかい</rt></ruby>" },
+      { id: 118, c: "平安時代", q: "空海が開いた高野山を拠点とする密教宗派は？", a: "真言宗", ruby: "<ruby>真言宗<rt>しんごんしゅう</rt></ruby>" },
+      { id: 119, c: "平安時代", q: "国風文化の風土で生まれた日本独自の文化スタイルは？", a: "国風文化", ruby: "<ruby>国風文化<rt>こくふうぶんか</rt></ruby>" },
+      { id: 120, c: "平安時代", q: "894年に遣唐使の廃止を提言した政治家・学者は？", a: "菅原道真", ruby: "<ruby>菅原道真<rt>すがわらのみちざね</rt></ruby>" },
+      { id: 121, c: "平安時代", q: "阿弥陀如来を信じ極楽浄土への往生を願う信仰は？", a: "浄土信仰", ruby: "<ruby>浄土信仰<rt>じょうどしんこう</rt></ruby>" },
+      { id: 122, c: "平安時代", q: "東大寺にあり聖武天皇の遺品などを収めた宝物庫は？", a: "正倉院", ruby: "<ruby>正倉院<rt>しょうそういん</rt></ruby>" },
+      { id: 123, c: "平安時代", q: "712年に編纂された日本最古の歴史書は？", a: "古事記", ruby: "『<ruby>古事記<rt>こじき</rt></ruby>』" },
+      { id: 124, c: "平安時代", q: "720年に完成した漢文表記の正史は？", a: "日本書紀", ruby: "『<ruby>日本書紀<rt>にほんしょき</rt></ruby>』" },
+      { id: 125, c: "平安時代", q: "国ごとに地理や産物、伝承を記録させた報告書は？", a: "風土記", ruby: "『<ruby>風土記<rt>ふどき</rt></ruby>』" },
+      { id: 126, c: "平安時代", q: "防人や農民の歌も含まれる日本最古の和歌集は？", a: "万葉集", ruby: "『<ruby>万葉集<rt>まんようしゅう</rt></ruby>』" },
+      { id: 127, c: "平安時代", q: "『源氏物語』を執筆した女流作家は？", a: "紫式部", ruby: "<ruby>紫式部<rt>むらさきしきぶ</rt></ruby>" },
+      { id: 128, c: "平安時代", q: "光源氏を主人公とする長編物語は？", a: "源氏物語", ruby: "『<ruby>源氏物語<rt>げんじものがたり</rt></ruby>』" },
+      { id: 129, c: "平安時代", q: "『枕草子』を執筆した清少納言は？", a: "清少納言", ruby: "<ruby>清少納言<rt>せいしょうなごん</rt></ruby>" },
+      { id: 130, c: "平安時代", q: "「春はあけぼの…」で始まる随筆集は？", a: "枕草子", ruby: "『<ruby>枕草子<rt>まくらのそうし</rt></ruby>』" },
+      { id: 131, c: "平安時代", q: "醍醐天皇の命で紀貫之らが編纂した初の勅撰和歌集は？", a: "古今和歌集", ruby: "『<ruby>古今和歌集<rt>こきんわかしゅう</rt></ruby>』" },
+      { id: 132, c: "平安時代", q: "藤原頼通が宇治に建立した阿弥陀堂建築は？", a: "平等院鳳凰堂", ruby: "<ruby>平等院鳳凰堂<rt>びょうどういんほうおうどう</rt></ruby>" },
+      { id: 133, c: "平安時代", q: "地方の館や荘園を警護するために生まれた武装集団は？", a: "武士", ruby: "<ruby>武士<rt>ぶし</rt></ruby>" },
+      { id: 134, c: "平安時代", q: "清和源氏の流れを汲む代表的な武士の棟梁一族は？", a: "源氏", ruby: "<ruby>源氏<rt>げんじ</rt></ruby>" },
+      { id: 135, c: "平安時代", q: "平泉を中心に東北地方で独自の黄金文化を築いた一族は？", a: "奥州藤原氏", ruby: "<ruby>奥州藤原氏<rt>おうしゅうふじわらし</rt></ruby>" },
+      { id: 136, c: "平安時代", q: "桓武平氏の流れを汲み武家政権を初めて樹立した一族は？", a: "平氏", ruby: "<ruby>平氏<rt>へいし</rt></ruby>" },
+      { id: 137, c: "平安時代", q: "天皇が譲位して上皇となり院庁で行なった政治形態は？", a: "院政", ruby: "<ruby>院政<rt>いんせい</rt></ruby>" },
+      { id: 138, c: "平安時代", q: "譲位した皇室の長は？", a: "上皇", ruby: "<ruby>上皇<rt>じょうこう</rt></ruby>" },
+      { id: 139, c: "平安時代", q: "太政大臣に上り詰め平氏全盛期を創出した人物は？", a: "平清盛", ruby: "<ruby>平清盛<rt>たいらのきよもり</rt></ruby>" },
+      { id: 140, c: "平安時代", q: "太政官の最高官職は？", a: "太政大臣", ruby: "<ruby>太政大臣<rt>だいじょうだいじん</rt></ruby>" },
+      { id: 141, c: "平安時代", q: "平清盛が音戸の瀬戸を開削し大輪田泊を進めた対外貿易は？", a: "日宋貿易", ruby: "<ruby>日宋貿易<rt>にっそうぼうえき</rt></ruby>" },
+      { id: 142, c: "平安時代", q: "鎌倉幕府を開いた源氏の棟梁は？", a: "源頼朝", ruby: "<ruby>源頼朝<rt>みなもとのよりとも</rt></ruby>" },
+      { id: 143, c: "平安時代", q: "1185年、平氏が滅亡した山口県の合戦場は？", a: "壇ノ浦", ruby: "<ruby>壇ノ浦<rt>だんのうら</rt></ruby>" },
+
+      // --- 5. 鎌倉・室町・戦国 ---
+      { id: 144, c: "鎌倉・室町・戦国", q: "源頼朝が東国に樹立した初の武家政権は？", a: "鎌倉幕府", ruby: "<ruby>鎌倉幕府<rt>かまくらばくふ</rt></ruby>" },
+      { id: 145, c: "鎌倉・室町・戦国", q: "鎌倉幕府が成立してからの時代は？", a: "鎌倉時代", ruby: "<ruby>鎌倉時代<rt>かまくらじだい</rt></ruby>" },
+      { id: 146, c: "鎌倉・室町・戦国", q: "国ごとに置かれ軍事・警察を司った役職は？", a: "守護", ruby: "<ruby>守護<rt>しゅご</rt></ruby>" },
+      { id: 147, c: "鎌倉・室町・戦国", q: "荘園や公領ごとに置かれ年貢徴収を司った役職は？", a: "地頭", ruby: "<ruby>地頭<rt>じとう</rt></ruby>" },
+      { id: 148, c: "鎌倉・室町・戦国", q: "将軍と主従関係を結んだ武士は？", a: "御家人", ruby: "<ruby>御家人<rt>ごけにん</rt></ruby>" },
+      { id: 149, c: "鎌倉・室町・戦国", q: "将軍が御家人に領地を保障・給与する恩恵は？", a: "御恩", ruby: "<ruby>御恩<rt>ごおん</rt></ruby>" },
+      { id: 150, c: "鎌倉・室町・戦国", q: "御家人が将軍のために軍役や番役を果たす義務は？", a: "奉公", ruby: "<ruby>奉公<rt>ほうこう</rt></ruby>" },
+      { id: 151, c: "鎌倉・室町・戦国", q: "北条氏が執権の職に就き行なった政治形態は？", a: "執権政治", ruby: "<ruby>執権政治<rt>しっけんせいじ</rt></ruby>" },
+      { id: 152, c: "鎌倉・室町・戦国", q: "将軍を補佐し幕政の実権を握った役職は？", a: "執権", ruby: "<ruby>執権<rt>しっけん</rt></ruby>" },
+      { id: 153, c: "鎌倉・室町・戦国", q: "北条政子や義時を輩出し執権を独占した一族は？", a: "北条氏", ruby: "<ruby>北条氏<rt>ほうじょうし</rt></ruby>" },
+      { id: 154, c: "鎌倉・室町・戦国", q: "御成敗式目を制定した3代執権は？", a: "北条泰時", ruby: "<ruby>北条泰時<rt>ほうじょうやすとき</rt></ruby>" },
+      { id: 155, c: "鎌倉・室町・戦国", q: "1232年に泰時が制定した武家社会初の裁判基準法規は？（補正: 菅玲等誤字無し）", a: "御成敗式目", ruby: "『<ruby>御成敗式目<rt>ごせいばいしきもく</rt></ruby>』" },
+      { id: 156, c: "鎌倉・室町・戦国", q: "1221年、後鳥羽上皇が幕府を倒そうとして起こした挙兵は？", a: "承久の乱", ruby: "<ruby>承久の乱<rt>じょうきゅうのらん</rt></ruby>" },
+      { id: 157, c: "鎌倉・室町・戦国", q: "承久の乱を起こし隠岐に流された上皇は？", a: "後鳥羽上皇", ruby: "<ruby>後鳥羽上皇<rt>ごとばじょうこう</rt></ruby>" },
+      { id: 158, c: "鎌倉・室町・戦国", q: "「御恩は山より高く…」と御家人を鼓舞した源頼朝の妻は？", a: "北条政子", ruby: "<ruby>北条政子<rt>ほうじょうまさこ</rt></ruby>" },
+      { id: 159, c: "鎌倉・室町・戦国", q: "13世紀後半、フビライの元軍が2度にわたり侵攻してきた事件は？", a: "元寇", ruby: "<ruby>元寇<rt>げんこう</rt></ruby>" },
+      { id: 160, c: "鎌倉・室町・戦国", q: "困窮した御家人の所領売却地を無償で取り戻させた法令は？", a: "徳政令", ruby: "<ruby>徳政令<rt>とくせいれい</rt></ruby>" },
+      { id: 161, c: "鎌倉・室町・戦国", q: "同じ耕地で1年に2回異なる作物を育てる農法は？", a: "二毛作", ruby: "<ruby>二毛作<rt>にもうさく</rt></ruby>" },
+      { id: 162, c: "鎌倉・室町・戦国", q: "月に数回、交通の要衝で開かれた市場は？", a: "定期市", ruby: "<ruby>定期市<rt>ていきいち</rt></ruby>" },
+      { id: 163, c: "鎌倉・室町・戦国", q: "鎌倉幕府滅亡後、後醍醐天皇が始めた天皇親政は？", a: "建武の新政", ruby: "<ruby>建武の新政<rt>けんむのしんせい</rt></ruby>" },
+      { id: 164, c: "鎌倉・室町・戦国", q: "建武の新政を行い吉野へ逃れて南朝を立てた天皇は？", a: "後醍醐天皇", ruby: "<ruby>後醍醐天皇<rt>ごだいごてんのう</rt></ruby>" },
+      { id: 165, c: "鎌倉・室町・戦国", q: "後醍醐天皇が吉野に開いた朝廷は？", a: "南朝", ruby: "<ruby>南朝<rt>なんちょう</rt></ruby>" },
+      { id: 166, c: "鎌倉・室町・戦国", q: "足利尊氏が京都に擁立した朝廷は？", a: "北朝", ruby: "<ruby>北朝<rt>ほくちょう</rt></ruby>" },
+      { id: 167, c: "鎌倉・室町・戦国", q: "室町幕府を開き北朝を擁立した武将は？", a: "足利尊氏", ruby: "<ruby>足利尊氏<rt>あしかがたかうじ</rt></ruby>" },
+      { id: 168, c: "鎌倉・室町・戦国", q: "南北の2つの朝廷が並立し対立した時代は？", a: "南北朝時代", ruby: "<ruby>南北朝時代<rt>なんぼくちょうじだい</rt></ruby>" },
+      { id: 169, c: "鎌倉・室町・戦国", q: "南北朝を合一し金閣を建てた3代将軍は？", a: "足利義満", ruby: "<ruby>足利義満<rt>あしかがよしみつ</rt></ruby>" },
+      { id: 170, c: "鎌倉・室町・戦国", q: "足利尊氏が京都に開いた武家政権は？", a: "室町幕府", ruby: "<ruby>室町幕府<rt>むろまちばくふ</rt></ruby>" },
+      { id: 171, c: "鎌倉・室町・戦国", q: "室町幕府が置かれていた時代は？", a: "室町時代", ruby: "<ruby>室町時代<rt>むろまちじだい</rt></ruby>" },
+      { id: 172, c: "鎌倉・室町・戦国", q: "将軍を補佐した最高役職は？（補正: 菅玲➔管領）", a: "管領", ruby: "<ruby>管領<rt>かんれい</rt></ruby>" },
+      { id: 173, c: "鎌倉・室町・戦国", q: "関東8か国を統治するために鎌倉に置かれた機関は？", a: "鎌倉府", ruby: "<ruby>鎌倉府<rt>かまくらふ</rt></ruby>" },
+      { id: 174, c: "鎌倉・室町・戦国", q: "一国の領主としての性格を強めた室町時代の守護は？", a: "守護大名", ruby: "<ruby>守護大名<rt>しゅごだいみょう</rt></ruby>" },
+      { id: 175, c: "鎌倉・室町・戦国", q: "東シナ海などで活動した海賊・海軍集団は？", a: "倭寇", ruby: "<ruby>倭寇<rt>わこう</rt></ruby>" },
+      { id: 176, c: "鎌倉・室町・戦国", q: "日明貿易で正規の貿易船かを証明するために使われた札は？", a: "勘合", ruby: "<ruby>勘合<rt>かんごう</rt></ruby>" },
+      { id: 177, c: "鎌倉・室町・戦国", q: "勘合符を用いて明と行った貿易は？", a: "日明貿易", ruby: "<ruby>日明貿易<rt>にちみんぼうえき</rt></ruby>（<ruby>勘合貿易<rt>かんごうぼうえき</rt></ruby>）" },
+      { id: 178, c: "鎌倉・室町・戦国", q: "沖縄本島を統一し尚氏が樹立した中継貿易国家は？", a: "琉球王国", ruby: "<ruby>琉球王国<rt>りゅうきゅうおうこく</rt></ruby>" },
+      { id: 179, c: "鎌倉・室町・戦国", q: "1467年、将軍継承問題等で京都が焦土となった戦乱は？", a: "応仁の乱", ruby: "<ruby>応仁の乱<rt>おうにんのらん</rt></ruby>" },
+      { id: 180, c: "鎌倉・室町・戦国", q: "銀閣を建て東山文化を開いた8代将軍は？", a: "足利義政", ruby: "<ruby>足利義政<rt>あしかがよしまさ</rt></ruby>" },
+      { id: 181, c: "鎌倉・室町・戦国", q: "下の者が実力で上の者を倒して取って代わる風潮は？", a: "下剋上", ruby: "<ruby>下剋上<rt>げこくじょう</rt></ruby>" },
+      { id: 182, c: "鎌倉・室町・戦国", q: "領国を独自に直接支配した戦国時代の領主は？", a: "戦国大名", ruby: "<ruby>戦国大名<rt>せんごくだいみょう</rt></ruby>" },
+      { id: 183, c: "鎌倉・室町・戦国", q: "応仁の乱以降、群雄が割拠した時代は？", a: "戦国時代", ruby: "<ruby>戦国時代<rt>せんごくじだい</rt></ruby>" },
+      { id: 184, c: "鎌倉・室町・戦国", q: "戦国大名の居城を中心に作られた城郭都市は？", a: "城下町", ruby: "<ruby>城下町<rt>じょうかまち</rt></ruby>" },
+      { id: 185, c: "鎌倉・室町・戦国", q: "戦国大名が領国内を統治するために制定した独自法規は？", a: "分国法", ruby: "<ruby>分国法<rt>ぶんこくほう</rt></ruby>" },
+      { id: 186, c: "鎌倉・室町・戦国", q: "米や麦、野菜などの食用作物は？", a: "食品作物", ruby: "<ruby>食品作物<rt>しょくひんさくもつ</rt></ruby>" },
+      { id: 187, c: "鎌倉・室町・戦国", q: "農民らが結成した自治的な村落組織は？", a: "惣", ruby: "<ruby>惣<rt>そう</rt></ruby>" },
+      { id: 188, c: "鎌倉・室町・戦国", q: "惣の農民が集まり村のルールを決めた話し合いは？", a: "寄合", ruby: "<ruby>寄合<rt>よりあい</rt></ruby>" },
+      { id: 189, c: "鎌倉・室町・戦国", q: "借金の帳消し（徳政）を求めて農民が起こした暴動は？", a: "土一揆", ruby: "<ruby>土一揆<rt>つちいっき</rt></ruby>" },
+      { id: 190, c: "鎌倉・室町・戦国", q: "質屋を営み高利貸しを行った金融業者は？", a: "土倉", ruby: "<ruby>土倉<rt>どそう</rt></ruby>" },
+      { id: 191, c: "鎌倉・室町・戦国", q: "馬を使って陸上輸送を行なった運送業者は？", a: "馬借", ruby: "<ruby>馬借<rt>ばしゃく</rt></ruby>" },
+      { id: 192, c: "鎌倉・室町・戦国", q: "港湾で商品の保管や輸送を請け負った業者は？", a: "問", ruby: "<ruby>問<rt>とい</rt></ruby>" },
+      { id: 193, c: "鎌倉・室町・戦国", q: "商人や手工業者が作った同業組合は？", a: "座", ruby: "<ruby>座<rt>ざ</rt></ruby>" },
+      { id: 194, c: "鎌倉・室町・戦国", q: "京都や自治都市堺などで自治を行った裕福な町人は？", a: "町衆", ruby: "<ruby>町衆<rt>まちしゅう</rt></ruby>" },
+      { id: 195, c: "鎌倉・室町・戦国", q: "足利義満が北山に建てた金箔張りの楼閣は？", a: "金閣", ruby: "<ruby>金閣<rt>きんかく</rt></ruby>" },
+      { id: 196, c: "鎌倉・室町・戦国", q: "観阿弥・世阿弥により大成された仮面芸能は？", a: "能", ruby: "<ruby>能<rt>のう</rt></ruby>" },
+      { id: 197, c: "鎌倉・室町・戦国", q: "足利義政が東山に建てた質素で落ち着いた楼閣は？", a: "銀閣", ruby: "<ruby>銀閣<rt>ぎんかく</rt></ruby>" },
+      { id: 198, c: "鎌倉・室町・戦国", q: "畳や障子、床の間を持つ近代和室の原型様式は？", a: "書院造", ruby: "<ruby>書院造<rt>しょいんづくり</rt></ruby>" },
+      { id: 199, c: "鎌倉・室町・戦国", q: "明に渡り水墨画を大成した画僧は？", a: "雪舟", ruby: "<ruby>雪舟<rt>せっしゅう</rt></ruby>" },
+      { id: 200, c: "鎌倉・室町・戦国", q: "墨の濃淡のみで表現する絵画技法は？", a: "水墨画", ruby: "<ruby>水墨画<rt>すいぼくが</rt></ruby>" },
+      { id: 201, c: "鎌倉・室町・戦国", q: "能の合間に演じられた滑稽な対話劇は？", a: "狂言", ruby: "<ruby>狂言<rt>きょうげん</rt></ruby>" },
+      { id: 202, c: "鎌倉・室町・戦国", q: "『一寸法師』など挿絵入りの通俗的な物語絵本は？", a: "御伽草子", ruby: "<ruby>御伽草子<rt>おとぎぞうし</rt></ruby>" },
+
+      // --- 6. ヨーロッパ世界と大航海時代 ---
+      { id: 203, c: "ヨーロッパ世界と大航海時代", q: "ローマ教皇を首長とするキリスト教西方の旧教は？", a: "カトリック教会", ruby: "カトリック<ruby>教会<rt>きょうかい</rt></ruby>" },
+      { id: 204, c: "ヨーロッパ世界と大航海時代", q: "ビザンツ帝国やロシアで信仰された東方のキリスト教は？", a: "正教会", ruby: "<ruby>正教会<rt>せいきょうかい</rt></ruby>" },
+      { id: 205, c: "ヨーロッパ世界と大航海時代", q: "カトリック教会の最高指導者は？", a: "ローマ教皇", ruby: "ローマ<ruby>教皇<rt>きょうこう</rt></ruby>" },
+      { id: 206, c: "ヨーロッパ世界と大航海時代", q: "キリスト教・ユダヤ教・イスラム教共通の聖地は？", a: "エルサレム", ruby: "エルサレム" },
+      { id: 207, c: "ヨーロッパ世界と大航海時代", q: "エルサレム奪還のためローマ教皇の呼びかけで派遣された軍は？", a: "十字軍", ruby: "<ruby>十字軍<rt>じゅうじぐん</rt></ruby>" },
+      { id: 208, c: "ヨーロッパ世界と大航海時代", q: "14〜16世紀、古代ギリシャ・ローマの文化を復興しようとした運動は？", a: "ルネサンス", ruby: "ルネサンス" },
+      { id: 209, c: "ヨーロッパ世界と大航海時代", q: "ヨーロッパ人が新航路を開拓し世界進出した時代は？", a: "大航海時代", ruby: "<ruby>大航海時代<rt>だいこうかいじだい</rt></ruby>" },
+      { id: 210, c: "ヨーロッパ世界と大航海時代", q: "アフリカ南端を回りインドへ到達した航海者は？", a: "バスコ・ダ・ガマ", ruby: "バスコ・ダ・ガマ" },
+      { id: 211, c: "ヨーロッパ世界と大航海時代", q: "1492年、大西洋を渡りアメリカ大陸へ到達した航海者は？", a: "コロンブス", ruby: "コロンブス" },
+      { id: 212, c: "ヨーロッパ世界と大航海時代", q: "列強国によって政治的・経済的に支配された地域は？", a: "植民地", ruby: "<ruby>植民地<rt>しょくみんち</rt></ruby>" },
+      { id: 213, c: "ヨーロッパ世界と大航海時代", q: "一行が史上初の世界周航を達成した航海者は？", a: "マゼラン", ruby: "マゼラン" },
+      { id: 214, c: "ヨーロッパ世界と大航海時代", q: "ルターやカルバンがカトリック教会を批判し起きた運動は？（補正: 宗教革命➔宗教改革）", a: "宗教改革", ruby: "<ruby>宗教改革<rt>しゅうきょうかいかく</rt></ruby>" },
+      { id: 215, c: "ヨーロッパ世界と大航海時代", q: "予定説を唱えプロテスタントの倫理を形成した改革者は？", a: "カルバン", ruby: "カルバン" },
+      { id: 216, c: "ヨーロッパ世界と大航海時代", q: "宗教改革によりカトリックから分離した新教徒は？", a: "プロテスタント", ruby: "プロテスタント" },
+      { id: 217, c: "ヨーロッパ世界と大航海時代", q: "カトリック側の海外布教組織でザビエルらを排出させた組織は？（補正: イエスズ会➔イエズス会）", a: "イエズス会", ruby: "イエズス<ruby>会<rt>かい</rt></ruby>" },
+
+      // --- 7. 安土桃山・江戸時代 ---
+      { id: 218, c: "安土桃山・江戸時代", q: "1543年、ポルトガル人を乗せた船が着いた島へ伝来した兵器は？", a: "鉄砲伝来", ruby: "<ruby>鉄砲伝来<rt>てっぽうでんらい</rt></ruby>" },
+      { id: 219, c: "安土桃山・江戸時代", q: "鉄砲が初めて伝来した鹿児島県の島は？", a: "種子島", ruby: "<ruby>種子島<rt>たねがしま</rt></ruby>" },
+      { id: 220, c: "安土桃山・江戸時代", q: "キリスト教に入信し保護した戦国大名は？", a: "キリシタン大名", ruby: "キリシタン<ruby>大名<rt>だいみょう</rt></ruby>" },
+      { id: 221, c: "安土桃山・江戸時代", q: "ポルトガルやスペイン（南蛮人）との貿易は？", a: "南蛮貿易", ruby: "<ruby>南蛮貿易<rt>なんばんぼうえき</rt></ruby>" },
+      { id: 222, c: "安土桃山・江戸時代", q: "桶狭間の戦いで今川氏を倒し天下統一を進めた武将は？", a: "織田信長", ruby: "<ruby>織田信長<rt>おだのぶなが</rt></ruby>" },
+      { id: 223, c: "安土桃山・江戸時代", q: "織田信長が城下町の商工業を自由化するため行った政策は？", a: "楽市楽座", ruby: "<ruby>楽市楽座<rt>らくいちらくざ</rt></ruby>" },
+      { id: 224, c: "安土桃山・江戸時代", q: "豊臣秀吉が宣教師の国外退去を命じた法令は？", a: "バテレン追放令", ruby: "バテレン<ruby>追放令<rt>ついほうれい</rt></ruby>" },
+      { id: 225, c: "安土桃山・江戸時代", q: "全国の土地の物質量（石高）を揃えた枡で調査した事業は？", a: "太閤検地", ruby: "<ruby>太閤検地<rt>たいこうけんち</rt></ruby>" },
+      { id: 226, c: "安土桃山・江戸時代", q: "土地の生産力を米の収穫量（石）で表した単位は？", a: "石高", ruby: "<ruby>石高<rt>こくだか</rt></ruby>" },
+      { id: 227, c: "安土桃山・江戸時代", q: "農民から武器を没収し一揆を防いだ政策は？", a: "刀狩", ruby: "<ruby>刀狩<rt>かたながり</rt></ruby>" },
+      { id: 228, c: "安土桃山・江戸時代", q: "武士と農民の身分を明確に区別した体制変化は？", a: "兵農分離", ruby: "<ruby>兵農分離<rt>へいのうぶんり</rt></ruby>" },
+      { id: 229, c: "安土桃山・江戸時代", q: "豪壮で華麗な屏風絵や茶の湯が栄えた文化は？", a: "桃山文化", ruby: "<ruby>桃山文化<rt>ももやまぶんか</rt></ruby>" },
+      { id: 230, c: "安土桃山・江戸時代", q: "織田信長・豊臣秀吉が支配した時代は？", a: "安土桃山時代", ruby: "<ruby>安土桃山時代<rt>あづちももやまじだい</rt></ruby>" },
+      { id: 231, c: "安土桃山・江戸時代", q: "侘び茶を大成し秀吉に仕えた茶人は？", a: "千利休", ruby: "<ruby>千利休<rt>せんのりきゅう</rt></ruby>" },
+      { id: 232, c: "安土桃山・江戸時代", q: "1600年、徳川家康が石田三成らを破った合戦は？（補正: 関ヶ原に戦い➔関ヶ原の戦い）", a: "関ヶ原の戦い", ruby: "<ruby>関ヶ原の戦い<rt>せきがはらのたたかい</rt></ruby>" },
+      { id: 233, c: "安土桃山・江戸時代", q: "関ヶ原の戦いに勝ち1603年に江戸幕府を開いた人物は？", a: "徳川家康", ruby: "<ruby>徳川家康<rt>とくがわいえやす</rt></ruby>" },
+      { id: 234, c: "安土桃山・江戸時代", q: "1603年、徳川家康が開いた武家政権は？", a: "江戸幕府", ruby: "<ruby>江戸幕府<rt>えどばくふ</rt></ruby>" },
+      { id: 235, c: "安土桃山・江戸時代", q: "約260年間続いた徳川氏の治世時代は？", a: "江戸時代", ruby: "<ruby>江戸時代<rt>えどじだい</rt></ruby>" },
+      { id: 236, c: "安土桃山・江戸時代", q: "幕府と全国の藩が土地と人民を支配する統治体制は？", a: "幕藩体制", ruby: "<ruby>幕藩体制<rt>ばくはんたいせい</rt></ruby>" },
+      { id: 237, c: "安土桃山・江戸時代", q: "幕府の老中・若年寄などの役職を構成する役人は？", a: "幕僚", ruby: "<ruby>幕僚<rt>ばくりょう</rt></ruby>" },
+      { id: 238, c: "安土桃山・江戸時代", q: "徳川一族（親族）の大名は？", a: "親藩", ruby: "<ruby>親藩<rt>しんぱん</rt></ruby>" },
+      { id: 239, c: "安土桃山・江戸時代", q: "関ヶ原の戦い以前から徳川氏に仕えていた大名は？", a: "譜代大名", ruby: "<ruby>譜代大名<rt>ふだいだいみょう</rt></ruby>" },
+      { id: 240, c: "安土桃山・江戸時代", q: "関ヶ原の戦い以降に徳川氏に服従した大名は？", a: "外様大名", ruby: "<ruby>外様大名<rt>とざまだいみょう</rt></ruby>" },
+      { id: 241, c: "安土桃山・江戸時代", q: "1615年に制定された大名を統制するための法令は？", a: "武家諸法度", ruby: "『<ruby>武家諸法度<rt>ぶけしょはっと</rt></ruby>』" },
+      { id: 242, c: "安土桃山・江戸時代", q: "参勤交代を制度化し鎖国を完成させた3代将軍は？", a: "徳川家光", ruby: "<ruby>徳川家光<rt>とくがわいえみつ</rt></ruby>" },
+      { id: 243, c: "安土桃山・江戸時代", q: "大名に1年おきに領地と江戸を往復させた制度は？", a: "参勤交代", ruby: "<ruby>参勤交代<rt>さんきんこうたい</rt></ruby>" },
+      { id: 244, c: "安土桃山・江戸時代", q: "苗字帯刀などの特権を持った支配身分は？", a: "武士", ruby: "<ruby>武士<rt>ぶし</rt></ruby>" },
+      { id: 245, c: "安土桃山・江戸時代", q: "城下町に住む商人と手工業者の総称は？", a: "町人", ruby: "<ruby>町人<rt>ちょうにん</rt></ruby>" },
+      { id: 246, c: "安土桃山・江戸時代", q: "全人口の約8割を占めた農民を中心とする身分は？", a: "百姓", ruby: "<ruby>百姓<rt>ひゃくしょう</rt></ruby>" },
+      { id: 247, c: "安土桃山・江戸時代", q: "百姓が収穫した米などを領主に納める税は？", a: "年貢", ruby: "<ruby>年貢<rt>ねんぐ</rt></ruby>" },
+      { id: 248, c: "安土桃山・江戸時代", q: "渡航許可状を持った船が行なった海外貿易は？", a: "朱印船貿易", ruby: "<ruby>朱印船貿易<rt>しゅいんせんぼうえき</rt></ruby>" },
+      { id: 249, c: "安土桃山・江戸時代", q: "幕府が発行した海外渡航許可状は？", a: "朱印状", ruby: "<ruby>朱印状<rt>しゅいんじょう</rt></ruby>" },
+      { id: 250, c: "安土桃山・江戸時代", q: "東南アジア各地に作られた日本人の居住地域は？", a: "日本町", ruby: "<ruby>日本町<rt>にほんまち</rt></ruby>" },
+      { id: 251, c: "安土桃山・江戸時代", q: "海外との交通や貿易を幕府が制限・独占した状態は？", a: "鎖国", ruby: "<ruby>鎖国<rt>さこく</rt></ruby>" },
+      { id: 252, c: "安土桃山・江戸時代", q: "キリスト教の信仰を禁止した命令は？", a: "禁教令", ruby: "<ruby>禁教令<rt>きんきょうれい</rt></ruby>" },
+      { id: 253, c: "安土桃山・江戸時代", q: "キリシタンを見分けるために聖画像を踏ませた儀式は？", a: "絵踏", ruby: "<ruby>絵踏<rt>えぶみ</rt></ruby>" },
+      { id: 254, c: "安土桃山・江戸時代", q: "人々を寺院に所属させ宗門改帳に記載させた制度は？", a: "宗門改", ruby: "<ruby>宗門改<rt>しゅうもんあらため</rt></ruby>" },
+      { id: 255, c: "安土桃山・江戸時代", q: "1637年、天草四郎を大将にキリシタン農民らが起こした一揆は？", a: "島原・天草一揆", ruby: "<ruby>島原・天草一揆<rt>しまばら・あまくさいっき</rt></ruby>" },
+      { id: 256, c: "安土桃山・江戸時代", q: "島原・天草一揆で総大将に担ぎ出された少年は？", a: "天草四郎", ruby: "<ruby>天草四郎<rt>あまくさしろう</rt></ruby>" },
+      { id: 257, c: "安土桃山・江戸時代", q: "長崎港内に作られオランダ商館が置かれた扇形の人工島は？", a: "長崎の出島", ruby: "<ruby>長崎の出島<rt>ながさきのでじま</rt></ruby>" },
+      { id: 258, c: "安土桃山・江戸時代", q: "鎖国下で長崎で貿易を許された2つの国・地域は？", a: "オランダ・清", ruby: "オランダ・<ruby>清<rt>しん</rt></ruby>" },
+      { id: 259, c: "安土桃山・江戸時代", q: "朝鮮王朝から将軍の就任ごとに祝賀で派遣された使節は？", a: "朝鮮通信使", ruby: "<ruby>朝鮮通信使<rt>ちょうせんつうしんし</rt></ruby>" },
+      { id: 260, c: "安土桃山・江戸時代", q: "薩摩藩の支配を受けつつ中国とも朝貢した南方の王国は？", a: "琉球王国", ruby: "<ruby>琉球王国<rt>りゅうきゅうおうこく</rt></ruby>" },
+      { id: 261, c: "安土桃山・江戸時代", q: "蝦夷地（北海道など）に先住していた固有の民族は？", a: "アイヌ民族", ruby: "アイヌ<ruby>民族<rt>みんぞく</rt></ruby>" },
+      { id: 262, c: "安土桃山・江戸時代", q: "松前藩の不当な取引に対して起ち上がったアイヌの首長は？", a: "シャクシャイン", ruby: "シャクシャイン" },
+      { id: 263, c: "安土桃山・江戸時代", q: "新田を開墾して耕地面積を増やした事業は？", a: "新田開発", ruby: "<ruby>新田開発<rt>しんでんかいはつ</rt></ruby>" },
+      { id: 264, c: "安土桃山・江戸時代", q: "深耕を可能にしたV字型の鉄製農具は？", a: "備中ぐわ", ruby: "<ruby>備中<rt>びっちゅう</rt></ruby>ぐわ" },
+      { id: 265, c: "安土桃山・江戸時代", q: "脱穀の効率を劇的に高めた鉄の歯を持つ農具は？", a: "千歯こき", ruby: "<ruby>千歯<rt>せんば</rt></ruby>こき" },
+      { id: 266, c: "安土桃山・江戸時代", q: "全国で統一して流通した寛永年間発行の銅銭は？", a: "寛永通宝", ruby: "『<ruby>寛永通宝<rt>かんえいつうほう</rt></ruby>』" },
+      { id: 267, c: "安土桃山・江戸時代", q: "金・銀・銭の交換や手形の決済を行なった金融業者は？", a: "両替商", ruby: "<ruby>両替商<rt>りょうがえしょう</rt></ruby>" },
+      { id: 268, c: "安土桃山・江戸時代", q: "東海道・中山道などの江戸を中心とする幹線道路は？", a: "五街道", ruby: "<ruby>五街道<rt>ごかいどう</rt></ruby>" },
+      { id: 269, c: "安土桃山・江戸時代", q: "東北地方太平洋側から江戸へ至る海上ルートは？（補正: 左回り航路➔東回り航路）", a: "東回り航路", ruby: "<ruby>東回り航路<rt>ひがしまいこうろ</rt></ruby>" },
+      { id: 270, c: "安土桃山・江戸時代", q: "日本海側から下関を経て大坂・江戸へ至る海上航路は？", a: "西廻り航路", ruby: "<ruby>西廻り航路<rt>にしまわりこうろ</rt></ruby>" },
+      { id: 271, c: "安土桃山・江戸時代", q: "政治の中心地であった江戸の別称・俗称は？", a: "将軍のおひざもと", ruby: "<ruby>将軍<rt>しょうぐん</rt></ruby>のおひざもと" },
+      { id: 272, c: "安土桃山・江戸時代", q: "全国の物資が集まり経済の中心であった大坂の別称は？", a: "天下の台所", ruby: "<ruby>天下<rt>てんか</rt></ruby>の<ruby>台所<rt>だいどころ</rt></ruby>" },
+      { id: 273, c: "安土桃山・江戸時代", q: "諸藩が大坂などに置き年貢米や特産物を売却した施設は？", a: "蔵屋敷", ruby: "<ruby>蔵屋敷<rt>くらやしき</rt></ruby>" },
+      { id: 274, c: "安土桃山・江戸時代", q: "幕府から株仲間として承認を得た同業者組合は？", a: "株仲間", ruby: "<ruby>株仲間<rt>かぶなかま</rt></ruby>" },
+      { id: 275, c: "安土桃山・江戸時代", q: "生類憐みの令を出した5代将軍は？", a: "徳川綱吉", ruby: "<ruby>徳川綱吉<rt>とくがわつなよし</rt></ruby>" },
+      { id: 276, c: "安土桃山・江戸時代", q: "大義名分や礼儀を重んじる朱子学の体系は？", a: "朱子学", ruby: "<ruby>朱子学<rt>しゅしがく</rt></ruby>" },
+      { id: 277, c: "安土桃山・江戸時代", q: "極端な極悪令として犬などを保護させた法令は？", a: "生類憐みの令", ruby: "『<ruby>生類憐みの令<rt>しょうるいあわれみのれい</rt></ruby>』" },
+      { id: 278, c: "安土桃山・江戸時代", q: "徳川家宣・家継に仕え「正徳の治」を行なった儒学者は？", a: "新井白石", ruby: "<ruby>新井白石<rt>あらいはくせき</rt></ruby>" },
+      { id: 279, c: "安土桃山・江戸時代", q: "新井白石が行なった貨幣改鋳や貿易制限などの政治は？", a: "正徳の治", ruby: "<ruby>正徳の治<rt>しょうとくのち</rt></ruby>" },
+      { id: 280, c: "安土桃山・江戸時代", q: "8代将軍吉宗が行なった財政再建改革は？", a: "享保の改革", ruby: "<ruby>享保の改革<rt>きょうほうのかいせい</rt></ruby>" },
+      { id: 281, c: "安土桃山・江戸時代", q: "米将軍と呼ばれ享保の改革を主導した8代将軍は？", a: "徳川吉宗", ruby: "<ruby>徳川吉宗<rt>とくがわよしむね</rt></ruby>" },
+      { id: 282, c: "安土桃山・江戸時代", q: "株仲間を奨励し賄賂政治とも批判された老中は？", a: "田沼意次", ruby: "<ruby>田沼意次<rt>たぬまおきつぐ</rt></ruby>" },
+      { id: 283, c: "安土桃山・江戸時代", q: "松平定信が質素倹約や旧里帰農令を出した改革は？", a: "寛政の改革", ruby: "<ruby>寛政の改革<rt>かんせいのかいかく</rt></ruby>" },
+      { id: 284, c: "安土桃山・江戸時代", q: "株仲間解散や人返しの法を出した老中は？", a: "水野忠邦", ruby: "<ruby>水野忠邦<rt>みずのただくに</rt></ruby>" },
+      { id: 285, c: "安土桃山・江戸時代", q: "各藩が独自に発行した紙幣は？", a: "藩札", ruby: "<ruby>藩札<rt>はんさつ</rt></ruby>" },
+      { id: 286, c: "安土桃山・江戸時代", q: "年貢軽減や不正役人の罷免を求め農民が集団行動した事件は？", a: "百姓一揆", ruby: "<ruby>百姓一揆<rt>ひゃくしょういっき</rt></ruby>" },
+      { id: 287, c: "安土桃山・江戸時代", q: "都市の貧民が米買い占め業者らを襲撃した暴動は？", a: "打ち壊し", ruby: "<ruby>打ち壊し<rt>うちこわし</rt></ruby>" },
+      { id: 288, c: "安土桃山・江戸時代", q: "1837年、大坂で元与力・陽明学者が救民のため起こした乱は？（補正: 大潮の乱➔大塩の乱）", a: "大塩の乱", ruby: "<ruby>大塩の乱<rt>おおしおのらん</rt></ruby>" },
+      { id: 289, c: "安土桃山・江戸時代", q: "1825年、接近する外国船を撃退するよう命じた法令は？", a: "異国船打払令", ruby: "『<ruby>異国船打払令<rt>いこくせんうちはらいれい</rt></ruby>』" },
+      { id: 290, c: "安土桃山・江戸時代", q: "幕府の外国船打払令を批判した尚歯会の学者は？", a: "高野長英・渡辺崋山", ruby: "<ruby>高野長英<rt>たかのちょうえい</rt></ruby>・<ruby>渡辺崋山<rt>わたなべかざん</rt></ruby>" },
+      { id: 291, c: "安土桃山・江戸時代", q: "高野長英・渡辺崋山らが処罰された言論弾圧事件は？", a: "蛮社の獄", ruby: "<ruby>蛮社の獄<rt>ばんしゃのごく</rt></ruby>" },
+      { id: 292, c: "安土桃山・江戸時代", q: "上方（京都・大坂）を中心に元禄期に栄えた町人文化は？", a: "元禄文化", ruby: "<ruby>元禄文化<rt>げんろくぶんか</rt></ruby>" },
+      { id: 293, c: "安土桃山・江戸時代", q: "化政期に江戸を中心に栄えた庶民的な町人文化は？", a: "化政文化", ruby: "<ruby>化政文化<rt>かせいぶんか</rt></ruby>" },
+      { id: 294, c: "安土桃山・江戸時代", q: "『古事記伝』を著し国学を大成した人物は？", a: "本居宣長", ruby: "<ruby>本居宣長<rt>もとおりのりなが</rt></ruby>" },
+      { id: 295, c: "安土桃山・江戸時代", q: "前野良沢らと『解体新書』を翻訳刊行した蘭学者は？", a: "杉田玄白", ruby: "<ruby>杉田玄白<rt>すぎたげんぱく</rt></ruby>" },
+      { id: 296, c: "安土桃山・江戸時代", q: "『富嶽三十六景』を描いた浮世絵師は？", a: "葛飾北斎", ruby: "<ruby>葛飾北斎<rt>かつしかほくさい</rt></ruby>" },
+
+      // --- 8. 欧米の近代化と幕末・明治 ---
+      { id: 297, c: "欧米の近代化と幕末・明治", q: "理性や科学によって社会の不合理を正そうとする思想は？", a: "啓蒙思想", ruby: "<ruby>啓蒙思想<rt>けいもうしそう</rt></ruby>" },
+      { id: 298, c: "欧米の近代化と幕末・明治", q: "1642年にイギリスで起きた清教徒中心の革命は？", a: "ピューリタン革命", ruby: "ピューリタン<ruby>革命<rt>かくめい</rt></ruby>" },
+      { id: 299, c: "欧米の近代化と幕末・明治", q: "1688年、流血なしに王を追放し立憲君主制を立てた革命は？", a: "名誉革命", ruby: "<ruby>名誉革命<rt>めいよかくめい</rt></ruby>" },
+      { id: 300, c: "欧米の近代化と幕末・明治", q: "1689年、イギリスで制定された立憲政治の基礎法規は？", a: "権利章典", ruby: "『<ruby>権利章典<rt>けんりしょうてん</rt></ruby>』" },
+      { id: 301, c: "欧米の近代化と幕末・明治", q: "1776年、アメリカ13州がイギリスからの独立を宣言した文書は？", a: "独立宣言", ruby: "『<ruby>独立宣言<rt>どくりつせんげん</rt></ruby>』" },
+      { id: 302, c: "欧米の近代化と幕末・明治", q: "アメリカ独立戦争の軍司令官で初代大統領は？", a: "ワシントン", ruby: "ワシントン" },
+      { id: 303, c: "欧米の近代化と幕末・明治", q: "国王が絶対的な権力を握る強大な統治形態は？", a: "絶対王政", ruby: "<ruby>絶対王政<rt>ぜったいおうせい</rt></ruby>" },
+      { id: 304, c: "欧米の近代化と幕末・明治", q: "1789年、人権宣言を採択し封建的特権を廃止した革命は？", a: "フランス革命", ruby: "フランス<ruby>革命<rt>かくめい</rt></ruby>" },
+      { id: 305, c: "欧米の近代化と幕末・明治", q: "18世紀後半、イギリスで始まった機械化・工場制手工業の変革は？", a: "産業革命", ruby: "<ruby>産業革命<rt>さんぎょうかくめい</rt></ruby>" },
+      { id: 306, c: "欧米の近代化と幕末・明治", q: "資本家が生産手段を所有し利潤を追求する経済体制は？", a: "資本主義", ruby: "<ruby>資本主義<rt>しほんしゅぎ</rt></ruby>" },
+      { id: 307, c: "欧米の近代化と幕末・明治", q: "生産手段を社会で共有し平等を目指す思想・経済体制は？", a: "社会主義", ruby: "<ruby>社会主義<rt>しゃかいしゅぎ</rt></ruby>" },
+      { id: 308, c: "欧米の近代化と幕末・明治", q: "鉄血宰相と呼ばれドイツ統一を成し遂げた首相は？", a: "ビスマルク", ruby: "ビスマルク" },
+      { id: 309, c: "欧米の近代化と幕末・明治", q: "ロシアが凍らない港を求めて南へ進出しようとした政策は？", a: "南下政策", ruby: "<ruby>南下政策<rt>なんかせいさく</rt></ruby>" },
+      { id: 310, c: "欧米の近代化と幕末・明治", q: "1861〜65年、アメリカの南北州間で起きた内戦は？", a: "南北戦争", ruby: "<ruby>南北戦争<rt>なんぼくせんそう</rt></ruby>" },
+      { id: 311, c: "欧米の近代化と幕末・明治", q: "「人民の、人民による…」演説で知られる第16代大統領は？", a: "リンカン", ruby: "リンカン" },
+      { id: 312, c: "欧米の近代化と幕末・明治", q: "1840年、アヘンの密輸を巡り清とイギリスの間で起きた戦争は？", a: "アヘン戦争", ruby: "アヘン<ruby>戦争<rt>せんそう</rt></ruby>" },
+      { id: 313, c: "欧米の近代化と幕末・明治", q: "1842年、アヘン戦争後に清とイギリスが結んだ不平等条約は？", a: "南京条約", ruby: "『<ruby>南京条約<rt>なんきんじょうやく</rt></ruby>』" },
+      { id: 314, c: "欧米の近代化と幕末・明治", q: "リンカンが出した黒人奴隷を解放する布告は？", a: "奴隷解放宣言", ruby: "『<ruby>奴隷解放宣言<rt>どれいかいほうせんげん</rt></ruby>』" },
+      { id: 315, c: "欧米の近代化と幕末・明治", q: "洪秀全がキリスト教の影響を受け清で起こした反乱は？", a: "太平天国の乱", ruby: "<ruby>太平天国の乱<rt>たいへいてんごくのらん</rt></ruby>" },
+      { id: 316, c: "欧米の近代化と幕末・明治", q: "1857年、東インド会社のシパーヒーらが起こした反抗は？", a: "インド大反乱", ruby: "インド<ruby>大反乱<rt>だいはんらん</rt></ruby>" },
+      { id: 317, c: "欧米の近代化と幕末・明治", q: "1854年、ペリー再航時に日本が開国を余儀なくされた条約は？", a: "日米和親条約", ruby: "『<ruby>日米和親条約<rt>にちべいわしんじょうやく</rt></ruby>』" },
+      { id: 318, c: "欧米の近代化と幕末・明治", q: "1858年、領事裁判権や関税自主権の欠如を含む不平等条約は？", a: "日米修好通商条約", ruby: "『<ruby>日米修好通商条約<rt>にちべいしゅうこうつうしょうじょうやく</rt></ruby>』" },
+      { id: 319, c: "欧米の近代化と幕末・明治", q: "領事裁判権の容認や関税自主権の放棄などを指す条約上の不利は？", a: "領事裁判権(関税自主権)", ruby: "<ruby>領事裁判権<rt>りょうじさいばんけん</rt></ruby>（<ruby>関税自主権<rt>かんぜいじしゅけん</rt></ruby>）" },
+      { id: 320, c: "欧米の近代化と幕末・明治", q: "天皇を尊び外国人を排除しようとした幕末の思想・運動は？", a: "尊王攘夷運動", ruby: "<ruby>尊王攘夷運動<rt>そんのうじょういうんどう</rt></ruby>" },
+      { id: 321, c: "欧米の近代化と幕末・明治", q: "安政の大獄を断行し桜田門外の変で暗殺された大老は？", a: "井伊直弼", ruby: "<ruby>井伊直弼<rt>いいなおすけ</rt></ruby>" },
+      { id: 322, c: "欧米の近代化と幕末・明治", q: "1860年、水戸藩浪士らが大老井伊直弼を襲撃した事件は？", a: "桜田門外の変", ruby: "<ruby>桜田門外の変<rt>さくらだもんがいのへん</rt></ruby>" },
+      { id: 323, c: "欧米の近代化と幕末・明治", q: "1866年、坂本龍馬らの仲介で薩摩藩と長州藩が結んだ同盟は？", a: "薩長同盟", ruby: "<ruby>薩長同盟<rt>さっちょうどうめい</rt></ruby>" },
+      { id: 324, c: "欧米の近代化と幕末・明治", q: "長州藩の指導者で薩長同盟を結び維新の十傑と称された人物は？", a: "木戸孝允", ruby: "<ruby>木戸孝允<rt>きどたかよし</rt></ruby>" },
+      { id: 325, c: "欧米の近代化と幕末・明治", q: "薩摩藩の指導者で征韓論に破れ西南戦争を起こした人物は？", a: "西郷隆盛", ruby: "<ruby>西郷隆盛<rt>さいごうたかもり</rt></ruby>" },
+      { id: 326, c: "欧米の近代化と幕末・明治", q: "明治政府の中心として殖産興業を進めた薩摩出身の政治家は？", a: "大久保利通", ruby: "<ruby>大久保利通<rt>おおくぼとしみち</rt></ruby>" },
+      { id: 327, c: "欧米の近代化と幕末・明治", q: "土佐藩士で亀山社中を設立し薩長同盟を仲介した志士は？", a: "坂本龍馬", ruby: "<ruby>坂本龍馬<rt>さかもとりょうま</rt></ruby>" },
+      { id: 328, c: "欧米の近代化と幕末・明治", q: "1867年、15代将軍徳川慶喜が政権を朝廷に返上した出来事は？", a: "大政奉還", ruby: "<ruby>大政奉還<rt>たいせいほうかん</rt></ruby>" },
+      { id: 329, c: "欧米の近代化と幕末・明治", q: "大政奉還を行なった江戸幕府最後の15代将軍は？", a: "徳川慶喜", ruby: "<ruby>徳川慶喜<rt>とくがわけいき</rt></ruby>" },
+      { id: 330, c: "欧米の近代化と幕末・明治", q: "幕府を廃止し天皇中心の新政府樹立を宣した宣言は？", a: "王政復古の大号令", ruby: "『<ruby>王政復古の大号令<rt>おうせいふっこのだいごうれい</rt></ruby>』" },
+      { id: 331, c: "欧米の近代化と幕末・明治", q: "1868〜69年、新政府軍と旧幕府軍との間で戦われた内戦は？", a: "戊辰戦争", ruby: "<ruby>戊辰戦争<rt>ぼしんせんそう</rt></ruby>" },
+      { id: 332, c: "欧米の近代化と幕末・明治", q: "明治政府が行なった近代化への一連の大改革は？", a: "明治維新", ruby: "<ruby>明治維新<rt>めいじいしん</rt></ruby>" },
+      { id: 333, c: "欧米の近代化と幕末・明治", q: "1868年、明治天皇が発布した新政府の基本基本方針は？", a: "五箇条の御誓文", ruby: "『<ruby>五箇条の御誓文<rt>ごかじょうのごせいもん</rt></ruby>』" },
+      { id: 334, c: "欧米の近代化と幕末・明治", q: "1869年、藩主たちに土地と人民を天皇へ返還させた政策は？", a: "版籍奉還", ruby: "<ruby>版籍奉還<rt>はんせきほうかん</rt></ruby>" },
+      { id: 335, c: "欧米の近代化と幕末・明治", q: "1871年、藩を廃止して県を置き中央集権を完成させた政策は？", a: "廃藩置県", ruby: "<ruby>廃藩置県<rt>はいはんちけん</rt></ruby>" },
+      { id: 336, c: "欧米の近代化と幕末・明治", q: "薩摩・長州・土佐・肥前出身者が政府高官を独占した政治は？", a: "藩閥政治", ruby: "<ruby>藩閥政治<rt>はんばんせいじ</rt></ruby>" },
+      { id: 337, c: "欧米の近代化と幕末・明治", q: "四民平等に伴い一般農民や町人に与えられた身分称号は？", a: "平民", ruby: "<ruby>平民<rt>へいみん</rt></ruby>" },
+      { id: 338, c: "欧米の近代化と幕末・明治", q: "1871年、賤称を廃止し身分上同等とした布告は？", a: "解放令", ruby: "『<ruby>解放令<rt>かいほうれい</rt></ruby>』" },
+      { id: 339, c: "欧米の近代化と幕末・明治", q: "1872年、満6歳以上の男女に小学校教育を受けさせた制度は？", a: "学制", ruby: "<ruby>学制<rt>がくせい</rt></ruby>" },
+      { id: 340, c: "欧米の近代化と幕末・明治", q: "1873年、20歳以上の男子に国民皆兵として軍役を課した法令は？", a: "徴兵令", ruby: "『<ruby>徴兵令<rt>ちょうへいれい</rt></ruby>』" },
+      { id: 341, c: "欧米の近代化と幕末・明治", q: "1873年、地価の3%を地券所有者に現金で納めさせた税制改革は？", a: "地租改正", ruby: "<ruby>地租改正<rt>ちそかいせい</rt></ruby>" },
+      { id: 342, c: "欧米の近代化と幕末・明治", q: "地租改正の基準とされた土地の価格は？", a: "地価", ruby: "<ruby>地価<rt>ちか</rt></ruby>" },
+      { id: 343, c: "欧米の近代化と幕末・明治", q: "土地の所有者や地価を記載し発行された所有権利証書は？", a: "地券", ruby: "<ruby>地券<rt>ちけん</rt></ruby>" },
+      { id: 344, c: "欧米の近代化と幕末・明治", q: "地価を基準にして課された土地税は？", a: "地租", ruby: "<ruby>地租<rt>ちそ</rt></ruby>" },
+      { id: 345, c: "欧米の近代化と幕末・明治", q: "地租改正スタート時の税率は地価の何%？", a: "3%", ruby: "3%" },
+      { id: 346, c: "欧米の近代化と幕末・明治", q: "税負担の重さに怒った農民たちが全国で起こした一揆は？", a: "地租改正反対一揆", ruby: "<ruby>地租改正反対一揆<rt>ちそかいせいはんたいいっき</rt></ruby>" },
+      { id: 347, c: "欧米の近代化と幕末・明治", q: "反対一揆を受け地租の税率は地価の何%に引き下げられた？", a: "2.5%", ruby: "2.5%" },
+      { id: 348, c: "欧米の近代化と幕末・明治", q: "経済を豊かにし強大な軍隊を保有しようとした明治の標語は？", a: "富国強兵", ruby: "<ruby>富国強兵<rt>ふこくきょうへい</rt></ruby>" },
+      { id: 349, c: "欧米の近代化と幕末・明治", q: "政府主導で近代産業・インフラを育成した政策は？", a: "殖産興業", ruby: "<ruby>殖産興業<rt>しょくさんこうぎょう</rt></ruby>" },
+      { id: 350, c: "欧米の近代化と幕末・明治", q: "前島密の尽力により全国に張り巡らされた近代通信網は？", a: "郵便制度", ruby: "<ruby>郵便制度<rt>ゆうびんせいど</rt></ruby>" },
+      { id: 351, c: "欧米の近代化と幕末・明治", q: "富岡製糸場など官営で作られた洋式モデル工場は？", a: "官営模範工場", ruby: "<ruby>官営模範工場<rt>かんえいもはんこうじょう</rt></ruby>" },
+      { id: 352, c: "欧米の近代化と幕末・明治", q: "西洋の生活様式や思想が急速に流入した風潮は？", a: "文明開化", ruby: "<ruby>文明開化<rt>ぶんめいかいか</rt></ruby>" },
+      { id: 353, c: "欧米の近代化と幕末・明治", q: "『学問のすすめ』を著し慶應義塾を創設した思想家は？", a: "福沢諭吉", ruby: "<ruby>福沢諭吉<rt>ふくざわゆきち</rt></ruby>" },
+      { id: 354, c: "欧米の近代化と幕末・明治", q: "「天は人の上に人をつくらず…」で始まる福沢諭吉の著書は？", a: "学問のすすめ", ruby: "『<ruby>学問のすすめ<rt>がくもんのすすめ</rt></ruby>』" },
+      { id: 355, c: "欧米の近代化と幕末・明治", q: "ルソーの思想を紹介し東洋のルソーと呼ばれた思想家は？", a: "中江兆民", ruby: "<ruby>中江兆民<rt>なかえちょうみん</rt></ruby>" },
+      { id: 356, c: "欧米の近代化と幕末・明治", q: "不平等条約改定交渉と欧米視察のため派遣された使節団は？", a: "岩倉使節団", ruby: "<ruby>岩倉使節団<rt>いわくらしせつだん</rt></ruby>" },
+      { id: 357, c: "欧米の近代化と幕末・明治", q: "岩倉使節団の全権大使を務めた公家出身の政治家は？", a: "岩倉具視", ruby: "<ruby>岩倉具視<rt>いわくらともみ</rt></ruby>" },
+      { id: 358, c: "欧米の近代化と幕末・明治", q: "武力で朝鮮を開国させようとした主張は？", a: "征韓論", ruby: "<ruby>征韓論<rt>せいかんろん</rt></ruby>" },
+      { id: 359, c: "欧米の近代化と幕末・明治", q: "1877年、西郷隆盛を大将に鹿児島士族が起こした最大の反乱は？", a: "西南戦争", ruby: "<ruby>西南戦争<rt>せいなんせんそう</rt></ruby>" },
+      { id: 360, c: "欧米の近代化と幕末・明治", q: "1874年、板垣退助らが国会開設を求めて政府へ提出した文書は？", a: "民撰議院設立の建白書", ruby: "『<ruby>民撰議院設立の建白書<rt>みんせんぎいんせくりつのけんぱくしょ</rt></ruby>』" },
+      { id: 361, c: "欧米の近代化と幕末・明治", q: "憲法制定や国会開設を要求した国民的政治運動は？", a: "自由民権運動", ruby: "<ruby>自由民権運動<rt>じゆうみんけんうんどう</rt></ruby>" },
+      { id: 362, c: "欧米の近代化と幕末・明治", q: "1871年、日本と清が結んだ対等な条約は？", a: "日清修好条規", ruby: "『<ruby>日清修好条規<rt>にっしんしゅうこうじょうき</rt></ruby>』" },
+      { id: 363, c: "欧米の近代化と幕末・明治", q: "1876年、江華島事件を機に日本が朝鮮と結んだ不平等条約は？", a: "日朝修好条規", ruby: "『<ruby>日朝修好条規<rt>にっちょうしゅうこうじょうき</rt></ruby>』" },
+      { id: 364, c: "欧米の近代化と幕末・明治", q: "1875年、ロシアと国境を確定させるため結んだ条約は？", a: "樺太・千島条約", ruby: "『<ruby>樺太・千島条約<rt>からふと・ちしまじょうやく</rt></ruby>』" },
+      { id: 365, c: "欧米の近代化と幕末・明治", q: "北海道の旧称は？", a: "蝦夷地", ruby: "<ruby>蝦夷地<rt>えぞち</rt></ruby>" },
+      { id: 366, c: "欧米の近代化と幕末・明治", q: "北海道の先住民族は？", a: "アイヌの人々", ruby: "アイヌの<ruby>人々<rt>ひとびと</rt></ruby>" },
+      { id: 367, c: "欧米の近代化と幕末・明治", q: "北海道の開拓と統治のため設置された政府機関は？", a: "開拓使", ruby: "<ruby>開拓使<rt>かいたくし</rt></ruby>" },
+      { id: 368, c: "欧米の近代化と幕末・明治", q: "1879年、琉球藩を廃して沖縄県を設置した強硬措置は？", a: "琉球処分", ruby: "<ruby>琉球処分<rt>りゅうきゅうしょぶん</rt></ruby>" },
+      { id: 369, c: "欧米の近代化と幕末・明治", q: "1880年、全国の民権派運動家が大阪に結集して作った組織は？", a: "国会期成同盟", ruby: "<ruby>国会期成同盟<rt>こっかいきせいどうめい</rt></ruby>" },
+      { id: 370, c: "欧米の近代化と幕末・明治", q: "初代内閣総理大臣を務め明治憲法草案を作成した政治家は？", a: "伊藤博文", ruby: "<ruby>伊藤博文<rt>いとうひろぶみ</rt></ruby>" },
+      { id: 371, c: "欧米の近代化と幕末・明治", q: "1881年、10年後の国会開設を約束した詔勅は？", a: "国会開設の勅諭", ruby: "『<ruby>国会開設の勅諭<rt>こっかいかいせつのちょくゆ</rt></ruby>』" },
+      { id: 372, c: "欧米の近代化と幕末・明治", q: "板垣退助が党首となり結成されたフランス風自由主義政党は？", a: "自由党", ruby: "<ruby>自由党<rt>じゆうとう</rt></ruby>" },
+      { id: 373, c: "欧米の近代化と幕末・明治", q: "大隈重信が党首となり結成されたイギリス風改進主義政党は？", a: "立憲改進党", ruby: "<ruby>立憲改進党<rt>りっけんかいしんとう</rt></ruby>" },
+      { id: 374, c: "欧米の近代化と幕末・明治", q: "1889年2月11日に発布されたアジア初の近代憲法は？", a: "大日本帝国憲法", ruby: "『<ruby>大日本帝国憲法<rt>だいにっぽんていこくけんぽう</rt></ruby>』" },
+      { id: 375, c: "欧米の近代化と幕末・明治", q: "貴族院と衆議院の二院制で構成された開設時の国会名称は？", a: "帝国議会", ruby: "<ruby>帝国議会<rt>ていこくぎかい</rt></ruby>" },
+      { id: 376, c: "欧米の近代化と幕末・明治", q: "皇族・華族や勅選議員で構成された非解散の議院は？", a: "貴族院", ruby: "<ruby>貴族院<rt>きぞくいん</rt></ruby>" },
+      { id: 377, c: "欧米の近代化と幕末・明治", q: "解散制度を持ち民選議員で構成された議院は？", a: "衆議院", ruby: "<ruby>衆議院<rt>しゅうぎいん</rt></ruby>" },
+      { id: 378, c: "欧米の近代化と幕末・明治", q: "第1回衆議院議員選挙の選挙権資格制限は？", a: "直接国税15円以上を納める25以上の男子", ruby: "<ruby>直接国税<rt>ちょくせつこくぜい</rt></ruby>15<ruby>円<rt>えん</rt></ruby>以上を納める25<ruby>歳<rt>さい</rt></ruby>以上の<ruby>男子<rt>だんし</rt></ruby>" },
+      { id: 379, c: "欧米の近代化と幕末・明治", q: "1890年に発布された道徳・教育の基準を示した勅語は？", a: "教育勅語", ruby: "『<ruby>教育勅語<rt>きょういくちょくご</rt></ruby>』" },
+      { id: 380, c: "欧米の近代化と幕末・明治", q: "列強が軍事・経済力で他国を侵略支配しようとする傾向は？", a: "帝国主義", ruby: "<ruby>帝国主義<rt>ていこくしゅぎ</rt></ruby>" },
+      { id: 381, c: "欧米の近代化と幕末・明治", q: "鹿鳴館などで欧米の生活様式を取り入れようとした政策は？", a: "欧化政策", ruby: "<ruby>欧化政策<rt>おうかせいさく</rt></ruby>" },
+      { id: 382, c: "欧米の近代化と幕末・明治", q: "1894年、領事裁判権の撤廃に成功した外務大臣は？", a: "陸奥宗光", ruby: "<ruby>陸奥宗光<rt>むつむねみつ</rt></ruby>" },
+      { id: 383, c: "欧米の近代化と幕末・明治", q: "1911年、関税自主権の完全回復に成功した外務大臣は？", a: "小村寿太郎", ruby: "<ruby>小村寿太郎<rt>こむらじゅたろう</rt></ruby>" },
+      { id: 384, c: "欧米の近代化と幕末・明治", q: "1894〜95年、朝鮮の主導権を巡り起きた日本と清の戦争は？", a: "日清戦争", ruby: "<ruby>日清戦争<rt>にっしんせんそう</rt></ruby>" },
+      { id: 385, c: "欧米の近代化と幕末・明治", q: "1894年、朝鮮で東学党が起こした大規模農民反乱は？", a: "甲午農民戦争", ruby: "<ruby>甲午農民戦争<rt>こうごのうみんせんそう</rt></ruby>" },
+      { id: 386, c: "欧米の近代化と幕末・明治", q: "1895年、日清戦争の講和条約として締結された条約は？", a: "下関条約", ruby: "『<ruby>下関条約<rt>しもせきじょうやく</rt></ruby>』" },
+      { id: 387, c: "欧米の近代化と幕末・明治", q: "下関条約で割譲されたが三国干渉で返還した半島は？", a: "遼東半島", ruby: "<ruby>遼東半島<rt>りょうとうはんとう</rt></ruby>" },
+      { id: 388, c: "欧米の近代化と幕末・明治", q: "ロシア・フランス・ドイツが遼東半島の清への返還を迫った干渉は？", a: "三国干渉", ruby: "<ruby>三国干渉<rt>さんごくかんしょう</rt></ruby>" },
+      { id: 389, c: "欧米の近代化と幕末・明治", q: "1904〜05年、満洲・朝鮮の権益を巡り日露間で行われた戦争は？", a: "日露戦争", ruby: "<ruby>日露戦争<rt>にちろせんそう</rt></ruby>" },
+      { id: 390, c: "欧米の近代化と幕末・明治", q: "1900年、「扶清滅洋」を掲げ北京の公使館街を包囲した事件は？", a: "義和団事件", ruby: "<ruby>義和団事件<rt>ぎわだんじけん</rt></ruby>" },
+      { id: 391, c: "欧米の近代化と幕末・明治", q: "1902年、ロシアの南下に対抗するため日英間で結ばれた同盟は？", a: "日英同盟", ruby: "<ruby>日英同盟<rt>にちえいどうめい</rt></ruby>" },
+      { id: 392, c: "欧米の近代化と幕末・明治", q: "1905年、アメリカの斡旋で日露戦争の講和が成立した条約は？", a: "ポーツマス条約", ruby: "『<ruby>ポーツマス条約<rt>ぽーつますじょうやく</rt></ruby>』" },
+      { id: 393, c: "欧米の近代化と幕末・明治", q: "ポーツマス条約で賠償金が得られず暴徒化した民衆騒擾事件は？", a: "日比谷焼き打ち事件", ruby: "<ruby>日比谷焼き打ち事件<rt>ひびややきうちじけん</rt></ruby>" },
+      { id: 394, c: "欧米の近代化と幕末・明治", q: "1905年、韓国の外交権を奪い統治するため設置した機関は？", a: "韓国統監府", ruby: "<ruby>韓国統監府<rt>かんこくとうかんふ</rt></ruby>" },
+      { id: 395, c: "欧米の近代化と幕末・明治", q: "1910年、大韓帝国を植民地化して併合した出来事は？", a: "韓国併合", ruby: "<ruby>韓国併合<rt>かんこくへいごう</rt></ruby>" },
+      { id: 396, c: "欧米の近代化と幕末・明治", q: "韓国併合後に朝鮮を統治するため設置された現地統治機関は？", a: "朝鮮総督府", ruby: "<ruby>朝鮮総督府<rt>ちょうせんそうとくふ</rt></ruby>" },
+      { id: 397, c: "欧米の近代化と幕末・明治", q: "主権を奪われ他国の直接支配下に置かれた地域は？", a: "植民地", ruby: "<ruby>植民地<rt>しょくみんち</rt></ruby>" },
+      { id: 398, c: "欧米の近代化と幕末・明治", q: "日露戦争後、長春以南の鉄道・炭鉱を経営した半官半民会社は？", a: "南満州鉄道株式会社(満鉄)", ruby: "<ruby>南満州鉄道株式会社<rt>みなみまんしゅうてつどうかぶしきがいしゃ</rt></ruby>" },
+
+      // --- 9. 世界大戦と現代 ---
+      { id: 399, c: "世界大戦と現代", q: "1912年、辛亥革命により清が倒れてアジア初の共和制国家として成立した国は？", a: "中華民国", ruby: "<ruby>中華民国<rt>ちゅうかみんこく</rt></ruby>" },
+      { id: 400, c: "世界大戦と現代", q: "1911年、孫文らを指導者として清を倒した革命は？", a: "辛亥革命", ruby: "<ruby>辛亥革命<rt>しんがいかくめい</rt></ruby>" },
+      { id: 401, c: "世界大戦と現代", q: "孫文が提唱した「民族・民権・民生」の政治原理は？", a: "三民主義", ruby: "<ruby>三民主義<rt>さんみんしゅぎ</rt></ruby>" },
+      { id: 402, c: "世界大戦と現代", q: "辛亥革命を指導し中華民国の臨時大総統に就任した人物は？", a: "孫文", ruby: "<ruby>孫文<rt>そんぶん</rt></ruby>" },
+      { id: 403, c: "世界大戦と現代", q: "孫文から大総統を譲られたが独裁を進めた清軍出身の軍閥は？", a: "袁世凱", ruby: "<ruby>袁世凱<rt>えんせいがい</rt></ruby>" },
+      { id: 404, c: "世界大戦と現代", q: "各地に割拠し私兵を率いて対立した軍人グループは？", a: "軍閥", ruby: "<ruby>軍閥<rt>ぐんばつ</rt></ruby>" },
+      { id: 405, c: "世界大戦と現代", q: "1901年に稼働開始した官営の製鉄所は？（補正: 八幡製鉄城➔八幡製鉄所）", a: "八幡製鉄所", ruby: "<ruby>八幡製鉄所<rt>やはたせいてつじょ</rt></ruby>" },
+      { id: 406, c: "世界大戦と現代", q: "三井・三菱・住友・安田などの巨大金融・産業資本閥は？", a: "財閥", ruby: "<ruby>財閥<rt>ざいばつ</rt></ruby>" },
+      { id: 407, c: "世界大戦と現代", q: "田中正造が命をかけて明治天皇へ直訴した鉱害公害事件は？", a: "足尾銅山鉱毒事件", ruby: "<ruby>足尾銅山鉱毒事件<rt>あしおどうざんこうどくじけん</rt></ruby>" },
+      { id: 408, c: "世界大戦と現代", q: "労働条件の維持改善を目指し労働者が結成した団体は？", a: "労働組合", ruby: "<ruby>労働組合<rt>ろうどうくみあい</rt></ruby>" },
+      { id: 409, c: "世界大戦と現代", q: "1914年、サラエボ事件を機に勃発した世界的対立戦争は？", a: "第一次世界大戦", ruby: "<ruby>第一次世界大戦<rt>だいいちじせかいたいせん</rt></ruby>" },
+      { id: 410, c: "世界大戦と現代", q: "1989年、ブッシュ・ゴルバチョフ両首脳が冷戦終結を宣言した会談は？（補正: マルタ階段➔マルタ会談）", a: "マルタ会談", ruby: "マルタ<ruby>会談<rt>かいだん</rt></ruby>" },
+      { id: 411, c: "世界大戦と現代", q: "1991年12月に不快感と経済破綻の中で崩壊解体した超大国は？", a: "ソ連解体", ruby: "ソ<ruby>連解体<rt>れんかいたい</rt></ruby>" }
+    ];
+
+    // 理科データベース：ユーザー提供用語＋教科書画像から重要な関連問題を追加
+    const scienceWordList = [{"id": 10000, "c": "観察器具・生物の分類", "q": "小さな物体を拡大して観察する手持ちの道具は？", "a": "ルーペ", "ruby": "ルーペ"}, {"id": 10001, "c": "観察器具・生物の分類", "q": "立体的なものを両目で観察する器具は？", "a": "双眼実体顕微鏡", "ruby": "双眼実体顕微鏡"}, {"id": 10002, "c": "観察器具・生物の分類", "q": "小さなものを拡大して観察する器具は？", "a": "顕微鏡", "ruby": "顕微鏡"}, {"id": 10003, "c": "観察器具・生物の分類", "q": "顕微鏡で高倍率にすると、視野はどうなる？", "a": "狭くなる", "ruby": "狭くなる"}, {"id": 10004, "c": "観察器具・生物の分類", "q": "顕微鏡で高倍率にすると、視野の明るさはどうなる？", "a": "暗くなる", "ruby": "暗くなる"}, {"id": 10005, "c": "観察器具・生物の分類", "q": "顕微鏡で目に近い側にあるレンズは？", "a": "接眼レンズ", "ruby": "接眼レンズ"}, {"id": 10006, "c": "観察器具・生物の分類", "q": "顕微鏡でプレパラートに近い側にあるレンズは？", "a": "対物レンズ", "ruby": "対物レンズ"}, {"id": 10007, "c": "観察器具・生物の分類", "q": "顕微鏡でピントを合わせるために回すねじは？", "a": "調節ねじ", "ruby": "調節ねじ"}, {"id": 10008, "c": "観察器具・生物の分類", "q": "顕微鏡で光の向きを調整する器具は？", "a": "反射鏡", "ruby": "反射鏡"}, {"id": 10009, "c": "観察器具・生物の分類", "q": "生物を特徴に基づいて分けることを何という？", "a": "分類", "ruby": "分類"}, {"id": 10010, "c": "観察器具・生物の分類", "q": "胚珠が子房に包まれている植物は？", "a": "被子植物", "ruby": "被子植物"}, {"id": 10011, "c": "観察器具・生物の分類", "q": "子葉が1枚の植物のグループは？", "a": "単子葉類", "ruby": "単子葉類"}, {"id": 10012, "c": "観察器具・生物の分類", "q": "単子葉類の葉脈の特徴は？", "a": "平行脈", "ruby": "平行脈"}, {"id": 10013, "c": "観察器具・生物の分類", "q": "単子葉類の根の特徴は？", "a": "ひげ根", "ruby": "ひげ根"}, {"id": 10014, "c": "観察器具・生物の分類", "q": "子葉が2枚の植物のグループは？", "a": "双子葉類", "ruby": "双子葉類"}, {"id": 10015, "c": "観察器具・生物の分類", "q": "めしべの先端で花粉がつく部分は？", "a": "柱頭", "ruby": "柱頭"}, {"id": 10016, "c": "観察器具・生物の分類", "q": "受粉後に種子になる胚珠を包む部分は？", "a": "子房", "ruby": "子房"}, {"id": 10017, "c": "観察器具・生物の分類", "q": "花粉が柱頭につくことを何という？", "a": "受粉", "ruby": "受粉"}, {"id": 10018, "c": "観察器具・生物の分類", "q": "双子葉類に多い網目状の葉脈は？", "a": "網状脈", "ruby": "網状脈"}, {"id": 10019, "c": "観察器具・生物の分類", "q": "双子葉類に多い、太い根は？", "a": "主根", "ruby": "主根"}, {"id": 10020, "c": "観察器具・生物の分類", "q": "主根から枝分かれする根は？", "a": "側根", "ruby": "側根"}, {"id": 10021, "c": "観察器具・生物の分類", "q": "胚珠がむき出しになっている植物は？", "a": "裸子植物", "ruby": "裸子植物"}, {"id": 10022, "c": "観察器具・生物の分類", "q": "種子でふえる植物の総称は？", "a": "種子植物", "ruby": "種子植物"}, {"id": 10023, "c": "観察器具・生物の分類", "q": "維管束を持ち、胞子でふえる植物の例は？", "a": "シダ植物", "ruby": "シダ植物"}, {"id": 10024, "c": "観察器具・生物の分類", "q": "水や養分を運ぶ道管と師管のまとまりは？", "a": "維管束", "ruby": "維管束"}, {"id": 10025, "c": "観察器具・生物の分類", "q": "維管束がなく、胞子でふえる植物は？", "a": "コケ植物", "ruby": "コケ植物"}, {"id": 10026, "c": "観察器具・生物の分類", "q": "胞子でふえる植物がつくる、生殖に関わる粒は？", "a": "胞子", "ruby": "胞子"}, {"id": 10027, "c": "観察器具・生物の分類", "q": "コケ植物には根・茎・葉の明確な区別がある？", "a": "区別がない", "ruby": "区別がない"}, {"id": 10028, "c": "観察器具・生物の分類", "q": "背骨を持つ動物のグループは？", "a": "セキツイ動物", "ruby": "セキツイ動物"}, {"id": 10029, "c": "観察器具・生物の分類", "q": "卵を産んで子をふやすことは？", "a": "卵生", "ruby": "卵生"}, {"id": 10030, "c": "観察器具・生物の分類", "q": "母体内である程度育ってから子を産むことは？", "a": "胎生", "ruby": "胎生"}, {"id": 10031, "c": "観察器具・生物の分類", "q": "背骨を持たない動物のグループは？", "a": "無セキツイ動物", "ruby": "無セキツイ動物"}, {"id": 10032, "c": "観察器具・生物の分類", "q": "軟らかい体を外とう膜でおおう動物の仲間は？", "a": "軟体動物", "ruby": "軟体動物"}, {"id": 10033, "c": "観察器具・生物の分類", "q": "体や脚に節があり、外骨格を持つ動物の仲間は？", "a": "節足動物", "ruby": "節足動物"}, {"id": 10034, "c": "観察器具・生物の分類", "q": "軟体動物で、貝殻をつくることが多い膜は？", "a": "外とう膜", "ruby": "外とう膜"}, {"id": 10035, "c": "観察器具・生物の分類", "q": "節足動物の体をおおうかたい殻は？", "a": "外骨格", "ruby": "外骨格"}, {"id": 10036, "c": "物質の性質・気体", "q": "物体をつくっている材料そのものを何という？", "a": "物質", "ruby": "物質"}, {"id": 10037, "c": "物質の性質・気体", "q": "形や用途に注目して区別したものを何という？", "a": "物体", "ruby": "物体"}, {"id": 10038, "c": "物質の性質・気体", "q": "金属に共通する、みがくと光る性質は？", "a": "金属光沢", "ruby": "金属光沢"}, {"id": 10039, "c": "物質の性質・気体", "q": "金属をたたいて薄く広げられる性質は？", "a": "展性", "ruby": "展性"}, {"id": 10040, "c": "物質の性質・気体", "q": "金属を引き伸ばして針金などにできる性質は？", "a": "延性", "ruby": "延性"}, {"id": 10041, "c": "物質の性質・気体", "q": "金属以外の物質の総称は？", "a": "非金属", "ruby": "非金属"}, {"id": 10042, "c": "物質の性質・気体", "q": "炭素を含み、燃えるものが多い物質の分類は？", "a": "有機物", "ruby": "有機物"}, {"id": 10043, "c": "物質の性質・気体", "q": "有機物以外の物質をまとめて何という？", "a": "無機物", "ruby": "無機物"}, {"id": 10044, "c": "物質の性質・気体", "q": "物質1 cm³あたりの質量を表す量は？", "a": "密度", "ruby": "密度"}, {"id": 10045, "c": "物質の性質・気体", "q": "密度を求める式は？", "a": "物質の質量÷物質の体積", "ruby": "物質の質量÷物質の体積"}, {"id": 10046, "c": "物質の性質・気体", "q": "水より密度が小さい物体は水にどうなる？", "a": "浮く", "ruby": "浮く"}, {"id": 10047, "c": "物質の性質・気体", "q": "水より密度が大きい物体は水中でどうなる？", "a": "沈む", "ruby": "沈む"}, {"id": 10048, "c": "物質の性質・気体", "q": "空気の約78%を占める気体は？", "a": "窒素", "ruby": "窒素"}, {"id": 10049, "c": "物質の性質・気体", "q": "ものを燃やすはたらきがある気体は？", "a": "酸素", "ruby": "酸素"}, {"id": 10050, "c": "物質の性質・気体", "q": "水に溶けにくい気体を集める方法は？", "a": "水上置換法", "ruby": "水上置換法"}, {"id": 10051, "c": "物質の性質・気体", "q": "空気より密度が小さい気体を集める方法は？", "a": "上方置換法", "ruby": "上方置換法"}, {"id": 10052, "c": "物質の性質・気体", "q": "空気より密度が大きく、水に溶けやすい気体を集める方法は？", "a": "下方置換法", "ruby": "下方置換法"}, {"id": 10053, "c": "物質の性質・気体", "q": "顕微鏡の明るさを調整する部品として授業で使う名称は？", "a": "反射鏡", "ruby": "反射鏡"}, {"id": 10054, "c": "物質の性質・気体", "q": "顕微鏡の「空気調節ねじ」は送られた表記のまま扱う用語。", "a": "空気調節ねじ", "ruby": "空気調節ねじ"}, {"id": 10055, "c": "物質の性質・気体", "q": "顕微鏡の「ガス調節ねじ」は送られた表記のまま扱う用語。", "a": "ガス調節ねじ", "ruby": "ガス調節ねじ"}, {"id": 10056, "c": "水溶液・状態変化", "q": "溶液に溶けている物質は？", "a": "溶質", "ruby": "溶質"}, {"id": 10057, "c": "水溶液・状態変化", "q": "溶質を溶かしている液体は？", "a": "溶媒", "ruby": "溶媒"}, {"id": 10058, "c": "水溶液・状態変化", "q": "溶質が溶媒に溶けた液全体は？", "a": "溶液", "ruby": "溶液"}, {"id": 10059, "c": "水溶液・状態変化", "q": "溶媒が水である溶液は？", "a": "水溶液", "ruby": "水溶液"}, {"id": 10060, "c": "水溶液・状態変化", "q": "溶液の質量に対する溶質の質量の割合を百分率で示したものは？", "a": "質量パーセント濃度", "ruby": "質量パーセント濃度"}, {"id": 10061, "c": "水溶液・状態変化", "q": "溶解度まで溶質が溶けている水溶液は？", "a": "飽和水溶液", "ruby": "飽和水溶液"}, {"id": 10062, "c": "水溶液・状態変化", "q": "一定量の溶媒に溶ける溶質の限度の量は？", "a": "溶解度", "ruby": "溶解度"}, {"id": 10063, "c": "水溶液・状態変化", "q": "温度と溶解度の関係を表すグラフは？", "a": "溶解度曲線", "ruby": "溶解度曲線"}, {"id": 10064, "c": "水溶液・状態変化", "q": "溶液から規則正しい形で出てきた固体は？", "a": "結晶", "ruby": "結晶"}, {"id": 10065, "c": "水溶液・状態変化", "q": "溶解度の差を利用して結晶を取り出す操作は？", "a": "再結晶", "ruby": "再結晶"}, {"id": 10066, "c": "水溶液・状態変化", "q": "物質が固体・液体・気体と状態を変えることは？", "a": "状態変化", "ruby": "状態変化"}, {"id": 10067, "c": "水溶液・状態変化", "q": "固体がとけ始める温度は？", "a": "融点", "ruby": "融点"}, {"id": 10068, "c": "水溶液・状態変化", "q": "液体が沸騰する温度は？", "a": "沸点", "ruby": "沸点"}, {"id": 10069, "c": "水溶液・状態変化", "q": "1種類の物質だけからできている物質は？", "a": "純物質", "ruby": "純物質"}, {"id": 10070, "c": "水溶液・状態変化", "q": "複数の物質が混じり合ったものは？", "a": "混合物", "ruby": "混合物"}, {"id": 10071, "c": "水溶液・状態変化", "q": "液体を加熱して蒸気にし、冷やして集める分離方法は？", "a": "蒸留", "ruby": "蒸留"}, {"id": 10072, "c": "水溶液・状態変化", "q": "溶液の濃度を求める式は？", "a": "溶質の質量÷溶液の質量×100", "ruby": "溶質の質量÷溶液の質量×100"}, {"id": 10073, "c": "水溶液・状態変化", "q": "水溶液を冷やすなどして溶質を結晶として取り出す方法は？", "a": "再結晶", "ruby": "再結晶"}, {"id": 10074, "c": "光・音・力", "q": "光を出すものを何という？", "a": "光源", "ruby": "光源"}, {"id": 10075, "c": "光・音・力", "q": "光が同じ物質中をまっすぐ進むことは？", "a": "光の直進", "ruby": "光の直進"}, {"id": 10076, "c": "光・音・力", "q": "光が境界面ではね返ることは？", "a": "光の反射", "ruby": "光の反射"}, {"id": 10077, "c": "光・音・力", "q": "入射光と法線の間の角度は？", "a": "入射角", "ruby": "入射角"}, {"id": 10078, "c": "光・音・力", "q": "反射光と法線の間の角度は？", "a": "反射角", "ruby": "反射角"}, {"id": 10079, "c": "光・音・力", "q": "入射角と反射角が等しいという決まりは？", "a": "光の反射の法則", "ruby": "光の反射の法則"}, {"id": 10080, "c": "光・音・力", "q": "鏡などに映って見えるものは？", "a": "像", "ruby": "像"}, {"id": 10081, "c": "光・音・力", "q": "光が異なる物質の境界で進む向きを変えることは？", "a": "光の屈折", "ruby": "光の屈折"}, {"id": 10082, "c": "光・音・力", "q": "屈折した光と法線の間の角度は？", "a": "屈折角", "ruby": "屈折角"}, {"id": 10083, "c": "光・音・力", "q": "光が境界面ですべて反射する現象は？", "a": "全反射", "ruby": "全反射"}, {"id": 10084, "c": "光・音・力", "q": "凸レンズを通った平行光線が集まる点は？", "a": "焦点", "ruby": "焦点"}, {"id": 10085, "c": "光・音・力", "q": "凸レンズの中心から焦点までの距離は？", "a": "焦点距離", "ruby": "焦点距離"}, {"id": 10086, "c": "光・音・力", "q": "スクリーンに映すことができる像は？", "a": "実像", "ruby": "実像"}, {"id": 10087, "c": "光・音・力", "q": "凸レンズの実像の向きはどうなる？", "a": "上下左右が反対の像", "ruby": "上下左右が反対の像"}, {"id": 10088, "c": "光・音・力", "q": "スクリーンに映すことができない像は？", "a": "虚像", "ruby": "虚像"}, {"id": 10089, "c": "光・音・力", "q": "音を出している物体は？", "a": "音源", "ruby": "音源"}, {"id": 10090, "c": "光・音・力", "q": "音が空気中を伝わるときに伝わるものは？", "a": "波", "ruby": "波"}, {"id": 10091, "c": "光・音・力", "q": "空気中の音の速さ（約）は？", "a": "340m/s", "ruby": "340m/s"}, {"id": 10092, "c": "光・音・力", "q": "音の波の振れ幅に関係する音の性質は？", "a": "振幅", "ruby": "振幅"}, {"id": 10093, "c": "光・音・力", "q": "1秒間の振動回数は？", "a": "振動数", "ruby": "振動数"}, {"id": 10094, "c": "光・音・力", "q": "振動数の単位は？", "a": "ヘルツ", "ruby": "ヘルツ"}, {"id": 10095, "c": "光・音・力", "q": "ヘルツを表す記号は？", "a": "Hz", "ruby": "Hz"}, {"id": 10096, "c": "光・音・力", "q": "力のはたらきの一つ。物体の形をどうする？", "a": "物体の形を変える", "ruby": "物体の形を変える"}, {"id": 10097, "c": "光・音・力", "q": "力のはたらきの一つ。物体の運動をどうする？", "a": "物体の運動の様子を変える", "ruby": "物体の運動の様子を変える"}, {"id": 10098, "c": "光・音・力", "q": "力のはたらきの一つ。物体をどうする？", "a": "物体を持ち上げたりする", "ruby": "物体を持ち上げたりする"}, {"id": 10099, "c": "光・音・力", "q": "力の単位は？", "a": "ニュートン", "ruby": "ニュートン"}, {"id": 10100, "c": "光・音・力", "q": "ニュートンを表す記号は？", "a": "N", "ruby": "N"}, {"id": 10101, "c": "光・音・力", "q": "ばねの伸びが加える力の大きさに比例する法則は？", "a": "フックの法則", "ruby": "フックの法則"}, {"id": 10102, "c": "光・音・力", "q": "力が物体にはたらく点は？", "a": "作用点", "ruby": "作用点"}, {"id": 10103, "c": "光・音・力", "q": "力がはたらく方向は？", "a": "力の向き", "ruby": "力の向き"}, {"id": 10104, "c": "光・音・力", "q": "力の程度を表すものは？", "a": "力の大きさ", "ruby": "力の大きさ"}, {"id": 10105, "c": "光・音・力", "q": "物体が面から受ける、面に垂直な力は？", "a": "垂直抗力", "ruby": "垂直抗力"}, {"id": 10106, "c": "光・音・力", "q": "変形した物体が元に戻ろうとする力は？", "a": "弾性力", "ruby": "弾性力"}, {"id": 10107, "c": "光・音・力", "q": "接触面で運動を妨げる力は？", "a": "摩擦力", "ruby": "摩擦力"}, {"id": 10108, "c": "光・音・力", "q": "地球が物体を引く力は？", "a": "重力", "ruby": "重力"}, {"id": 10109, "c": "光・音・力", "q": "物体そのものの量を表す量は？", "a": "質量", "ruby": "質量"}, {"id": 10110, "c": "光・音・力", "q": "質量を測る器具は？", "a": "上皿てんびん", "ruby": "上皿てんびん"}, {"id": 10111, "c": "光・音・力", "q": "つり合う2力の条件の一つは、2力が何上にあること？", "a": "2力が一直線上にある", "ruby": "2力が一直線上にある"}, {"id": 10112, "c": "光・音・力", "q": "つり合う2力の大きさは？", "a": "2力の大きさが等しい", "ruby": "2力の大きさが等しい"}, {"id": 10113, "c": "光・音・力", "q": "つり合う2力の向きは？", "a": "2力の向きが反対向きである", "ruby": "2力の向きが反対向きである"}, {"id": 10114, "c": "火山・地震・地層", "q": "地下で高温のために溶けた岩石は？", "a": "マグマ", "ruby": "マグマ"}, {"id": 10115, "c": "火山・地震・地層", "q": "噴火で火口から出る溶岩・火山灰・火山ガスなどは？", "a": "火山噴出物", "ruby": "火山噴出物"}, {"id": 10116, "c": "火山・地震・地層", "q": "マグマが地表に噴き出す場所や山は？", "a": "火山", "ruby": "火山"}, {"id": 10117, "c": "火山・地震・地層", "q": "ねばりけの小さいマグマの噴火は比較的どうなる？", "a": "おだやか", "ruby": "おだやか"}, {"id": 10118, "c": "火山・地震・地層", "q": "ねばりけの大きいマグマの噴火はどうなりやすい？", "a": "爆発的", "ruby": "爆発的"}, {"id": 10119, "c": "火山・地震・地層", "q": "ねばりけの小さいマグマからできる溶岩は何色っぽい？", "a": "黒っぽい", "ruby": "黒っぽい"}, {"id": 10120, "c": "火山・地震・地層", "q": "ねばりけの大きいマグマからできる溶岩は何色っぽい？", "a": "白っぽい", "ruby": "白っぽい"}, {"id": 10121, "c": "火山・地震・地層", "q": "ねばりけの小さいマグマの噴火の規模は？", "a": "弱い", "ruby": "弱い"}, {"id": 10122, "c": "火山・地震・地層", "q": "ねばりけの大きいマグマの噴火の規模は？", "a": "強い", "ruby": "強い"}, {"id": 10123, "c": "火山・地震・地層", "q": "ねばりけの小さい溶岩でできやすい火山の形は？", "a": "平らな形", "ruby": "平らな形"}, {"id": 10124, "c": "火山・地震・地層", "q": "ねばりけが中程度のマグマでできやすい火山の形は？", "a": "円すい形", "ruby": "円すい形"}, {"id": 10125, "c": "火山・地震・地層", "q": "ねばりけの大きいマグマでできやすい火山の形は？", "a": "ドーム状の形", "ruby": "ドーム状の形"}, {"id": 10126, "c": "火山・地震・地層", "q": "岩石をつくる粒状の物質は？", "a": "鉱物", "ruby": "鉱物"}, {"id": 10127, "c": "火山・地震・地層", "q": "無色や白色に見える鉱物の総称は？", "a": "無色鉱物", "ruby": "無色鉱物"}, {"id": 10128, "c": "火山・地震・地層", "q": "無色鉱物の一つで、ガラスのような光沢をもつものは？", "a": "セキエイ", "ruby": "セキエイ"}, {"id": 10129, "c": "火山・地震・地層", "q": "長石の一種で、白っぽい鉱物は？", "a": "チョウ石", "ruby": "チョウ石"}, {"id": 10130, "c": "火山・地震・地層", "q": "色のついた鉱物の総称は？", "a": "有色鉱物", "ruby": "有色鉱物"}, {"id": 10131, "c": "火山・地震・地層", "q": "黒く薄くはがれる鉱物は？", "a": "クロウンモ", "ruby": "クロウンモ"}, {"id": 10132, "c": "火山・地震・地層", "q": "暗緑色などで柱状の鉱物は？", "a": "カクセン石", "ruby": "カクセン石"}, {"id": 10133, "c": "火山・地震・地層", "q": "暗緑色で短い柱状などの鉱物は？", "a": "キ石", "ruby": "キ石"}, {"id": 10134, "c": "火山・地震・地層", "q": "黄緑色の鉱物は？", "a": "カンラン石", "ruby": "カンラン石"}, {"id": 10135, "c": "火山・地震・地層", "q": "マグマが冷えて固まってできた岩石は？", "a": "火成岩", "ruby": "火成岩"}, {"id": 10136, "c": "火山・地震・地層", "q": "火山岩で大きな結晶を何という？", "a": "斑晶", "ruby": "斑晶"}, {"id": 10137, "c": "火山・地震・地層", "q": "火山岩で斑晶の周りの細かい部分は？", "a": "石基", "ruby": "石基"}, {"id": 10138, "c": "火山・地震・地層", "q": "大きな結晶が細かい部分に散らばる組織は？", "a": "斑状組織", "ruby": "斑状組織"}, {"id": 10139, "c": "火山・地震・地層", "q": "火山岩の一つで黒っぽい岩石は？", "a": "玄武岩", "ruby": "玄武岩"}, {"id": 10140, "c": "火山・地震・地層", "q": "地下深くでマグマがゆっくり冷えてできる岩石は？", "a": "深成岩", "ruby": "深成岩"}, {"id": 10141, "c": "火山・地震・地層", "q": "深成岩の一つで、白っぽい岩石は？", "a": "花崗岩", "ruby": "花崗岩"}, {"id": 10142, "c": "火山・地震・地層", "q": "地震が地下で発生した場所は？", "a": "震源", "ruby": "震源"}, {"id": 10143, "c": "火山・地震・地層", "q": "震源の真上の地表の地点は？", "a": "震央", "ruby": "震央"}, {"id": 10144, "c": "火山・地震・地層", "q": "P波が到着してからS波が到着するまでの小さな揺れは？", "a": "初期微動", "ruby": "初期微動"}, {"id": 10145, "c": "火山・地震・地層", "q": "地震で先に伝わる速い波は？", "a": "P波", "ruby": "P波"}, {"id": 10146, "c": "火山・地震・地層", "q": "S波が到着してからの大きな揺れは？", "a": "主要動", "ruby": "主要動"}, {"id": 10147, "c": "火山・地震・地層", "q": "地震で後から伝わる遅い波は？", "a": "S波", "ruby": "S波"}, {"id": 10148, "c": "火山・地震・地層", "q": "初期微動が続いた時間は？", "a": "初期微動継続時間", "ruby": "初期微動継続時間"}, {"id": 10149, "c": "火山・地震・地層", "q": "ある場所での揺れの強さは？", "a": "震度", "ruby": "震度"}, {"id": 10150, "c": "火山・地震・地層", "q": "地震そのものの規模を表す値は？", "a": "マグニチュード", "ruby": "マグニチュード"}, {"id": 10151, "c": "火山・地震・地層", "q": "地球表面をおおう板状の岩盤は？", "a": "プレート", "ruby": "プレート"}, {"id": 10152, "c": "火山・地震・地層", "q": "地層や岩盤が割れてずれたものは？", "a": "断層", "ruby": "断層"}, {"id": 10153, "c": "火山・地震・地層", "q": "最近の地質時代に活動し、将来も活動する可能性のある断層は？", "a": "活断層", "ruby": "活断層"}, {"id": 10154, "c": "火山・地震・地層", "q": "海底の地震などで発生する大きな波は？", "a": "津波", "ruby": "津波"}, {"id": 10155, "c": "火山・地震・地層", "q": "海洋プレートが沈み込む細長く深い海底地形は？", "a": "海溝", "ruby": "海溝"}, {"id": 10156, "c": "火山・地震・地層", "q": "岩石が気温変化などで崩れていくことは？", "a": "風化", "ruby": "風化"}, {"id": 10157, "c": "火山・地震・地層", "q": "流水などが地表を削るはたらきは？", "a": "侵食", "ruby": "侵食"}, {"id": 10158, "c": "火山・地震・地層", "q": "流水が土砂を運ぶはたらきは？", "a": "運搬", "ruby": "運搬"}, {"id": 10159, "c": "火山・地震・地層", "q": "運ばれた土砂が積もるはたらきは？", "a": "堆積", "ruby": "堆積"}, {"id": 10160, "c": "火山・地震・地層", "q": "流水で運ばれた土砂は河口などのどんな場所に積もる？", "a": "離れたところ", "ruby": "離れたところ"}, {"id": 10161, "c": "火山・地震・地層", "q": "地層の重なりで、通常どの層ほど新しい？", "a": "上の層ほど新しい", "ruby": "上の層ほど新しい"}, {"id": 10162, "c": "火山・地震・地層", "q": "地層の厚さや岩石の種類を柱状に表した図は？", "a": "柱状図", "ruby": "柱状図"}, {"id": 10163, "c": "火山・地震・地層", "q": "広い範囲で見られ、地層の対比の手がかりとなる層は？", "a": "かぎ層", "ruby": "かぎ層"}, {"id": 10164, "c": "火山・地震・地層", "q": "堆積物が固まってできた岩石は？", "a": "堆積岩", "ruby": "堆積岩"}, {"id": 10165, "c": "火山・地震・地層", "q": "粒の直径が2mm以上の堆積物は？", "a": "れき", "ruby": "れき"}, {"id": 10166, "c": "火山・地震・地層", "q": "粒の直径が2mm未満で1/16mm以上の堆積物は？", "a": "砂", "ruby": "砂"}, {"id": 10167, "c": "火山・地震・地層", "q": "粒の直径が1/16mmより小さい堆積物は？", "a": "泥", "ruby": "泥"}, {"id": 10168, "c": "火山・地震・地層", "q": "塩酸をかけると二酸化炭素が発生する岩石は？", "a": "石灰岩", "ruby": "石灰岩"}, {"id": 10169, "c": "火山・地震・地層", "q": "生物の殻などからでき、硬く割れやすい岩石は？", "a": "チャート", "ruby": "チャート"}, {"id": 10170, "c": "火山・地震・地層", "q": "石灰岩やチャートのもとになるものは？", "a": "生物の死骸", "ruby": "生物の死骸"}, {"id": 10171, "c": "火山・地震・地層", "q": "石灰岩に塩酸を加えると二酸化炭素がどうなる？", "a": "発生する", "ruby": "発生する"}, {"id": 10172, "c": "火山・地震・地層", "q": "チャートに塩酸を加えると二酸化炭素はどうなる？", "a": "発生しない", "ruby": "発生しない"}, {"id": 10173, "c": "火山・地震・地層", "q": "火山灰などが固まってできた岩石は？", "a": "凝灰岩", "ruby": "凝灰岩"}, {"id": 10174, "c": "火山・地震・地層", "q": "火山灰に含まれる粒の形は？", "a": "角ばった粒", "ruby": "角ばった粒"}, {"id": 10175, "c": "火山・地震・地層", "q": "地層ができた当時の環境を示す化石は？", "a": "示相化石", "ruby": "示相化石"}, {"id": 10176, "c": "火山・地震・地層", "q": "地層ができた地質年代を知る手がかりになる化石は？", "a": "示準化石", "ruby": "示準化石"}, {"id": 10177, "c": "火山・地震・地層", "q": "地球の歴史を区分した時代は？", "a": "地質年代", "ruby": "地質年代"}, {"id": 10178, "c": "火山・地震・地層", "q": "古生代の次にくる時代は？", "a": "中生代", "ruby": "中生代"}, {"id": 10179, "c": "火山・地震・地層", "q": "中生代の次にくる時代は？", "a": "新生代", "ruby": "新生代"}, {"id": 10180, "c": "火山・地震・地層", "q": "地層が横から押されて波状に曲がることは？", "a": "しゅう曲", "ruby": "しゅう曲"}, {"id": 10181, "c": "火山・地震・地層", "q": "地面が周囲に対して上昇することは？", "a": "隆起", "ruby": "隆起"}, {"id": 10182, "c": "火山・地震・地層", "q": "地面が周囲に対して沈むことは？", "a": "沈降", "ruby": "沈降"}, {"id": 10183, "c": "火山・地震・地層", "q": "隆起した海岸に階段状に残る地形は？", "a": "海岸段丘", "ruby": "海岸段丘"}, {"id": 10184, "c": "生物の細胞・植物", "q": "1個の細胞で体ができている生物は？", "a": "単細胞生物", "ruby": "単細胞生物"}, {"id": 10185, "c": "生物の細胞・植物", "q": "多くの細胞で体ができている生物は？", "a": "多細胞生物", "ruby": "多細胞生物"}, {"id": 10186, "c": "生物の細胞・植物", "q": "細胞内で遺伝情報などを含む構造は？", "a": "核", "ruby": "核"}, {"id": 10187, "c": "生物の細胞・植物", "q": "細胞の内側を包む膜は？", "a": "細胞膜", "ruby": "細胞膜"}, {"id": 10188, "c": "生物の細胞・植物", "q": "細胞内で水などを蓄える袋状の構造は？", "a": "液胞", "ruby": "液胞"}, {"id": 10189, "c": "生物の細胞・植物", "q": "植物細胞の外側にある丈夫なつくりは？", "a": "細胞壁", "ruby": "細胞壁"}, {"id": 10190, "c": "生物の細胞・植物", "q": "光合成を行う細胞内の構造は？", "a": "葉緑体", "ruby": "葉緑体"}, {"id": 10191, "c": "生物の細胞・植物", "q": "同じようなはたらきをする細胞の集まりは？", "a": "組織", "ruby": "組織"}, {"id": 10192, "c": "生物の細胞・植物", "q": "いくつかの組織が集まり特定のはたらきをする部分は？", "a": "器官", "ruby": "器官"}, {"id": 10193, "c": "生物の細胞・植物", "q": "光エネルギーを使い二酸化炭素と水から養分をつくるはたらきは？", "a": "光合成", "ruby": "光合成"}, {"id": 10194, "c": "生物の細胞・植物", "q": "養分を分解してエネルギーを取り出すはたらきは？", "a": "呼吸", "ruby": "呼吸"}, {"id": 10195, "c": "生物の細胞・植物", "q": "光合成を行う植物は一般に昼間、呼吸と光合成のどちらも行う？", "a": "昼間", "ruby": "昼間"}, {"id": 10196, "c": "生物の細胞・植物", "q": "植物は光がなくても呼吸を行うのはいつ？", "a": "夜間", "ruby": "夜間"}, {"id": 10197, "c": "生物の細胞・植物", "q": "植物の体内の水が水蒸気として外へ出ることは？", "a": "蒸散", "ruby": "蒸散"}, {"id": 10198, "c": "生物の細胞・植物", "q": "葉などにある、気体の出入り口は？", "a": "気孔", "ruby": "気孔"}, {"id": 10199, "c": "生物の細胞・植物", "q": "気孔の開閉に関わる細胞は？", "a": "孔辺細胞", "ruby": "孔辺細胞"}, {"id": 10200, "c": "生物の細胞・植物", "q": "根から吸収した水などを運ぶ管は？", "a": "道管", "ruby": "道管"}, {"id": 10201, "c": "生物の細胞・植物", "q": "光合成でできた養分などを運ぶ管は？", "a": "師管", "ruby": "師管"}, {"id": 10202, "c": "生物の細胞・植物", "q": "根の表面で水や無機養分を吸収する細い毛は？", "a": "根毛", "ruby": "根毛"}, {"id": 10203, "c": "消化・血液・排出", "q": "食物を体内に吸収されやすい物質に分解することは？", "a": "消化", "ruby": "消化"}, {"id": 10204, "c": "消化・血液・排出", "q": "口から肛門まで食物が通る一本の管は？", "a": "消化管", "ruby": "消化管"}, {"id": 10205, "c": "消化・血液・排出", "q": "消化を助けるはたらきをする物質は？", "a": "消化酵素", "ruby": "消化酵素"}, {"id": 10206, "c": "消化・血液・排出", "q": "デンプンを分解する消化酵素は？", "a": "アミラーゼ", "ruby": "アミラーゼ"}, {"id": 10207, "c": "消化・血液・排出", "q": "タンパク質を分解する胃液中の消化酵素は？", "a": "ペプシン", "ruby": "ペプシン"}, {"id": 10208, "c": "消化・血液・排出", "q": "消化された養分が体内に取り込まれることは？", "a": "吸収", "ruby": "吸収"}, {"id": 10209, "c": "消化・血液・排出", "q": "小腸で吸収される、デンプンが分解されてできる物質は？", "a": "ブドウ糖", "ruby": "ブドウ糖"}, {"id": 10210, "c": "消化・血液・排出", "q": "タンパク質が分解されてできる物質は？", "a": "アミノ酸", "ruby": "アミノ酸"}, {"id": 10211, "c": "消化・血液・排出", "q": "脂肪が分解されてできる物質は？", "a": "脂肪酸、モノグリセリド", "ruby": "脂肪酸、モノグリセリド"}, {"id": 10212, "c": "消化・血液・排出", "q": "小腸の柔毛などから入った物質を運ぶ細い血管は？", "a": "毛細血管", "ruby": "毛細血管"}, {"id": 10213, "c": "消化・血液・排出", "q": "脂肪の分解産物などが入る管は？", "a": "リンパ管", "ruby": "リンパ管"}, {"id": 10214, "c": "消化・血液・排出", "q": "酸素を運ぶ赤い血球は？", "a": "赤血球", "ruby": "赤血球"}, {"id": 10215, "c": "消化・血液・排出", "q": "赤血球に含まれ、酸素と結びつく物質は？", "a": "ヘモグロビン", "ruby": "ヘモグロビン"}, {"id": 10216, "c": "消化・血液・排出", "q": "体内に侵入した病原体などから体を守る血球は？", "a": "白血球", "ruby": "白血球"}, {"id": 10217, "c": "消化・血液・排出", "q": "血液の液体成分は？", "a": "血しょう", "ruby": "血しょう"}, {"id": 10218, "c": "消化・血液・排出", "q": "細胞の周囲を満たし、血しょうからできる液体は？", "a": "組織液", "ruby": "組織液"}, {"id": 10219, "c": "消化・血液・排出", "q": "心臓から送り出される血液が流れる血管は？", "a": "動脈", "ruby": "動脈"}, {"id": 10220, "c": "消化・血液・排出", "q": "心臓へ戻る血液が流れる血管は？", "a": "静脈", "ruby": "静脈"}, {"id": 10221, "c": "消化・血液・排出", "q": "心臓と肺の間を血液が循環することは？", "a": "肺循環", "ruby": "肺循環"}, {"id": 10222, "c": "消化・血液・排出", "q": "心臓と全身の間を血液が循環することは？", "a": "体循環", "ruby": "体循環"}, {"id": 10223, "c": "消化・血液・排出", "q": "肺で気体交換を行う小さな袋は？", "a": "肺胞", "ruby": "肺胞"}, {"id": 10224, "c": "消化・血液・排出", "q": "酸素を多く含む血液は？", "a": "動脈血", "ruby": "動脈血"}, {"id": 10225, "c": "消化・血液・排出", "q": "二酸化炭素を多く含む血液は？", "a": "静脈血", "ruby": "静脈血"}, {"id": 10226, "c": "消化・血液・排出", "q": "肝臓でつくられ、脂肪の消化を助ける液は？", "a": "胆汁", "ruby": "胆汁"}, {"id": 10227, "c": "消化・血液・排出", "q": "タンパク質の分解で生じ、肝臓でつくられる有害な物質は？", "a": "尿素", "ruby": "尿素"}, {"id": 10228, "c": "消化・血液・排出", "q": "余分なブドウ糖を肝臓や筋肉に蓄える形は？", "a": "グリコーゲン", "ruby": "グリコーゲン"}, {"id": 10229, "c": "消化・血液・排出", "q": "不要な物質を体外に出すことは？", "a": "排出", "ruby": "排出"}, {"id": 10230, "c": "消化・血液・排出", "q": "血液から尿をつくり、不要物を取り除く器官は？", "a": "じん臓", "ruby": "じん臓"}, {"id": 10231, "c": "感覚・神経・運動", "q": "刺激を受け取り、情報に変える器官は？", "a": "感覚器官", "ruby": "感覚器官"}, {"id": 10232, "c": "感覚・神経・運動", "q": "刺激を受け取る細胞は？", "a": "感覚細胞", "ruby": "感覚細胞"}, {"id": 10233, "c": "感覚・神経・運動", "q": "瞳孔の大きさを変えて光の量を調節する部分は？", "a": "虹彩", "ruby": "虹彩"}, {"id": 10234, "c": "感覚・神経・運動", "q": "目で光を屈折させる部分は？", "a": "レンズ", "ruby": "レンズ"}, {"id": 10235, "c": "感覚・神経・運動", "q": "目の奥で光を受け取る部分は？", "a": "網膜", "ruby": "網膜"}, {"id": 10236, "c": "感覚・神経・運動", "q": "音の振動を受け取る薄い膜は？", "a": "鼓膜", "ruby": "鼓膜"}, {"id": 10237, "c": "感覚・神経・運動", "q": "耳の奥で音の振動を神経の信号に変える器官は？", "a": "うずまき管", "ruby": "うずまき管"}, {"id": 10238, "c": "感覚・神経・運動", "q": "脳やせきずいからなる神経系は？", "a": "中枢神経", "ruby": "中枢神経"}, {"id": 10239, "c": "感覚・神経・運動", "q": "中枢神経と体の各部をつなぐ神経は？", "a": "末しょう神経", "ruby": "末しょう神経"}, {"id": 10240, "c": "感覚・神経・運動", "q": "感覚器官から中枢神経へ信号を伝える神経は？", "a": "感覚神経", "ruby": "感覚神経"}, {"id": 10241, "c": "感覚・神経・運動", "q": "中枢神経から筋肉などへ信号を伝える神経は？", "a": "運動神経", "ruby": "運動神経"}, {"id": 10242, "c": "感覚・神経・運動", "q": "意識とは関係なく、刺激に対してすばやく起こる反応は？", "a": "反射", "ruby": "反射"}, {"id": 10243, "c": "感覚・神経・運動", "q": "骨と骨がつながり、曲げ伸ばしできる部分は？", "a": "関節", "ruby": "関節"}, {"id": 10244, "c": "原子・分子・化学変化", "q": "物質をつくっている最小の粒子は？", "a": "原子", "ruby": "原子"}, {"id": 10245, "c": "原子・分子・化学変化", "q": "原子の種類を表す言葉は？", "a": "元素", "ruby": "元素"}, {"id": 10246, "c": "原子・分子・化学変化", "q": "元素をアルファベットで表した記号は？", "a": "元素記号", "ruby": "元素記号"}, {"id": 10247, "c": "原子・分子・化学変化", "q": "元素を原子番号順に並べた表は？", "a": "周期表", "ruby": "周期表"}, {"id": 10248, "c": "原子・分子・化学変化", "q": "いくつかの原子が結びついた粒子は？", "a": "分子", "ruby": "分子"}, {"id": 10249, "c": "原子・分子・化学変化", "q": "1種類の元素だけからできている物質は？", "a": "単体", "ruby": "単体"}, {"id": 10250, "c": "原子・分子・化学変化", "q": "2種類以上の元素からできている物質は？", "a": "化合物", "ruby": "化合物"}, {"id": 10251, "c": "原子・分子・化学変化", "q": "元素記号と数字で物質を表したものは？", "a": "化学式", "ruby": "化学式"}, {"id": 10252, "c": "原子・分子・化学変化", "q": "化学変化を化学式で表し、原子の種類と数をそろえた式は？", "a": "化学反応式", "ruby": "化学反応式"}, {"id": 10253, "c": "原子・分子・化学変化", "q": "もとの物質と異なる別の物質ができる変化は？", "a": "化学変化(化学反応)", "ruby": "化学変化(化学反応)"}, {"id": 10254, "c": "原子・分子・化学変化", "q": "1種類の物質が2種類以上の別の物質に分かれる変化は？", "a": "分解", "ruby": "分解"}, {"id": 10255, "c": "原子・分子・化学変化", "q": "加熱によって物質を分解することは？", "a": "熱分解", "ruby": "熱分解"}, {"id": 10256, "c": "原子・分子・化学変化", "q": "電流を流して物質を分解することは？", "a": "電気分解", "ruby": "電気分解"}, {"id": 10257, "c": "原子・分子・化学変化", "q": "酸化銀を加熱するとできる金属は？", "a": "銀", "ruby": "銀"}, {"id": 10258, "c": "原子・分子・化学変化", "q": "酸化銀の熱分解で発生する気体は？", "a": "酸素", "ruby": "酸素"}, {"id": 10259, "c": "原子・分子・化学変化", "q": "水の電気分解で陰極に発生する気体は？", "a": "水素", "ruby": "水素"}, {"id": 10260, "c": "原子・分子・化学変化", "q": "水の電気分解で陽極に発生する気体は？", "a": "酸素", "ruby": "酸素"}, {"id": 10261, "c": "原子・分子・化学変化", "q": "水の電気分解の化学反応式は？", "a": "2H2O → 2H2 + O2", "ruby": "2H2O → 2H2 + O2"}, {"id": 10262, "c": "原子・分子・化学変化", "q": "鉄と硫黄が結びついてできる物質は？", "a": "硫化鉄", "ruby": "硫化鉄"}, {"id": 10263, "c": "原子・分子・化学変化", "q": "銅と硫黄が結びついてできる物質は？", "a": "硫化銅", "ruby": "硫化銅"}, {"id": 10264, "c": "原子・分子・化学変化", "q": "炭酸水素ナトリウムを加熱して発生する気体は？", "a": "二酸化炭素", "ruby": "二酸化炭素"}, {"id": 10265, "c": "原子・分子・化学変化", "q": "二酸化炭素を石灰水に通すとどうなる？", "a": "石灰水が白くにごる", "ruby": "石灰水が白くにごる"}, {"id": 10266, "c": "原子・分子・化学変化", "q": "酸素の元素記号は？", "a": "O", "ruby": "O"}, {"id": 10267, "c": "原子・分子・化学変化", "q": "水素の元素記号は？", "a": "H", "ruby": "H"}, {"id": 10268, "c": "原子・分子・化学変化", "q": "銅の元素記号は？", "a": "Cu", "ruby": "Cu"}, {"id": 10269, "c": "原子・分子・化学変化", "q": "鉄の元素記号は？", "a": "Fe", "ruby": "Fe"}, {"id": 10270, "c": "原子・分子・化学変化", "q": "銀の元素記号は？", "a": "Ag", "ruby": "Ag"}, {"id": 10271, "c": "原子・分子・化学変化", "q": "酸素分子の化学式は？", "a": "O2", "ruby": "O2"}, {"id": 10272, "c": "原子・分子・化学変化", "q": "水分子の化学式は？", "a": "H2O", "ruby": "H2O"}, {"id": 10273, "c": "原子・分子・化学変化", "q": "二酸化炭素の化学式は？", "a": "CO2", "ruby": "CO2"}, {"id": 10274, "c": "原子・分子・化学変化", "q": "アンモニアの化学式は？", "a": "NH3", "ruby": "NH3"}, {"id": 10275, "c": "原子・分子・化学変化", "q": "窒素分子の化学式は？", "a": "N2", "ruby": "N2"}, {"id": 10276, "c": "原子・分子・化学変化", "q": "化学変化の前後で、原子の種類と総数はどうなる？", "a": "変わらない", "ruby": "変わらない"}, {"id": 10277, "c": "原子・分子・化学変化", "q": "鉄と硫黄の混合物に磁石を近づけると鉄はどうなる？", "a": "磁石に引きつけられる", "ruby": "磁石に引きつけられる"}, {"id": 10278, "c": "原子・分子・化学変化", "q": "鉄と硫黄を加熱してできた硫化鉄は磁石にどう反応する？", "a": "ほとんど引きつけられない", "ruby": "ほとんど引きつけられない"}, {"id": 10279, "c": "原子・分子・化学変化", "q": "銅が塩化銅水溶液の電気分解で付着する電極は？", "a": "陰極", "ruby": "陰極"}];
+    const socialWordList = rawWordList;
+    let currentSubject = localStorage.getItem('histori_subject') || 'social';
+    let activeWordList = currentSubject === 'science' ? scienceWordList : socialWordList;
+    const socialCategoryList = [
+      "原始・古代文明", "宗教・縄文・弥生", "古墳・飛鳥・奈良", 
+      "平安時代", "鎌倉・室町・戦国", "ヨーロッパ世界と大航海時代", 
+      "安土桃山・江戸時代", "欧米の近代化と幕末・明治", "世界大戦と現代"
+    ];
+    const scienceCategoryList = [...new Set(scienceWordList.map(q => q.c))];
+    let categoryList = currentSubject === 'science' ? scienceCategoryList : socialCategoryList;
+    let selectedCategories = [...categoryList];
+
+    // ユーザー作成の漢字問題（端末内に保存）
+    let kanjiProblems = JSON.parse(localStorage.getItem('histori_kanji_problems') || '[]');
+    let kanjiSelectedIds = new Set();
+    let kanjiStudyList = [], kanjiStudyIndex = 0, kanjiPhase = 'reading', kanjiWritingRevealed = false, kanjiStats = {unknown:0,maybe:0,know:0};
+    function saveKanjiProblem(){
+      const answer=document.getElementById('kanjiAnswerInput').value.trim(), reading=document.getElementById('kanjiReadingInput').value.trim(), example=document.getElementById('kanjiExampleInput').value.trim();
+      if(!answer||!reading||!example){showToast('答えの漢字・読み・例文を入力してください');return;}
+      const item={id:'k'+Date.now()+Math.random().toString(16).slice(2,6),answer,reading,example};
+      kanjiProblems.push(item);kanjiSelectedIds.add(item.id);persistKanjiProblems();renderKanjiProblemList();clearKanjiForm();showToast('漢字問題を作成しました');
+    }
+    function persistKanjiProblems(){localStorage.setItem('histori_kanji_problems',JSON.stringify(kanjiProblems));}
+    function clearKanjiForm(){['kanjiAnswerInput','kanjiReadingInput','kanjiExampleInput'].forEach(id=>document.getElementById(id).value='');}
+    function deleteKanjiProblem(id){kanjiProblems=kanjiProblems.filter(x=>x.id!==id);kanjiSelectedIds.delete(id);persistKanjiProblems();renderKanjiProblemList();}
+    function selectAllKanji(on){kanjiSelectedIds= new Set(on?kanjiProblems.map(x=>x.id):[]);renderKanjiProblemList();}
+    function renderKanjiProblemList(){const root=document.getElementById('kanjiProblemList');if(!root)return;root.innerHTML='';if(!kanjiProblems.length){root.innerHTML='<div style="padding:20px;text-align:center;color:#64748b;background:#fff;border-radius:12px">まだ問題がありません。上の「＋ 問題を作成」から作ろう！</div>';}kanjiProblems.forEach(p=>{const row=document.createElement('label');row.className='kanji-problem';row.innerHTML=`<input type="checkbox" ${kanjiSelectedIds.has(p.id)?'checked':''} aria-label="問題を選択"><span style="flex:1"><strong>${escapeKanjiHtml(p.answer)}</strong> <span style="color:#64748b">（${escapeKanjiHtml(p.reading)}）</span><small>${escapeKanjiHtml(p.example)}</small></span><button type="button" class="btn-neo" style="padding:4px 8px" aria-label="問題を削除">削除</button>`;row.querySelector('input').addEventListener('change',e=>{e.target.checked?kanjiSelectedIds.add(p.id):kanjiSelectedIds.delete(p.id);updateKanjiSelectedCount();});row.querySelector('button').addEventListener('click',e=>{e.preventDefault();deleteKanjiProblem(p.id);});root.appendChild(row);});updateKanjiSelectedCount();}
+    function updateKanjiSelectedCount(){const el=document.getElementById('kanjiSelectedCount');if(el)el.textContent=`${kanjiSelectedIds.size}問選択中`;}
+    function escapeKanjiHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function startKanjiStudy(){kanjiStudyList=kanjiProblems.filter(p=>kanjiSelectedIds.has(p.id));if(!kanjiStudyList.length){showToast('先に練習したい問題をチェックしてください');return;}kanjiStudyList.sort(()=>Math.random()-.5);kanjiStudyIndex=0;kanjiStats={unknown:0,maybe:0,know:0};document.getElementById('kanjiPanel').classList.remove('active');document.getElementById('categoryCenterSection').style.display='none';document.getElementById('heroSection').classList.add('fade-out-up');document.getElementById('kanjiStudy').classList.add('active');showKanjiReadingQuestion();}
+    function showKanjiReadingQuestion(){const p=kanjiStudyList[kanjiStudyIndex];if(!p)return finishKanjiStudy();kanjiPhase='reading';document.getElementById('kanjiPhaseLabel').textContent='STEP 1 / 読み';document.getElementById('kanjiQuestionCount').textContent=`${kanjiStudyIndex+1} / ${kanjiStudyList.length}`;document.getElementById('kanjiProgressFill').style.width=`${(kanjiStudyIndex/kanjiStudyList.length)*100}%`;document.getElementById('kanjiStudyPrompt').textContent=p.example;document.getElementById('kanjiReadingArea').style.display='block';document.getElementById('kanjiWritingArea').style.display='none';document.getElementById('kanjiReadingAnswer').value='';document.getElementById('kanjiReadingAnswer').disabled=false;document.getElementById('kanjiReadingFeedback').style.display='none';setTimeout(()=>document.getElementById('kanjiReadingAnswer').focus(),50);}
+    function kanjiReplaceAnswer(example, answer, replacement){if(!answer)return example;return String(example).split(answer).join(replacement);}
+    function normalizeKanjiReading(s){return String(s||'').trim().replace(/[\s　]/g,'').replace(/[。．、,]/g,'');}
+    document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('kanjiStudy')?.classList.contains('active')&&kanjiPhase==='reading')checkKanjiReading();});
+    function checkKanjiReading(){const p=kanjiStudyList[kanjiStudyIndex],input=normalizeKanjiReading(document.getElementById('kanjiReadingAnswer').value),target=normalizeKanjiReading(p.reading),feedback=document.getElementById('kanjiReadingFeedback');feedback.style.display='block';if(input===target){feedback.innerHTML='正解！読みを覚えたね。<div style="margin-top:10px"><button class="btn-neo btn-primary-blue" onclick="goKanjiWriting()">次へ：書き問題</button></div>';}else{feedback.innerHTML=`もう一度確認しよう。<div style="margin-top:6px">正しい読み：<strong>${escapeKanjiHtml(p.reading)}</strong></div><div style="margin-top:10px"><button class="btn-neo btn-primary-blue" onclick="goKanjiWriting()">書き問題へ進む</button></div>`;}}
+    function goKanjiWriting(){kanjiPhase='writing';const p=kanjiStudyList[kanjiStudyIndex];document.getElementById('kanjiPhaseLabel').textContent='STEP 2 / 書き';document.getElementById('kanjiProgressFill').style.width=`${((kanjiStudyIndex+.5)/kanjiStudyList.length)*100}%`;document.getElementById('kanjiStudyPrompt').textContent=kanjiReplaceAnswer(p.example,p.answer,p.reading.toKatakana());document.getElementById('kanjiReadingArea').style.display='none';document.getElementById('kanjiWritingArea').style.display='block';document.getElementById('kanjiWritingReveal').style.display='none';document.getElementById('kanjiWritingEval').style.display='none';kanjiWritingRevealed=false;clearKanjiCanvas();}
+    String.prototype.toKatakana=function(){return this.replace(/[ぁ-ゖ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)+0x60));};
+    function clearKanjiCanvas(){const c=document.getElementById('kanjiWritingCanvas');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.strokeStyle='#0f172a';x.lineWidth=10;x.lineCap='round';x.lineJoin='round';}
+    function revealKanjiAnswer(){const p=kanjiStudyList[kanjiStudyIndex];kanjiWritingRevealed=true;const el=document.getElementById('kanjiWritingReveal');el.style.display='block';el.innerHTML=`正解：<span style="font-size:1.8rem;color:#1d4ed8">${escapeKanjiHtml(p.answer)}</span><div style="font-size:.9rem;color:#475569;margin-top:5px">読み：${escapeKanjiHtml(p.reading)} ／ 例文：${escapeKanjiHtml(p.example)}</div><small style="display:block;color:#64748b;margin-top:6px">手書き文字の自動判定は行わないので、見比べて自己評価してね。</small>`;document.getElementById('kanjiWritingEval').style.display='flex';}
+    function rateKanjiAnswer(state){kanjiStats[state]++;kanjiStudyIndex++;if(kanjiStudyIndex>=kanjiStudyList.length)finishKanjiStudy();else showKanjiReadingQuestion();}
+    function finishKanjiStudy(){document.getElementById('kanjiStudy').classList.remove('active');document.getElementById('kanjiPanel').classList.add('active');document.getElementById('categoryCenterSection').style.display='';document.getElementById('heroSection').classList.remove('fade-out-up');const total=kanjiStudyList.length;showToast(`漢字練習終了！ できた ${kanjiStats.know}・微妙 ${kanjiStats.maybe}・できなかった ${kanjiStats.unknown}（計${total}問）`);renderKanjiProblemList();}
+    function exitKanjiStudy(){document.getElementById('kanjiStudy').classList.remove('active');document.getElementById('kanjiPanel').classList.add('active');document.getElementById('categoryCenterSection').style.display='';document.getElementById('heroSection').classList.remove('fade-out-up');}
+    function setupKanjiCanvas(){const c=document.getElementById('kanjiWritingCanvas');if(!c||c.dataset.ready)return;c.dataset.ready='1';const ctx=c.getContext('2d');let drawing=false;function point(e){const r=c.getBoundingClientRect();return {x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};}c.addEventListener('pointerdown',e=>{drawing=true;c.setPointerCapture(e.pointerId);const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});c.addEventListener('pointermove',e=>{if(!drawing)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();});['pointerup','pointercancel','pointerleave'].forEach(n=>c.addEventListener(n,()=>drawing=false));}
+
+    function switchSubject(subject) {
+      currentSubject = ['social','science','kanji'].includes(subject) ? subject : 'social';
+      localStorage.setItem('histori_subject', currentSubject);
+      const isKanji=currentSubject==='kanji';
+      document.getElementById('kanjiPanel').classList.toggle('active',isKanji);
+      document.getElementById('categoryCenterSection').style.display=isKanji?'none':'';
+      document.getElementById('heroSection').style.display=isKanji?'none':'';
+      document.getElementById('subjectSocialBtn').classList.toggle('btn-primary-yellow',currentSubject==='social');
+      document.getElementById('subjectScienceBtn').classList.toggle('btn-primary-yellow',currentSubject==='science');
+      document.getElementById('subjectKanjiBtn').classList.toggle('btn-primary-yellow',isKanji);
+      if(isKanji){document.querySelector('.badge-sub').textContent='KANJI WORKSHOP';document.querySelector('.hero-title').innerHTML='漢字 <span class="highlight">ー 読んで、書いて、覚える</span>';renderKanjiProblemList();setupKanjiCanvas();return;}
+      activeWordList = currentSubject === 'science' ? scienceWordList : socialWordList;
+      categoryList = currentSubject === 'science' ? scienceCategoryList : socialCategoryList;
+      selectedCategories = [...categoryList];
+      document.querySelector('.badge-sub').textContent = currentSubject === 'science' ? 'SCIENCE // BATTLE ACADEMY' : 'HISTORY // BATTLE ACADEMY';
+      document.querySelector('.hero-title').innerHTML = currentSubject === 'science' ? 'りか <span class="highlight">ー 満点突破</span>' : 'ひすとり <span class="highlight">ー 満点突破</span>';
+      document.getElementById('btnStartStudy').innerHTML = '<i class="fa-solid fa-play"></i> 学習を開始';
+      document.querySelector('.btn-open-category').innerHTML = '<i class="fa-solid fa-folder-open"></i> 出題カテゴリーを選択・開く';
+      initCategorySpreadGrid();
+    }
+
+    let userData = {
+      name: localStorage.getItem('histori_name') || 'ゲスト',
+      level: parseInt(localStorage.getItem('histori_lvl') || '1', 10),
+      xp: parseInt(localStorage.getItem('histori_xp') || '0', 10),
+      coins: parseInt(localStorage.getItem('histori_coins') || '20', 10),
+      masteredIds: JSON.parse(localStorage.getItem('histori_mstr_ids') || '[]'),
+      icon: localStorage.getItem('histori_icon') || '🎓',
+      questionCountSetting: localStorage.getItem('histori_qcount') || '10',
+      studyMode: localStorage.getItem('histori_studymode') || 'flashcard',
+      currentTheme: localStorage.getItem('histori_theme') || 'ocean',
+      isVipPlus: localStorage.getItem('histori_vip') === 'true'
+    };
+
+    let peer = null, peerConnMap = {}, myPeerId = "", roomCode = "", isHost = false;
+    let roomMembers = [];
+    let activeQuizList = [], currentQuizIndex = 0;
+    let battleMode = "speed";
+    let speedScores = {};
+    let answerStartTime = 0;
+    let sessionStartedAt = 0, sessionTimer = null, sessionMode = 'normal', survivalHp = 5000;
+    let sessionReviewStats = {}, sessionQuestionStats = {};
+    let botBattleActive=false, botLevel='イージー', botAnswerMode='typing', botPlayerHp=5000, botEnemyHp=5000, botStreak=0, botQuestionTimer=null, botQuestionStarted=0, botQuestionRevealed=false;
+    const botProfiles={'堀大輔':{accuracy:.35,min:6,max:9},'イージー':{accuracy:.55,min:4.5,max:8},'ノーマル':{accuracy:.72,min:3,max:6},'ハード':{accuracy:.86,min:2.2,max:4.2},'アルティメット':{accuracy:.985,min:1.7,max:3.2},'ナイトメア':{accuracy:.995,min:1.2,max:2.1},'河野玄斗':{accuracy:1,min:.65,max:1.0}};
+
+    let canvas, ctx, animationFrameId, particles = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('themeCanvas');
+      if (canvas) ctx = canvas.getContext('2d');
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      initCategorySpreadGrid();
+      initUserDataUI();
+      renderKanjiProblemList();
+      setupKanjiCanvas();
+      initPeerJS();
+      initKeyShortcut();
+      changeTheme(userData.currentTheme);
+      const savedLayout = localStorage.getItem('histori_layout') || 'auto';
+      const layoutSelect = document.getElementById('layoutModeSelect');
+      if (layoutSelect) layoutSelect.value = savedLayout;
+      applyLayoutMode(savedLayout);
+
+      document.getElementById('bgFileInput').addEventListener('change', handleBgFileUpload);
+      document.getElementById('typingInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitTypingAnswer();
+      });
+    });
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    // モーダル開閉
+    function openModal(id) {
+      if (id === 'skillModal') openSkillTreeModal();
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+    }
+
+    function closeModal(id) {
+      const target = document.getElementById(id);
+      if (target) target.classList.remove('active');
+    }
+
+    // テーマ設定
+    function changeTheme(t) {
+      userData.currentTheme = t;
+      localStorage.setItem('histori_theme', t);
+      document.documentElement.setAttribute('data-theme', t);
+      const sel = document.getElementById('themeSelect');
+      if (sel) sel.value = t;
+
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      particles = [];
+
+      if (!ctx) return;
+      if (t === 'sunlight') initSunlightParticles();
+      else if (t === 'sakura') initSakuraParticles();
+      else if (t === 'lavender') initLavenderParticles();
+      else if (t === 'ocean') initAmbientParticles('ocean');
+      else if (t === 'sunset') initAmbientParticles('sunset');
+      else if (t === 'mint') initAmbientParticles('mint');
+      else if (t === 'midnight') initAmbientParticles('midnight');
+      else if (t === 'peach') initAmbientParticles('peach');
+      else if (t === 'starlight') initAmbientParticles('starlight');
+      else if (t === 'forest') initAmbientParticles('forest');
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function initSunlightParticles() {
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          r: Math.random() * 3 + 1, alpha: Math.random() * 0.5 + 0.2, speed: Math.random() * 0.5 + 0.2
+        });
+      }
+      animateSunlight();
+    }
+
+    function animateSunlight() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, 'rgba(254, 240, 138, 0.25)');
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'rgba(253, 224, 71, 0.6)';
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.y -= p.speed;
+        if (p.y < 0) p.y = canvas.height;
+      });
+      animationFrameId = requestAnimationFrame(animateSunlight);
+    }
+
+    function initSakuraParticles() {
+      const count = Math.min(90, Math.max(45, Math.round(canvas.width / 15)));
+      for (let i = 0; i < count; i++) particles.push({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        size: Math.random() * 7 + 4, speedY: Math.random() * 1.25 + .45,
+        speedX: Math.random() * 1.1 - .55, rot: Math.random() * Math.PI * 2,
+        spin: (Math.random() - .5) * .045, sway: Math.random() * 1.4 + .3,
+        phase: Math.random() * Math.PI * 2, alpha: Math.random() * .38 + .42,
+        tone: ['#f9a8d4','#fbcfe8','#fda4af','#fff1f2','#f472b6'][Math.floor(Math.random()*5)]
+      });
+      animateSakura();
+    }
+
+    function drawSakuraPetal(p) {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.globalAlpha = p.alpha;
+      ctx.shadowColor = 'rgba(190,24,93,.20)'; ctx.shadowBlur = 5;
+      const r=p.size;
+      ctx.fillStyle=p.tone; ctx.strokeStyle='rgba(190,24,93,.20)'; ctx.lineWidth=.7;
+      ctx.beginPath();
+      for(let i=0;i<5;i++){
+        const a=-Math.PI/2+i*Math.PI*2/5;
+        const x=Math.cos(a)*r, y=Math.sin(a)*r*.82;
+        const c1x=Math.cos(a-.22)*r*.55, c1y=Math.sin(a-.22)*r*.55;
+        const c2x=Math.cos(a+.22)*r*.55, c2y=Math.sin(a+.22)*r*.55;
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        ctx.quadraticCurveTo(c1x,c1y,Math.cos(a+Math.PI/5)*r*.56,Math.sin(a+Math.PI/5)*r*.46);
+        ctx.quadraticCurveTo(c2x,c2y,Math.cos(a+Math.PI*2/5)*r,Math.sin(a+Math.PI*2/5)*r*.82);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur=0; ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.lineWidth=.8;
+      ctx.beginPath();ctx.moveTo(-r*.35,0);ctx.quadraticCurveTo(0,-r*.18,r*.42,-r*.45);ctx.stroke();
+      ctx.restore();
+    }
+
+    function animateSakura() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const wash=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+      wash.addColorStop(0,'rgba(255,228,239,.10)');wash.addColorStop(1,'rgba(255,255,255,.04)');
+      ctx.fillStyle=wash;ctx.fillRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p=>{
+        drawSakuraPetal(p); p.phase += .018; p.y += p.speedY; p.x += p.speedX + Math.sin(p.phase)*p.sway*.15; p.rot += p.spin;
+        if(p.y>canvas.height+20){p.y=-20;p.x=Math.random()*canvas.width;}
+        if(p.x < -20) p.x=canvas.width+15; if(p.x>canvas.width+20) p.x=-15;
+      });
+      animationFrameId=requestAnimationFrame(animateSakura);
+    }
+
+    function initAmbientParticles(kind) {
+      const count = Math.min(55, Math.round(canvas.width / 22));
+      const palette = {ocean:['rgba(14,165,233,.36)','rgba(103,232,249,.45)'],sunset:['rgba(251,146,60,.35)','rgba(251,113,133,.4)'],mint:['rgba(52,211,153,.35)','rgba(167,243,208,.5)'],midnight:['rgba(167,139,250,.4)','rgba(196,181,253,.5)'],peach:['rgba(251,146,60,.32)','rgba(251,207,232,.45)'],starlight:['rgba(99,102,241,.35)','rgba(253,224,71,.6)'],forest:['rgba(101,163,13,.3)','rgba(190,242,100,.45)']}[kind];
+      for(let i=0;i<count;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2.8+1,vx:(Math.random()-.5)*.35,vy:Math.random()*.5+.15,a:Math.random()*.45+.2});
+      function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach((p,i)=>{ctx.beginPath();ctx.fillStyle=palette[i%palette.length];ctx.globalAlpha=p.a;ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.y>canvas.height+5){p.y=-5;p.x=Math.random()*canvas.width;}if(p.x<0||p.x>canvas.width)p.vx*=-1;});ctx.globalAlpha=1;
+        animationFrameId=requestAnimationFrame(draw);
+      } draw();
+    }
+
+    function initLavenderParticles() {
+      for (let i = 0; i < 4; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          vx: Math.random() * 1.2 - 0.6, vy: Math.random() * 1.2 - 0.6
+        });
+      }
+      animateLavender();
+    }
+
+    function animateLavender() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '24px sans-serif';
+      particles.forEach(p => {
+        ctx.fillText('🦋', p.x, p.y);
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+      });
+      animationFrameId = requestAnimationFrame(animateLavender);
+    }
+
+    // モード・出題数設定
+    function changeStudyMode(m) {
+      userData.studyMode = m;
+      localStorage.setItem('histori_studymode', m);
+      showToast(`回答モードを「${m === 'typing' ? 'タイピングモード' : '一問一答モード'}」に変更しました`);
+    }
+
+    function changeQuestionCount(cnt) {
+      userData.questionCountSetting = cnt;
+      localStorage.setItem('histori_qcount', cnt);
+      showToast(`出題数を ${cnt === 'all' ? '全問題' : cnt + '問'} に設定しました`);
+    }
+
+    function initUserDataUI() {
+      document.getElementById('userNameDisplay').innerText = userData.name;
+      document.getElementById('p1Name').innerText = userData.name;
+      document.getElementById('userLevel').innerText = userData.level;
+      document.getElementById('userXp').innerText = userData.xp;
+      document.getElementById('userCoins').innerText = userData.coins;
+      document.getElementById('userMastered').innerText = userData.masteredIds.length;
+      document.getElementById('userAvatarBtn').innerText = userData.icon;
+      document.getElementById('p1Avatar').innerText = userData.icon;
+      document.getElementById('treeCenterAvatar').innerText = userData.icon;
+      document.getElementById('questionCountSelect').value = userData.questionCountSetting;
+      document.getElementById('studyModeSelect').value = userData.studyMode;
+
+      localStorage.setItem('histori_name', userData.name);
+      localStorage.setItem('histori_lvl', userData.level);
+      localStorage.setItem('histori_xp', userData.xp);
+      localStorage.setItem('histori_coins', userData.coins);
+      localStorage.setItem('histori_mstr_ids', JSON.stringify(userData.masteredIds));
+    }
+
+    function handleLoginSubmit() {
+      const id = document.getElementById('loginIdInput').value.trim();
+      if (id) {
+        userData.name = id;
+        document.getElementById('loginBtnText').innerText = id;
+        initUserDataUI();
+        closeModal('loginModal');
+        showToast(`ようこそ、${id} さん！`);
+      }
+    }
+
+    // 保存された教科設定を反映
+    document.addEventListener('DOMContentLoaded', () => switchSubject(currentSubject));
+
+    function quickSocialLogin(p) {
+      userData.name = `${p}ユーザー`;
+      document.getElementById('loginBtnText').innerText = userData.name;
+      initUserDataUI();
+      closeModal('loginModal');
+      showToast(`${p}でログインしました`);
+    }
+
+    function initCategorySpreadGrid() {
+      const grid = document.getElementById('categorySpreadGrid');
+      grid.innerHTML = "";
+
+      categoryList.forEach(cat => {
+        const count = activeWordList.filter(q => q.c === cat).length;
+        const isSelected = selectedCategories.includes(cat);
+        const card = document.createElement('div');
+        card.className = `category-check-card ${isSelected ? 'selected' : ''}`;
+        const reviewKey = `histori_review_${currentSubject}_${cat}`;
+        const review = JSON.parse(localStorage.getItem(reviewKey) || '["unknown","maybe","know"]');
+        card.innerHTML = `
+          <div style="flex:1;min-width:0"><div style="font-weight:800;">${cat}</div><div style="font-size:0.75rem; color:#64748b;">${count}問</div>
+          <div class="category-review-picks" onclick="event.stopPropagation()">
+            <label><input type="checkbox" data-review="unknown" ${review.includes('unknown')?'checked':''}> わからない</label>
+            <label><input type="checkbox" data-review="maybe" ${review.includes('maybe')?'checked':''}> 微妙</label>
+            <label><input type="checkbox" data-review="know" ${review.includes('know')?'checked':''}> わかる</label>
+          </div>
+          <select class="category-mode-select" aria-label="${cat}のモード" onclick="event.stopPropagation()"><option value="normal">通常モード</option><option value="speed">スピードラン</option><option value="dontmiss">ドントミス</option><option value="survival">サバイバル</option></select></div>
+          <div class="custom-checkbox"><i class="fa-solid fa-check"></i></div>
+        `;
+        card.querySelectorAll('[data-review]').forEach(cb=>cb.addEventListener('change',()=>{
+          const picked=[...card.querySelectorAll('[data-review]:checked')].map(x=>x.dataset.review);
+          localStorage.setItem(reviewKey,JSON.stringify(picked));
+        }));
+        const modeSel=card.querySelector('.category-mode-select');
+        modeSel.value=localStorage.getItem(`histori_category_mode_${currentSubject}_${cat}`)||'normal';
+        modeSel.addEventListener('change',()=>localStorage.setItem(`histori_category_mode_${currentSubject}_${cat}`,modeSel.value));
+        card.addEventListener('click', () => {
+          if (selectedCategories.includes(cat)) {
+            selectedCategories = selectedCategories.filter(c => c !== cat);
+            card.classList.remove('selected');
+          } else {
+            selectedCategories.push(cat);
+            card.classList.add('selected');
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function toggleCategorySpread() {
+      document.getElementById('categorySpreadContainer').classList.toggle('active');
+    }
+
+    function selectAllCategories(select) {
+      selectedCategories = select ? [...categoryList] : [];
+      initCategorySpreadGrid();
+    }
+
+    // PeerJS 通信
+    function initPeerJS() {
+      // PeerJSのシグナリングサーバーへ接続。別々のWi-Fi間でもWebRTC接続を試みる。
+      try {
+        peer = new Peer();
+        peer.on('open', (id) => { myPeerId = id; });
+        peer.on('connection', (conn) => { handleIncomingConn(conn); });
+        peer.on('error', (err) => {
+          console.warn('PeerJS:', err);
+          showToast(peerErrorMessage(err));
+        });
+        peer.on('disconnected', () => {
+          if (peer && !peer.destroyed) peer.reconnect();
+        });
+      } catch (e) {
+        console.warn("PeerJS Warning:", e);
+      }
+    }
+
+    function peerErrorMessage(err) {
+      if (err && err.type === 'peer-unavailable') return '部屋が見つかりません。コードを確認し、ホストが待機中か確認してください。';
+      if (err && err.type === 'unavailable-id') return '部屋コードが使用中です。もう一度部屋を作成してください。';
+      if (err && err.type === 'network') return '接続サーバーに接続できません。インターネット接続を確認してください。';
+      return 'オンライン接続に失敗しました。ページを再読み込みして再試行してください。';
+    }
+
+    function ensurePeerReady(callback) {
+      if (peer && peer.open && !peer.destroyed) { callback(); return; }
+      if (peer && !peer.destroyed) peer.destroy();
+      peer = new Peer();
+      peer.on('open', (id) => { myPeerId = id; callback(); });
+      peer.on('connection', (conn) => handleIncomingConn(conn));
+      peer.on('error', (err) => { console.warn('PeerJS:', err); showToast(peerErrorMessage(err)); });
+    }
+
+    function createRoomHost() {
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      const hostPeerId = `histori-room-${code}`;
+      isHost = true;
+      roomCode = code;
+      document.getElementById('createdRoomCode').innerText = '接続中…';
+      document.getElementById('btnHostStartSelect').style.display = 'none';
+      roomMembers = [];
+      peerConnMap = {};
+      if (peer && !peer.destroyed) peer.destroy();
+
+      // 4桁コードをPeer IDに使い、他の端末から同じコードで接続できるようにする。
+      peer = new Peer(hostPeerId);
+      peer.on('open', (id) => {
+        myPeerId = id;
+        document.getElementById('createdRoomCode').innerText = roomCode;
+        roomMembers = [{ id: myPeerId, name: userData.name, avatar: userData.icon }];
+        updateRoomMemberListUI();
+        document.getElementById('btnHostStartSelect').style.display = 'inline-flex';
+        showToast(`部屋コード ${roomCode} を作成しました。相手に4桁コードを伝えてください`);
+      });
+      peer.on('connection', (conn) => handleIncomingConn(conn));
+      peer.on('error', (err) => {
+        console.warn('PeerJS host:', err);
+        document.getElementById('createdRoomCode').innerText = '失敗';
+        showToast(peerErrorMessage(err));
+      });
+      peer.on('disconnected', () => {
+        if (peer && !peer.destroyed) peer.reconnect();
+      });
+    }
+
+    function joinRoomGuest() {
+      const code = document.getElementById('joinRoomCodeInput').value.trim();
+      if (!/^\d{4}$/.test(code)) return showToast('4桁の数字を入力してください');
+
+      isHost = false;
+      roomCode = code;
+      peerConnMap = {};
+      const hostPeerId = `histori-room-${code}`;
+      showToast('部屋に接続しています…');
+
+      const connect = () => {
+        if (!peer || peer.destroyed || !peer.open) {
+          return showToast('通信の準備ができていません。数秒後にもう一度お試しください');
+        }
+        const conn = peer.connect(hostPeerId, { reliable: true });
+        let settled = false;
+        conn.on('open', () => {
+          settled = true;
+          peerConnMap[hostPeerId] = conn;
+          conn.send({ type: 'JOIN', name: userData.name, avatar: userData.icon });
+          showToast(`部屋 ${code} に接続しました`);
+        });
+        conn.on('data', (data) => handlePeerData(data));
+        conn.on('error', (err) => {
+          console.warn('PeerJS guest connection:', err);
+          if (!settled) showToast(peerErrorMessage(err));
+        });
+        conn.on('close', () => {
+          delete peerConnMap[hostPeerId];
+          showToast('ホストとの接続が切れました');
+        });
+      };
+
+      // 初期PeerがまだIDを取得していない場合も、準備完了後に接続する。
+      ensurePeerReady(connect);
+    }
+
+    function handleIncomingConn(conn) {
+      conn.on('open', () => {
+        peerConnMap[conn.peer] = conn;
+      });
+      conn.on('data', (data) => handlePeerData(data, conn));
+      conn.on('close', () => {
+        delete peerConnMap[conn.peer];
+        if (isHost) {
+          roomMembers = roomMembers.filter(m => m.id !== conn.peer);
+          updateRoomMemberListUI();
+          broadcastData({ type: 'ROOM_MEMBERS', members: roomMembers });
+        }
+      });
+      conn.on('error', (err) => console.warn('PeerJS connection:', err));
+    }
+
+    function handlePeerData(data, conn) {
+      if (!data || typeof data.type !== 'string') return;
+      if (data.type === 'JOIN' && isHost) {
+        if (!roomMembers.some(m => m.id === conn.peer)) {
+          roomMembers.push({ id: conn.peer, name: String(data.name || 'ゲスト').slice(0, 24), avatar: String(data.avatar || '🎓') });
+        }
+        updateRoomMemberListUI();
+        broadcastData({ type: 'ROOM_MEMBERS', members: roomMembers });
+      } else if (data.type === 'ROOM_MEMBERS') {
+        roomMembers = Array.isArray(data.members) ? data.members : roomMembers;
+        updateRoomMemberListUI();
+      } else if (data.type === 'START_BATTLE') {
+        if (!Array.isArray(data.questions) || !data.questions.length) return;
+        battleMode = data.mode || 'speed';
+        activeQuizList = data.questions;
+        currentQuizIndex = 0;
+        speedScores = {};
+        closeModal('onlineModal');
+        closeModal('gameModeModal');
+        startBattleQuizUI();
+      } else if (data.type === 'TYPING_ANSWER') {
+        speedScores[data.name] = { time: Number(data.time), correct: !!data.correct };
+        if (isHost && Object.keys(speedScores).length >= roomMembers.length) {
+          showRoundSpeedRanking();
+        }
+      }
+    }
+
+    function broadcastData(data) {
+      Object.values(peerConnMap).forEach(c => {
+        if (c && c.open) {
+          try { c.send(data); } catch (e) { console.warn('送信失敗:', e); }
+        }
+      });
+    }
+
+    function updateRoomMemberListUI() {
+      const el = document.getElementById('roomMemberList');
+      if (el) el.innerText = roomMembers.length
+        ? roomMembers.map(m => `${m.avatar || '🎓'} ${m.name || 'プレイヤー'}`).join(' , ')
+        : '(接続待ち...)';
+    }
+
+    function selectMode(m) {
+      battleMode = m;
+      document.querySelectorAll('.mode-select-card').forEach(c => c.style.background = '#fff');
+      const target = document.getElementById(m === 'speed' ? 'modeSpeed' : 'modeSurvival');
+      if (target) target.style.background = '#fef08a';
+    }
+
+    function confirmAndStartBattle() {
+      closeModal('gameModeModal');
+      closeModal('onlineModal');
+
+      let questions = activeWordList.filter(q => selectedCategories.includes(q.c));
+      sessionMode = 'normal';
+      const categoryModes = selectedCategories.map(cat=>localStorage.getItem(`histori_category_mode_${currentSubject}_${cat}`)||'normal');
+      if (categoryModes.includes('dontmiss')) sessionMode='dontmiss'; else if(categoryModes.includes('survival')) sessionMode='survival'; else if(categoryModes.includes('speed')) sessionMode='speed';
+      // If only one review level is checked for a category, use it as a focused review filter.
+      questions = questions.filter(q=>{
+        const key=`histori_review_${currentSubject}_${q.c}`;
+        const picks=JSON.parse(localStorage.getItem(key)||'["unknown","maybe","know"]');
+        if(picks.length===1){
+          const state=JSON.parse(localStorage.getItem(`histori_card_state_${currentSubject}`)||'{}')[q.id];
+          return picks[0]==='unknown' ? state==='unknown' : picks[0]==='maybe' ? state==='maybe' : state==='know';
+        }
+        return true;
+      });
+      if (questions.length === 0) questions = [...activeWordList];
+      questions.sort(() => Math.random() - 0.5);
+
+      const limit = userData.questionCountSetting === 'all' ? questions.length : parseInt(userData.questionCountSetting, 10);
+      activeQuizList = questions.slice(0, limit);
+      currentQuizIndex = 0;
+
+      if (!isHost) {
+        showToast('対戦の開始はホストが行います');
+        return;
+      }
+      speedScores = {};
+      broadcastData({ type: 'START_BATTLE', mode: battleMode, questions: activeQuizList });
+      startBattleQuizUI();
+    }
+
+    // 学習・クイズ開始
+    function startSoloStudy() {
+      let questions = activeWordList.filter(q => selectedCategories.includes(q.c));
+      sessionMode = 'normal';
+      const categoryModes = selectedCategories.map(cat=>localStorage.getItem(`histori_category_mode_${currentSubject}_${cat}`)||'normal');
+      if (categoryModes.includes('dontmiss')) sessionMode='dontmiss'; else if(categoryModes.includes('survival')) sessionMode='survival'; else if(categoryModes.includes('speed')) sessionMode='speed';
+      // If only one review level is checked for a category, use it as a focused review filter.
+      questions = questions.filter(q=>{
+        const key=`histori_review_${currentSubject}_${q.c}`;
+        const picks=JSON.parse(localStorage.getItem(key)||'["unknown","maybe","know"]');
+        if(picks.length===1){
+          const state=JSON.parse(localStorage.getItem(`histori_card_state_${currentSubject}`)||'{}')[q.id];
+          return picks[0]==='unknown' ? state==='unknown' : picks[0]==='maybe' ? state==='maybe' : state==='know';
+        }
+        return true;
+      });
+      if (questions.length === 0) return showToast('出題対象がありません。カテゴリーと復習レベルを確認してください');
+      questions.sort(() => Math.random() - 0.5);
+
+      const limit = userData.questionCountSetting === 'all' ? questions.length : parseInt(userData.questionCountSetting, 10);
+      activeQuizList = questions.slice(0, limit);
+
+      currentQuizIndex = 0;
+      sessionStartedAt=Date.now(); survivalHp=5000; sessionReviewStats={}; sessionQuestionStats={};
+      const hud=document.getElementById('quizHud'); hud.classList.add('active'); document.getElementById('quizModeLabel').textContent=({normal:'通常',speed:'スピードラン',dontmiss:'ドントミス',survival:'サバイバル'})[sessionMode];
+      document.getElementById('hpWrap').style.display=sessionMode==='survival'?'flex':'none'; updateSurvivalHud(); if(sessionTimer)clearInterval(sessionTimer); sessionTimer=setInterval(()=>{document.getElementById('quizElapsed').textContent=((Date.now()-sessionStartedAt)/1000).toFixed(1)+' 秒';},100);
+      document.getElementById('heroSection').classList.add('fade-out-up');
+      document.getElementById('categoryCenterSection').style.display = 'none';
+
+      document.getElementById('battleStatusBar').classList.remove('active');
+      document.getElementById('quizContainer').classList.add('active');
+
+      renderCurrentQuestion();
+    }
+
+    function startBattleQuizUI() {
+      document.getElementById('heroSection').classList.add('fade-out-up');
+      document.getElementById('categoryCenterSection').style.display = 'none';
+
+      document.getElementById('battleStatusBar').classList.add('active');
+      document.getElementById('quizContainer').classList.add('active');
+
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      const q = activeQuizList[currentQuizIndex];
+      document.getElementById('currentCategoryBadge').innerText = q.c;
+      document.getElementById('questionNumText').innerText = `Q.${currentQuizIndex + 1} / ${activeQuizList.length}`;
+      document.getElementById('questionDisplay').innerText = q.q;
+      
+      const isOnlineBattle = document.getElementById('battleStatusBar').classList.contains('active');
+      const isTypingMode = isOnlineBattle || (userData.studyMode === 'typing');
+
+      document.getElementById('nextQuestionArea').style.display = 'none';
+      document.getElementById('evalControlButtons').style.display = 'none';
+
+      if (isTypingMode) {
+        // タイピングモード
+        document.getElementById('typingArea').style.display = 'flex';
+        document.getElementById('studyControlButtons').style.display = 'none';
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#94a3b8; font-size:0.95rem;">タイピングで回答を入力してください</span>`;
+        
+        const inputEl = document.getElementById('typingInput');
+        inputEl.value = "";
+        inputEl.disabled = false;
+        document.getElementById('btnSubmitTyping').style.display = 'inline-flex';
+        inputEl.focus();
+      } else {
+        // 一問一答モード
+        document.getElementById('typingArea').style.display = 'none';
+        document.getElementById('studyControlButtons').style.display = 'flex';
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#94a3b8; font-size:0.95rem;">【答えを見る】ボタンを押すと答えが表示されます</span>`;
+      }
+
+      if (isOnlineBattle) {
+        runCountdown(() => { answerStartTime = Date.now(); });
+      } else {
+        answerStartTime = Date.now();
+      }
+    }
+
+    function runCountdown(cb) {
+      const overlay = document.getElementById('countdownOverlay');
+      const numEl = document.getElementById('countdownNumber');
+      overlay.classList.add('active');
+
+      let count = 3; numEl.innerText = count;
+      const timer = setInterval(() => {
+        count--;
+        if (count > 0) numEl.innerText = count;
+        else if (count === 0) numEl.innerText = "START!";
+        else {
+          clearInterval(timer);
+          overlay.classList.remove('active');
+          cb();
+        }
+      }, 800);
+    }
+
+    // 一問一答モード：「答えを見る」ボタン
+    function toggleAnswer() {
+      if(botBattleActive){const q=activeQuizList[currentQuizIndex];document.getElementById('answerDisplay').innerHTML=`<b>${q.ruby||q.a}</b>`;document.getElementById('studyControlButtons').style.display='none';document.getElementById('evalControlButtons').style.display='flex';return;}
+      const q = activeQuizList[currentQuizIndex];
+      document.getElementById('answerDisplay').innerHTML = `<span>${q.ruby || q.a}</span>`;
+      document.getElementById('studyControlButtons').style.display = 'none';
+      document.getElementById('evalControlButtons').style.display = 'flex'; // 右から順に「わかった」「微妙」「わからない」
+    }
+
+    // タイピングモード：「送信」ボタン
+    function submitTypingAnswer() {
+      if(botBattleActive){const q=activeQuizList[currentQuizIndex];const val=document.getElementById('typingInput').value.trim();botSubmitPlayer(val===q.a);return;}
+      const inputEl = document.getElementById('typingInput');
+      const input = inputEl.value.trim();
+      const q = activeQuizList[currentQuizIndex];
+      const isCorrect = (input === q.a);
+      recordQuestionResult(q, isCorrect ? 'know' : 'unknown');
+      const timeTaken = ((Date.now() - answerStartTime) / 1000).toFixed(2);
+
+      inputEl.disabled = true;
+      document.getElementById('btnSubmitTyping').style.display = 'none';
+
+      if (!isCorrect && sessionMode==='survival') applySurvivalDamage();
+      if (!isCorrect && sessionMode==='dontmiss') return finishSpecialMode('ドントミス失敗！', `不正解：${q.ruby || q.a}`);
+      if (isCorrect) {
+        showToast(`正解！ (${timeTaken}秒)`);
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#10b981;">⭕ 正解！ ${q.ruby}</span>`;
+        if (!userData.masteredIds.includes(q.id)) {
+          userData.masteredIds.push(q.id);
+        }
+        userData.xp += 10; userData.coins += 2;
+        if (userData.xp >= userData.level * 50) {
+          userData.level += 1;
+          showToast(`🎉 Lv.${userData.level} にレベルアップ！`);
+        }
+        initUserDataUI();
+      } else {
+        showToast(`不正解... 答え: ${q.a}`);
+        document.getElementById('answerDisplay').innerHTML = `<span style="color:#ef4444;">❌ 不正解！ 答え: ${q.ruby}</span>`;
+      }
+
+      if (document.getElementById('battleStatusBar').classList.contains('active')) {
+        speedScores[userData.name] = { time: timeTaken, correct: isCorrect };
+        broadcastData({ type: 'TYPING_ANSWER', name: userData.name, time: timeTaken, correct: isCorrect });
+        
+        if (isHost && Object.keys(speedScores).length >= roomMembers.length) {
+          showRoundSpeedRanking();
+        }
+      } else {
+        // ソロタイピング時：「次の問題へ ➔」ボタンを表示
+        document.getElementById('nextQuestionArea').style.display = 'block';
+      }
+    }
+
+    // 「次の問題へ ➔」進行
+    function goToNextQuestion() {
+      currentQuizIndex++;
+      if (currentQuizIndex < activeQuizList.length) {
+        renderCurrentQuestion();
+      } else { finishStudySession(); }
+    }
+
+    function showRoundSpeedRanking() {
+      const content = document.getElementById('speedRankContent');
+      const sorted = Object.entries(speedScores).sort((a,b) => a[1].time - b[1].time);
+
+      content.innerHTML = sorted.map(([name, res], idx) => `
+        <div style="margin-bottom:6px;">
+          ${idx === 0 ? '🥇' : '🥈'} <strong>${name}</strong>: ${res.correct ? res.time + '秒' : '不正解'}
+        </div>
+      `).join('');
+
+      openModal('speedRankModal');
+      speedScores = {};
+
+      setTimeout(() => {
+        closeModal('speedRankModal');
+        currentQuizIndex++;
+        if (currentQuizIndex < activeQuizList.length) renderCurrentQuestion();
+        else showFinalRanking();
+      }, 2000);
+    }
+
+    function showFinalRanking() {
+      document.getElementById('rankModalTitle').innerText = "🏆 最終総合結果";
+      document.getElementById('rankSubNotice').innerText = "対戦お疲れ様でした！";
+      document.getElementById('btnFinishRank').style.display = 'block';
+      openModal('speedRankModal');
+    }
+
+    // 一問一答評価ボタン処理
+    function handleAnswerEval(score) {
+      if(botBattleActive){botSubmitPlayer(score===2);return;}
+      const q = activeQuizList[currentQuizIndex];
+      recordQuestionResult(q, score===2?'know':score===1?'maybe':'unknown');
+      if(sessionMode==='dontmiss' && score<2) return finishSpecialMode('ドントミス終了', '「微妙」または「わからない」を選んだため終了しました。');
+      if(sessionMode==='survival' && score<2) applySurvivalDamage();
+      if (score === 2) { // わかった（覚えた！）
+        if (!userData.masteredIds.includes(q.id)) {
+          userData.masteredIds.push(q.id);
+        }
+        userData.xp += 10; userData.coins += 2;
+        if (userData.xp >= userData.level * 50) {
+          userData.level += 1;
+          showToast(`🎉 Lv.${userData.level} にレベルアップ！`);
+        }
+      }
+      initUserDataUI();
+
+      currentQuizIndex++;
+      if (currentQuizIndex < activeQuizList.length) renderCurrentQuestion();
+      else { finishStudySession(); }
+    }
+
+
+    function selectBotLevel(level){botLevel=level;document.querySelectorAll('.bot-level-option').forEach(b=>b.classList.toggle('selected',b.dataset.level===level));}
+    function selectBotAnswerMode(mode){botAnswerMode=mode;document.getElementById('botTypeTyping').classList.toggle('btn-primary-blue',mode==='typing');document.getElementById('botTypeFlash').classList.toggle('btn-primary-blue',mode==='flashcard');}
+    function startBotBattle(){
+      closeModal('botBattleModal');
+      const source=currentSubject==='science'?scienceWordList:socialWordList;
+      let qs=source.filter(q=>selectedCategories.includes(q.c));
+      if(!qs.length)qs=source.slice();
+      qs=qs.sort(()=>Math.random()-.5); const limit=userData.questionCountSetting==='all'?qs.length:Math.min(qs.length,Math.max(10,parseInt(userData.questionCountSetting,10)||10));
+      activeQuizList=qs.slice(0,limit); if(!activeQuizList.length){showToast('問題がありません');return;}
+      currentQuizIndex=0;botBattleActive=true;botPlayerHp=5000;botEnemyHp=5000;botStreak=0;sessionStartedAt=Date.now();sessionReviewStats={};sessionQuestionStats={};
+      document.body.classList.add('bot-battle-active');document.getElementById('heroSection').classList.add('fade-out-up');document.getElementById('categoryCenterSection').style.display='none';document.getElementById('quizHud').classList.add('active');document.getElementById('quizModeLabel').textContent='BOT対戦';document.getElementById('quizElapsed').textContent='ラウンド開始';document.getElementById('hpWrap').style.display='none';document.getElementById('botArenaHud').classList.add('active');document.getElementById('botEnemyName').textContent=botLevel;document.getElementById('quizContainer').classList.add('active');updateBotHp();renderBotQuestion();
+    }
+    function updateBotHp(){[['botEnemyHpFill','botEnemyHpLabel',botEnemyHp],['botPlayerHpFill','botPlayerHpLabel',botPlayerHp]].forEach(([fi,la,hp])=>{document.getElementById(fi).style.width=Math.max(0,hp/5000*100)+'%';document.getElementById(la).textContent=Math.max(0,hp)+' / 5000';});document.getElementById('botStreakLabel').textContent=botStreak?`${(1+botStreak*.25).toFixed(2)}×`:'';}
+    function renderBotQuestion(){
+      if(!botBattleActive)return; if(botQuestionTimer)clearInterval(botQuestionTimer);const q=activeQuizList[currentQuizIndex];if(!q){endBotBattle('引き分け','問題をすべて解き終えました');return;}
+      document.getElementById('currentCategoryBadge').textContent=q.c;document.getElementById('questionNumText').textContent=`Q.${currentQuizIndex+1}`;const el=document.getElementById('questionDisplay');el.textContent='';el.classList.add('bot-question-text');let chars=Array.from(q.q),i=0;const reveal=setInterval(()=>{if(!botBattleActive){clearInterval(reveal);return;}el.textContent+=chars[i++]||'';if(i>=chars.length)clearInterval(reveal);},Math.max(8,1000/Math.max(1,chars.length)));
+      document.getElementById('answerDisplay').innerHTML='<span>10秒以内に回答！</span>';document.getElementById('nextQuestionArea').style.display='none';document.getElementById('evalControlButtons').style.display='none';document.getElementById('studyControlButtons').style.display=botAnswerMode==='flashcard'?'flex':'none';document.getElementById('typingArea').style.display=botAnswerMode==='typing'?'flex':'none';document.getElementById('btnShowAnswer').textContent='答えを見る';const input=document.getElementById('typingInput');input.value='';input.disabled=false;document.getElementById('btnSubmitTyping').style.display=botAnswerMode==='typing'?'inline-flex':'none';botQuestionRevealed=false;botQuestionStarted=Date.now();
+      const prof=botProfiles[botLevel];let delay=prof.min+Math.random()*(prof.max-prof.min);if(Math.random()>prof.accuracy)delay=10.2;
+      botQuestionTimer=setInterval(()=>{const elapsed=(Date.now()-botQuestionStarted)/1000;const timerEl=document.getElementById('botQuestionTimer');timerEl.textContent=Math.max(0,10-elapsed).toFixed(1);timerEl.classList.toggle('urgent',elapsed>=7);if(elapsed>=delay){clearInterval(botQuestionTimer);if(elapsed>=10){botDamagePlayer(1500);return;}botResolveEnemy();}else if(elapsed>=10){clearInterval(botQuestionTimer);botDamagePlayer(1500);}},50);
+      if(botAnswerMode==='typing')input.focus();
+    }
+    function botImpact(target){const body=document.body;body.classList.remove('hit-player','hit-enemy');void body.offsetWidth;body.classList.add(target==='player'?'hit-player':'hit-enemy');const flash=document.getElementById('botImpactFlash');if(flash){flash.classList.remove('active');void flash.offsetWidth;flash.classList.add('active');}setTimeout(()=>body.classList.remove('hit-player','hit-enemy'),380);}
+    function botResolveEnemy(){if(!botBattleActive||botQuestionRevealed)return;botQuestionRevealed=true;const prof=botProfiles[botLevel];const delay=prof.min+Math.random()*(prof.max-prof.min);const damage=Math.round(Math.max(0,10-delay)*150);botPlayerHp=Math.max(0,botPlayerHp-damage);botImpact('player');updateBotHp();showToast(`${botLevel}の回答！ 自分に ${damage} ダメージ`);if(botPlayerHp<=0)endBotBattle('敗北',`${botLevel}に負けました`);else setTimeout(nextBotQuestion,700);}
+    function botSubmitPlayer(correct){if(!botBattleActive||botQuestionRevealed)return;botQuestionRevealed=true;if(botQuestionTimer)clearInterval(botQuestionTimer);const q=activeQuizList[currentQuizIndex];const elapsed=Math.min(10,(Date.now()-botQuestionStarted)/1000);const playerDamage=Math.round(Math.max(0,10-elapsed)*150*(1+botStreak*.25));const prof=botProfiles[botLevel];let enemyTime=prof.min+Math.random()*(prof.max-prof.min);const enemyCorrect=Math.random()<=prof.accuracy; if(!enemyCorrect)enemyTime=10.1;const enemyDamage=Math.round(Math.max(0,10-enemyTime)*150);
+      if(correct)botStreak=elapsed<=2?botStreak+1:0;else botStreak=0;
+      const playerAttack=correct?playerDamage:0, enemyAttack=enemyCorrect?enemyDamage:0;
+      if(playerAttack>enemyAttack){botEnemyHp=Math.max(0,botEnemyHp-(playerAttack-enemyAttack));botImpact('enemy');}
+      else if(enemyAttack>playerAttack){botPlayerHp=Math.max(0,botPlayerHp-(enemyAttack-playerAttack));botImpact('player');}
+      recordQuestionResult(q,correct?'know':'unknown');updateBotHp();document.getElementById('typingInput').disabled=true;document.getElementById('btnSubmitTyping').style.display='none';document.getElementById('studyControlButtons').style.display='none';document.getElementById('answerDisplay').innerHTML=`<b>${correct?'正解！':'不正解'}</b>　答え：${q.ruby||q.a}<br>自分の攻撃 ${correct?playerDamage:0} / Botの攻撃 ${enemyCorrect?enemyDamage:0}`;
+      if(botEnemyHp<=0){endBotBattle('勝利！',`${botLevel}を倒した！`);return;}if(botPlayerHp<=0){endBotBattle('敗北',`${botLevel}に負けました`);return;}setTimeout(nextBotQuestion,1100);
+    }
+    function nextBotQuestion(){if(!botBattleActive)return;currentQuizIndex=(currentQuizIndex+1)%activeQuizList.length;renderBotQuestion();}
+    function endBotBattle(title,message){botBattleActive=false;if(botQuestionTimer)clearInterval(botQuestionTimer);document.body.classList.remove('bot-battle-active');document.getElementById('botArenaHud').classList.remove('active');document.getElementById('quizContainer').classList.remove('active');document.getElementById('quizHud').classList.remove('active');document.getElementById('heroSection').classList.remove('fade-out-up');document.getElementById('categoryCenterSection').style.display='block';document.getElementById('rankModalTitle').textContent=title;document.getElementById('speedRankContent').innerHTML=`<p>${message}</p><p>残りHP：自分 ${botPlayerHp} / ${botLevel} ${botEnemyHp}</p>`;document.getElementById('categoryResultContent').innerHTML='';document.getElementById('rankSubNotice').textContent='BOT ARENA';document.getElementById('btnFinishRank').style.display='block';openModal('speedRankModal');}
+    const originalSubmitTypingAnswer=submitTypingAnswer;
+
+    // スキルツリー描画
+    function openSkillTreeModal() {
+      openModal('skillModal');
+      const wrapper = document.getElementById('skillTreeCanvasWrapper');
+      const svg = document.getElementById('skillTreeSvg');
+      svg.innerHTML = "";
+      document.querySelectorAll('.word-node').forEach(el => el.remove());
+
+      const centerX = wrapper.clientWidth / 2, centerY = wrapper.clientHeight / 2, radius = 135;
+      const displayWords = activeWordList.slice(0, 14);
+
+      displayWords.forEach((item, idx) => {
+        const angle = (idx / displayWords.length) * 2 * Math.PI;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", centerX); line.setAttribute("y1", centerY);
+        line.setAttribute("x2", x); line.setAttribute("y2", y);
+        line.setAttribute("stroke", "#334155"); line.setAttribute("stroke-width", "2");
+        svg.appendChild(line);
+
+        const isMastered = userData.masteredIds.includes(item.id);
+        const node = document.createElement('div');
+        node.className = `word-node ${isMastered ? 'unlocked' : ''}`;
+        node.style.left = `${x}px`; node.style.top = `${y}px`;
+        node.innerHTML = `<span>${item.a}</span><div class="fog-layer">🌫️ 未修得</div>`;
+        wrapper.appendChild(node);
+      });
+    }
+
+    function recordQuestionResult(q, state){
+      const key=`histori_card_state_${currentSubject}`; const states=JSON.parse(localStorage.getItem(key)||'{}'); states[q.id]=state; localStorage.setItem(key,JSON.stringify(states));
+      if(!sessionReviewStats[q.c])sessionReviewStats[q.c]={total:0,correct:0};
+      sessionReviewStats[q.c].total++; if(state==='know')sessionReviewStats[q.c].correct++;
+      sessionQuestionStats[q.c]=(sessionQuestionStats[q.c]||0)+1;
+    }
+    function updateSurvivalHud(){
+      const fill=document.getElementById('hpFill'),label=document.getElementById('hpLabel'); if(!fill||!label)return;
+      const pct=Math.max(0,survivalHp/5000*100); fill.style.width=pct+'%'; fill.style.background=pct<25?'linear-gradient(90deg,#ef4444,#fca5a5)':pct<55?'linear-gradient(90deg,#eab308,#fde68a)':'linear-gradient(90deg,#22c55e,#86efac)'; label.textContent=`${Math.max(0,survivalHp)} / 5000`;
+    }
+    function applySurvivalDamage(){
+      const total=Math.max(1,activeQuizList.length); const damage=Math.round(15000/total); survivalHp=Math.max(0,survivalHp-damage); updateSurvivalHud();
+      const fill=document.getElementById('hpFill'); if(fill){fill.animate([{filter:'brightness(1)'},{filter:'brightness(1.8)'},{filter:'brightness(1)'}],{duration:450});}
+      showToast(`HP -${damage}`); if(survivalHp<=0)finishSpecialMode('サバイバル終了','体力が0になりました。');
+    }
+    function finishSpecialMode(title, message){
+      if(sessionTimer)clearInterval(sessionTimer); document.getElementById('rankModalTitle').textContent=title;
+      document.getElementById('speedRankContent').innerHTML=`<p>${message}</p><p>クリア時間：${((Date.now()-sessionStartedAt)/1000).toFixed(2)}秒</p><p>残りHP：${survivalHp}</p>`;
+      document.getElementById('categoryResultContent').innerHTML=''; document.getElementById('rankSubNotice').textContent=''; document.getElementById('btnFinishRank').style.display='block'; openModal('speedRankModal');
+    }
+    function finishStudySession(){
+      if(sessionTimer)clearInterval(sessionTimer);
+      document.getElementById('rankModalTitle').textContent='学習結果';
+      document.getElementById('speedRankContent').innerHTML=`<p>クリア時間：${((Date.now()-sessionStartedAt)/1000).toFixed(2)}秒</p><p>正答扱い：${Object.values(sessionReviewStats).reduce((a,v)=>a+v.correct,0)} / ${Object.values(sessionReviewStats).reduce((a,v)=>a+v.total,0)}</p>`;
+      const rows=Object.entries(sessionReviewStats).map(([cat,v])=>{const pct=v.total?Math.round(v.correct/v.total*100):0;return `<div class="category-result-row"><span>${cat}</span><div class="category-result-track"><div class="category-result-fill" style="width:${pct}%"></div></div><span>${pct}%</span></div>`}).join('');
+      document.getElementById('categoryResultContent').innerHTML=rows?`<h3>カテゴリー別の達成率</h3>${rows}`:'';
+      document.getElementById('rankSubNotice').textContent='学習お疲れさまでした！'; document.getElementById('btnFinishRank').style.display='block'; openModal('speedRankModal');
+    }
+
+    function exitQuizToLobby() {
+      if(sessionTimer)clearInterval(sessionTimer); document.getElementById('quizHud').classList.remove('active'); closeModal('speedRankModal');
+      document.getElementById('heroSection').classList.remove('fade-out-up');
+      document.getElementById('categoryCenterSection').style.display = 'block';
+      document.getElementById('quizContainer').classList.remove('active');
+      document.getElementById('battleStatusBar').classList.remove('active');
+    }
+
+    function changeLayoutMode(mode) {
+      localStorage.setItem('histori_layout', mode);
+      applyLayoutMode(mode);
+      showToast(mode === 'mobile' ? 'スマホ向けレイアウトに変更しました' : mode === 'desktop' ? 'PC向けレイアウトに変更しました' : '画面幅に合わせる設定にしました');
+    }
+    function applyLayoutMode(mode) {
+      document.body.classList.toggle('mobile-mode', mode === 'mobile' || (mode === 'auto' && window.innerWidth <= 640));
+      document.body.classList.toggle('desktop-mode', mode === 'desktop');
+    }
+    window.addEventListener('resize', () => { const m=localStorage.getItem('histori_layout')||'auto'; if(m==='auto') applyLayoutMode('auto'); });
+
+    function changeFontSize(s) {
+      document.body.classList.remove('font-large', 'font-xlarge');
+      if (s === 'large') document.body.classList.add('font-large');
+      if (s === 'xlarge') document.body.classList.add('font-xlarge');
+    }
+
+    function chooseAvatar(icon) { userData.icon = icon; initUserDataUI(); closeModal('avatarModal'); }
+
+    // Shift + G ショートカットで VIP+ 確実に解放
+    function initKeyShortcut() {
+      document.addEventListener('keydown', (e) => {
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (activeTag === 'input' || activeTag === 'textarea') return;
+
+        if (e.shiftKey && (e.key === 'G' || e.key === 'g' || e.code === 'KeyG')) {
+          if (!userData.isVipPlus) {
+            userData.isVipPlus = true;
+            localStorage.setItem('histori_vip', 'true');
+            showToast("🌟 VIP+ 特典が解放されました！");
+            updateVipUI();
+          } else {
+            openModal('vipSettingsModal');
+          }
+        }
+      });
+      updateVipUI();
+    }
+
+    function updateVipUI() {
+      if (userData.isVipPlus) {
+        const vipBtn = document.getElementById('btnVipSettings');
+        if (vipBtn) vipBtn.style.display = 'inline-flex';
+        
+        const savedBg = localStorage.getItem('histori_bg_img');
+        if (savedBg) {
+          const bgEl = document.getElementById('vipBgOverlay');
+          if (bgEl) bgEl.style.backgroundImage = `url('${savedBg}')`;
+          document.body.classList.add('vip-active');
+        }
+      }
+    }
+
+    function saveBgImage() {
+      const url = document.getElementById('bgUrlInput').value.trim();
+      if (url) {
+        localStorage.setItem('histori_bg_img', url);
+        updateVipUI(); closeModal('vipSettingsModal'); showToast('背景を適用しました');
+      }
+    }
+
+    function handleBgFileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          localStorage.setItem('histori_bg_img', evt.target.result);
+          updateVipUI(); closeModal('vipSettingsModal'); showToast('背景を適用しました');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function resetBgImage() {
+      localStorage.removeItem('histori_bg_img');
+      document.body.classList.remove('vip-active');
+      closeModal('vipSettingsModal');
+      showToast('背景をリセットしました');
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${msg}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
